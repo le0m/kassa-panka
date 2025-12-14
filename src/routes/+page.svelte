@@ -262,12 +262,12 @@
 <div class="container">
 	<header class="mb-8 flex items-center justify-between">
 		<div>
-			<h1 class="mb-2 text-4xl font-bold">Kassa Panka</h1>
-			<p class="text-gray-600">Sound effects for your tabletop gaming sessions</p>
+			<h1 class="mb-2 text-4xl font-bold text-indigo-400">Kassa Panka</h1>
+			<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
 		</div>
 		<button
 			onclick={openModal}
-			class="rounded-md bg-blue-600 px-6 py-3 font-medium text-white shadow-md transition-colors hover:bg-blue-700 hover:shadow-lg"
+			class="rounded-md bg-indigo-600 px-6 py-3 font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
 		>
 			Upload Sound
 		</button>
@@ -280,11 +280,11 @@
 				type="text"
 				bind:value={searchQuery}
 				onkeydown={handleSearch}
-				class="w-full rounded-md border border-gray-300 px-4 py-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+				class="w-full rounded-md border border-slate-700 bg-slate-800 px-4 py-2 pl-10 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
 				placeholder="Search sounds by name or tags... (press Enter)"
 			/>
 			<svg
-				class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400"
+				class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -304,14 +304,14 @@
 
 	<!-- Sound List -->
 	<section>
-		<h2 class="mb-4 text-2xl font-semibold">Sound Library</h2>
+		<h2 class="mb-4 text-2xl font-semibold text-slate-100">Sound Library</h2>
 
 		{#if data.sounds.length === 0}
-			<div class="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-				<p class="mb-4 text-gray-500">No sounds yet. Upload your first sound!</p>
+			<div class="rounded-lg border border-slate-700 bg-slate-800 p-8 text-center">
+				<p class="mb-4 text-slate-400">No sounds yet. Upload your first sound!</p>
 				<button
 					onclick={openModal}
-					class="rounded-md bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
+					class="rounded-md bg-indigo-600 px-6 py-2 text-white transition-colors hover:bg-indigo-700"
 				>
 					Upload Sound
 				</button>

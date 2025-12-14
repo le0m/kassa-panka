@@ -34,13 +34,15 @@
 	}
 </script>
 
-<div class="rounded-lg bg-white p-4 shadow-md transition-shadow hover:shadow-lg">
+<div
+	class="rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-slate-600 hover:shadow-lg"
+>
 	<div class="mb-2 flex items-start justify-between">
-		<h3 class="flex-1 text-lg font-semibold">{sound.name}</h3>
+		<h3 class="flex-1 text-lg font-semibold text-slate-100">{sound.name}</h3>
 		<div class="flex gap-1">
 			<button
 				onclick={handleEditClick}
-				class="rounded p-1 text-blue-600 transition-colors hover:bg-blue-50"
+				class="rounded p-1 text-indigo-400 transition-colors hover:bg-slate-700 hover:text-indigo-300"
 				aria-label="Edit sound"
 				title="Edit sound"
 			>
@@ -56,7 +58,7 @@
 			<button
 				onclick={handleDeleteClick}
 				disabled={deleting === sound.id}
-				class="ml-2 rounded p-1 text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:text-gray-400"
+				class="ml-2 rounded p-1 text-rose-400 transition-colors hover:bg-slate-700 hover:text-rose-300 disabled:cursor-not-allowed disabled:text-slate-600"
 				aria-label="Delete sound"
 				title="Delete sound"
 			>
@@ -85,14 +87,14 @@
 	</div>
 
 	{#if sound.description}
-		<p class="mb-3 text-sm text-gray-600">{sound.description}</p>
+		<p class="mb-3 text-sm text-slate-400">{sound.description}</p>
 	{/if}
 
 	{#if sound.tags && sound.tags.length > 0}
 		<div class="mb-3 flex flex-wrap gap-1.5">
 			{#each sound.tags as tag (tag)}
 				<span
-					class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs text-blue-800"
+					class="inline-flex items-center rounded-full border border-cyan-700/50 bg-cyan-900/40 px-2.5 py-0.5 text-xs text-cyan-300"
 				>
 					{tag}
 				</span>
@@ -105,7 +107,7 @@
 		Your browser does not support the audio element.
 	</audio>
 
-	<div class="mt-2 text-xs text-gray-500">
+	<div class="mt-2 text-xs text-slate-500">
 		<div>Size: {(sound.fileSize / 1024).toFixed(2)} KB</div>
 		<div>Added: {new Date(sound.createdAt).toLocaleDateString()}</div>
 	</div>
