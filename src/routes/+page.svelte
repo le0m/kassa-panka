@@ -18,6 +18,12 @@
 	let selectedSuggestionIndex = $state(-1);
 	let searchQuery = $state('');
 	let deleting = $state<string | null>(null);
+	let editSound = $state<{
+		id: string;
+		name: string;
+		description?: string | null;
+		tags?: string[];
+	} | null>(null);
 
 	/**
 	 * Handles search input when Enter is pressed
@@ -65,6 +71,7 @@
 	 * Opens the upload modal
 	 */
 	function openModal() {
+		editSound = null;
 		isModalOpen = true;
 		uploadError = null;
 		uploadSuccess = false;
@@ -78,12 +85,27 @@
 	 */
 	function closeModal() {
 		isModalOpen = false;
+		editSound = null;
 		uploadError = null;
 		uploadSuccess = false;
 		selectedTags = [];
 		tagInput = '';
 		showTagSuggestions = false;
 		selectedSuggestionIndex = -1;
+	}
+
+	/**
+	 * Handles editing a sound
+	 * @param sound - The sound data to edit
+	 */
+	function handleEdit(sound: {
+		id: string;
+		name: string;
+		description?: string | null;
+		tags?: string[];
+	}) {
+		editSound = sound;
+		isModalOpen = true;
 	}
 
 	/**
@@ -278,7 +300,7 @@
 	</section>
 
 	<!-- Upload Modal -->
-	<UploadModal isOpen={isModalOpen} onClose={closeModal} />
+	<UploadModal isOpen={isModalOpen} {editSound} onClose={closeModal} />
 
 	<!-- Sound List -->
 	<section>
@@ -297,7 +319,7 @@
 		{:else}
 			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{#each data.sounds as sound (sound.id)}
-					<SoundCard {sound} {deleting} ondelete={handleDelete} />
+					<SoundCard {sound} {deleting} ondelete={handleDelete} onedit={handleEdit} />
 				{/each}
 			</div>
 		{/if}

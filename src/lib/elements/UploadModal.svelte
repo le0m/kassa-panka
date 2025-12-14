@@ -4,9 +4,15 @@
 	interface Props {
 		isOpen: boolean;
 		onClose: () => void;
+		editSound?: {
+			id: string;
+			name: string;
+			description?: string | null;
+			tags?: string[];
+		} | null;
 	}
 
-	let { isOpen, onClose }: Props = $props();
+	let { isOpen, onClose, editSound = null }: Props = $props();
 
 	let uploading = $state(false);
 	let uploadError = $state<string | null>(null);
@@ -16,6 +22,10 @@
 	let availableTags = $state<string[]>([]);
 	let showTagSuggestions = $state(false);
 	let selectedSuggestionIndex = $state(-1);
+	let formName = $state('');
+	let formDescription = $state('');
+
+	let isEditMode = $derived(editSound !== null);
 
 	/**
 	 * Loads available tags from the database
@@ -97,48 +107,72 @@
 	);
 
 	/**
-	 * Handles the form submission for uploading a new sound file
+	 * Handles the form submission for uploading or updating a sound file
 	 */
 	async function handleUpload(event: Event) {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
-		const formData = new FormData(form);
-
-		// Add tags to form data
-		if (selectedTags.length > 0) {
-			formData.append('tags', JSON.stringify(selectedTags));
-		}
 
 		uploading = true;
 		uploadError = null;
 		uploadSuccess = false;
 
 		try {
-			const response = await fetch('/api/sounds/upload', {
-				method: 'POST',
-				body: formData
-			});
+			if (isEditMode && editSound) {
+				// Edit mode: send JSON with updated data
+				const response = await fetch(`/api/sounds/${editSound.id}`, {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name: formName,
+						description: formDescription,
+						tags: selectedTags
+					})
+				});
 
-			const result = await response.json();
+				const result = await response.json();
 
-			if (!response.ok) {
-				uploadError = result.error || 'Upload failed';
-				return;
+				if (!response.ok) {
+					uploadError = result.error || 'Update failed';
+					return;
+				}
+
+				uploadSuccess = true;
+			} else {
+				// Create mode: send FormData with file
+				const formData = new FormData(form);
+
+				// Add tags to form data
+				if (selectedTags.length > 0) {
+					formData.append('tags', JSON.stringify(selectedTags));
+				}
+
+				const response = await fetch('/api/sounds/upload', {
+					method: 'POST',
+					body: formData
+				});
+
+				const result = await response.json();
+
+				if (!response.ok) {
+					uploadError = result.error || 'Upload failed';
+					return;
+				}
+
+				uploadSuccess = true;
+				form.reset();
 			}
 
-			uploadSuccess = true;
-			form.reset();
-
-			// Refresh the page data to show the new sound
+			// Refresh the page data
 			await invalidateAll();
 
-			// Close modal after successful upload
+			// Close modal after successful operation
 			setTimeout(() => {
 				handleClose();
 			}, 500);
 		} catch (error) {
 			uploadError = 'Network error occurred';
-			console.error('Upload error:', error);
+			console.error('Upload/update error:', error);
 		} finally {
 			uploading = false;
 		}
@@ -154,15 +188,28 @@
 		tagInput = '';
 		showTagSuggestions = false;
 		selectedSuggestionIndex = -1;
+		formName = '';
+		formDescription = '';
 		onClose();
 	}
 
 	/**
-	 * Load tags when modal opens
+	 * Load tags and populate form when modal opens
 	 */
 	$effect(() => {
 		if (isOpen) {
 			loadTags();
+
+			// Populate form with edit data if in edit mode
+			if (editSound) {
+				formName = editSound.name;
+				formDescription = editSound.description || '';
+				selectedTags = editSound.tags || [];
+			} else {
+				formName = '';
+				formDescription = '';
+				selectedTags = [];
+			}
 		}
 	});
 </script>
@@ -186,7 +233,7 @@
 			tabindex="0"
 		>
 			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-2xl font-semibold">Upload New Sound</h2>
+				<h2 class="text-2xl font-semibold">{isEditMode ? 'Edit Sound' : 'Upload New Sound'}</h2>
 				<button
 					onclick={handleClose}
 					class="text-2xl leading-none text-gray-400 hover:text-gray-600"
@@ -205,6 +252,7 @@
 						type="text"
 						id="name"
 						name="name"
+						bind:value={formName}
 						required
 						class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 						placeholder="e.g., Thunder Strike"
@@ -218,25 +266,28 @@
 					<textarea
 						id="description"
 						name="description"
+						bind:value={formDescription}
 						rows={3}
 						class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 						placeholder="Optional description..."
 					></textarea>
 				</div>
 
-				<div>
-					<label for="file" class="mb-1 block text-sm font-medium text-gray-700">
-						Audio File *
-					</label>
-					<input
-						type="file"
-						id="file"
-						name="file"
-						accept="audio/*"
-						required
-						class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-					/>
-				</div>
+				{#if !isEditMode}
+					<div>
+						<label for="file" class="mb-1 block text-sm font-medium text-gray-700">
+							Audio File *
+						</label>
+						<input
+							type="file"
+							id="file"
+							name="file"
+							accept="audio/*"
+							required
+							class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+						/>
+					</div>
+				{/if}
 
 				<div>
 					<label for="tags" class="mb-1 block text-sm font-medium text-gray-700"> Tags </label>
@@ -301,7 +352,7 @@
 
 				{#if uploadSuccess}
 					<div class="rounded border border-green-200 bg-green-50 px-4 py-3 text-green-700">
-						Sound uploaded successfully!
+						{isEditMode ? 'Sound updated successfully!' : 'Sound uploaded successfully!'}
 					</div>
 				{/if}
 
@@ -318,7 +369,13 @@
 						disabled={uploading}
 						class="flex-1 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
 					>
-						{uploading ? 'Uploading...' : 'Upload'}
+						{uploading
+							? isEditMode
+								? 'Saving...'
+								: 'Uploading...'
+							: isEditMode
+								? 'Save'
+								: 'Upload'}
 					</button>
 				</div>
 			</form>
