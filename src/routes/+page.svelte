@@ -9,6 +9,26 @@
 	let uploading = $state(false);
 	let uploadError = $state<string | null>(null);
 	let uploadSuccess = $state(false);
+	let tagInput = $state('');
+	let selectedTags = $state<string[]>([]);
+	let availableTags = $state<string[]>([]);
+	let showTagSuggestions = $state(false);
+	let selectedSuggestionIndex = $state(-1);
+
+	/**
+	 * Loads available tags from the database
+	 */
+	async function loadTags() {
+		try {
+			const response = await fetch('/api/tags');
+			const result = await response.json();
+			if (result.tags) {
+				availableTags = result.tags.map((tag: { name: string }) => tag.name);
+			}
+		} catch (error) {
+			console.error('Error loading tags:', error);
+		}
+	}
 
 	/**
 	 * Opens the upload modal
@@ -17,6 +37,9 @@
 		isModalOpen = true;
 		uploadError = null;
 		uploadSuccess = false;
+		selectedTags = [];
+		tagInput = '';
+		loadTags();
 	}
 
 	/**
@@ -26,7 +49,75 @@
 		isModalOpen = false;
 		uploadError = null;
 		uploadSuccess = false;
+		selectedTags = [];
+		tagInput = '';
+		showTagSuggestions = false;
+		selectedSuggestionIndex = -1;
 	}
+
+	/**
+	 * Adds a tag to the selected tags list
+	 */
+	function addTag(tag: string) {
+		const trimmedTag = tag.trim().toLowerCase();
+		if (trimmedTag && !selectedTags.includes(trimmedTag)) {
+			selectedTags = [...selectedTags, trimmedTag];
+			tagInput = '';
+			selectedSuggestionIndex = -1;
+		}
+	}
+
+	/**
+	 * Removes a tag from the selected tags list
+	 */
+	function removeTag(tag: string) {
+		selectedTags = selectedTags.filter((t) => t !== tag);
+	}
+
+	/**
+	 * Handles tag input keypress with keyboard navigation
+	 */
+	function handleTagInput(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < filteredTags.length) {
+				// Add the selected suggestion
+				addTag(filteredTags[selectedSuggestionIndex]);
+			} else if (tagInput.trim()) {
+				// Add the typed tag
+				addTag(tagInput);
+			}
+		} else if (event.key === 'ArrowDown') {
+			event.preventDefault();
+			if (filteredTags.length > 0) {
+				selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, filteredTags.length - 1);
+			}
+		} else if (event.key === 'ArrowUp') {
+			event.preventDefault();
+			if (selectedSuggestionIndex > 0) {
+				selectedSuggestionIndex--;
+			} else {
+				// Back to input
+				selectedSuggestionIndex = -1;
+			}
+		} else {
+			// Reset selection when user types (any other key)
+			selectedSuggestionIndex = -1;
+		}
+	}
+
+	/**
+	 * Filtered tag suggestions based on input
+	 */
+	let filteredTags = $derived(
+		availableTags
+			.filter(
+				(tag) =>
+					tag.toLowerCase().includes(tagInput.toLowerCase()) &&
+					!selectedTags.includes(tag.toLowerCase())
+			)
+			.slice(0, 5)
+	);
 
 	/**
 	 * Handles the form submission for uploading a new sound file
@@ -35,6 +126,11 @@
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
+
+		// Add tags to form data
+		if (selectedTags.length > 0) {
+			formData.append('tags', JSON.stringify(selectedTags));
+		}
 
 		uploading = true;
 		uploadError = null;
@@ -158,6 +254,61 @@
 						/>
 					</div>
 
+					<div>
+						<label for="tags" class="mb-1 block text-sm font-medium text-gray-700"> Tags </label>
+						<div class="relative">
+							<input
+								type="text"
+								id="tags"
+								bind:value={tagInput}
+								onkeydown={handleTagInput}
+								onfocus={() => (showTagSuggestions = true)}
+								onblur={() => setTimeout(() => (showTagSuggestions = false), 200)}
+								class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+								placeholder="Type and press Enter to add tags..."
+							/>
+
+							{#if showTagSuggestions && filteredTags.length > 0 && tagInput.length >= 3}
+								<div
+									class="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg"
+								>
+									{#each filteredTags as tag, index (tag)}
+										<button
+											type="button"
+											class="w-full px-3 py-2 text-left text-sm transition-colors {selectedSuggestionIndex ===
+											index
+												? 'bg-blue-100'
+												: 'hover:bg-gray-100'}"
+											onclick={() => addTag(tag)}
+										>
+											{tag}
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+
+						{#if selectedTags.length > 0}
+							<div class="mt-2 flex flex-wrap gap-2">
+								{#each selectedTags as tag (tag)}
+									<span
+										class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
+									>
+										{tag}
+										<button
+											type="button"
+											onclick={() => removeTag(tag)}
+											class="text-blue-600 hover:text-blue-800"
+											aria-label="Remove tag"
+										>
+											×
+										</button>
+									</span>
+								{/each}
+							</div>
+						{/if}
+					</div>
+
 					{#if uploadError}
 						<div class="rounded border border-red-200 bg-red-50 px-4 py-3 text-red-700">
 							{uploadError}
@@ -213,6 +364,18 @@
 
 						{#if sound.description}
 							<p class="mb-3 text-sm text-gray-600">{sound.description}</p>
+						{/if}
+
+						{#if sound.tags && sound.tags.length > 0}
+							<div class="mb-3 flex flex-wrap gap-1.5">
+								{#each sound.tags as tag (tag)}
+									<span
+										class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs text-blue-800"
+									>
+										{tag}
+									</span>
+								{/each}
+							</div>
 						{/if}
 
 						<audio controls class="mb-2 w-full">

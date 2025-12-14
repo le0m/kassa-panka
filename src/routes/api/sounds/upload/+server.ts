@@ -1,9 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { sounds } from '$lib/server/db/schema';
+import { sounds, tags, soundsTags } from '$lib/server/db/schema';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
+import { eq } from 'drizzle-orm';
 
 /**
  * POST endpoint to upload a new sound file
@@ -15,6 +16,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const file = formData.get('file') as File | null;
 		const name = formData.get('name') as string | null;
 		const description = formData.get('description') as string | null;
+		const tagsJson = formData.get('tags') as string | null;
 
 		if (!file) {
 			return json({ error: 'No file provided' }, { status: 400 });
@@ -44,13 +46,71 @@ export const POST: RequestHandler = async ({ request }) => {
 		await writeFile(filePath, buffer);
 
 		// Create database record
-		const [newSound] = await db.insert(sounds).values({
-			name,
-			description: description || null,
-			fileName,
-			fileSize: file.size,
-			mediaType: file.type,
-		}).returning();
+		const [newSound] = await db
+			.insert(sounds)
+			.values({
+				name,
+				description: description || null,
+				fileName,
+				fileSize: file.size,
+				mediaType: file.type
+			})
+			.returning();
+
+		// Handle tags if provided
+		if (tagsJson) {
+			try {
+				const tagNames: string[] = JSON.parse(tagsJson);
+
+				if (tagNames.length > 0) {
+					const tagIds: string[] = [];
+
+					// Process each tag
+					for (const tagName of tagNames) {
+						const trimmedTag = tagName.trim().toLowerCase();
+						if (!trimmedTag) continue;
+
+						// Check if tag already exists
+						const existingTags = await db
+							.select()
+							.from(tags)
+							.where(eq(tags.name, trimmedTag))
+							.limit(1);
+
+						let tagId: string;
+
+						if (existingTags.length > 0) {
+							// Use existing tag
+							tagId = existingTags[0].id;
+						} else {
+							// Create new tag
+							const [newTag] = await db
+								.insert(tags)
+								.values({
+									name: trimmedTag
+								})
+								.returning();
+							tagId = newTag.id;
+						}
+
+						tagIds.push(tagId);
+					}
+
+					// Create associations between sound and tags
+					if (tagIds.length > 0) {
+						await db.insert(soundsTags).values(
+							tagIds.map((tagId) => ({
+								soundId: newSound.id,
+								tagId
+							}))
+						);
+					}
+				}
+			} catch (error) {
+				console.error('Error processing tags:', error);
+				// Continue without tags rather than failing the entire upload
+			}
+		}
 
 		return json({ success: true, sound: newSound }, { status: 201 });
 	} catch (error) {
