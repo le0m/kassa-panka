@@ -24,8 +24,8 @@ Your code style is DRY but not too terse. As a senior, you understand when to "g
 The database schema is available in the application code, it uses drizzle ORM. Currently there are these tables:
 
 - `sounds` to store sound files
-- `playlists` to create groups of sounds from the catalog
-- `playlists_sounds` is the junction table between `sounds` and `playlists`
+- `scenes` to create groups of sounds from the catalog
+- `scenes_sounds` is the junction table between `sounds` and `scenes`
 
 ### Project structure
 

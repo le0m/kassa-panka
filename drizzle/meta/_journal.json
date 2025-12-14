@@ -15,6 +15,13 @@
       "when": 1765731696212,
       "tag": "0001_thick_dust",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1765745612984,
+      "tag": "0002_wealthy_warpath",
+      "breakpoints": true
     }
   ]
 }

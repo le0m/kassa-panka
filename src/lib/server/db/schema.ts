@@ -22,11 +22,11 @@ export const sounds = sqliteTable('sounds', {
 });
 
 export const soundsRelations = relations(sounds, ({ many }) => ({
-	soundPlaylists: many(playlistsSounds),
+	soundScenes: many(scenesSounds),
 	soundTags: many(soundsTags)
 }));
 
-export const playlists = sqliteTable('playlists', {
+export const scenes = sqliteTable('scenes', {
 	id: text('id', { length: 128 })
 		.primaryKey()
 		.$defaultFn(() => randomUUID()),
@@ -42,30 +42,30 @@ export const playlists = sqliteTable('playlists', {
 	deletedAt: text('deleted_at')
 });
 
-export const playlistsRelations = relations(playlists, ({ many }) => ({
-	playlistSounds: many(playlistsSounds)
+export const scenesRelations = relations(scenes, ({ many }) => ({
+	sceneSounds: many(scenesSounds)
 }));
 
-export const playlistsSounds = sqliteTable(
-	'playlists_sounds',
+export const scenesSounds = sqliteTable(
+	'scenes_sounds',
 	{
-		playlistId: text('playlist_id', { length: 128 })
+		sceneId: text('scene_id', { length: 128 })
 			.notNull()
-			.references(() => playlists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+			.references(() => scenes.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
 		soundId: text('sound_id', { length: 128 })
 			.notNull()
 			.references(() => sounds.id, { onDelete: 'cascade', onUpdate: 'cascade' })
 	},
-	(table) => [primaryKey({ columns: [table.playlistId, table.soundId] })]
+	(table) => [primaryKey({ columns: [table.sceneId, table.soundId] })]
 );
 
-export const playlistsSoundsRelations = relations(playlistsSounds, ({ one }) => ({
-	playlist: one(playlists, {
-		fields: [playlistsSounds.playlistId],
-		references: [playlists.id]
+export const scenesSoundsRelations = relations(scenesSounds, ({ one }) => ({
+	scene: one(scenes, {
+		fields: [scenesSounds.sceneId],
+		references: [scenes.id]
 	}),
 	sound: one(sounds, {
-		fields: [playlistsSounds.soundId],
+		fields: [scenesSounds.soundId],
 		references: [sounds.id]
 	})
 }));
@@ -109,17 +109,17 @@ export const soundsTagsRelations = relations(soundsTags, ({ one }) => ({
 }));
 
 export type SoundsTable = typeof sounds;
-export type PlaylistsTable = typeof playlists;
-export type PlaylistsSoundsTable = typeof playlistsSounds;
+export type ScenesTable = typeof scenes;
+export type ScenesSoundsTable = typeof scenesSounds;
 export type TagsTable = typeof tags;
 export type SoundsTagsTable = typeof soundsTags;
 
 export type NewSoundEntity = typeof sounds.$inferInsert;
 export type SoundEntity = typeof sounds.$inferSelect;
-export type NewPlaylistEntity = typeof playlists.$inferInsert;
-export type PlaylistEntity = typeof playlists.$inferSelect;
-export type NewPlaylistSoundEntity = typeof playlistsSounds.$inferInsert;
-export type PlaylistSoundEntity = typeof playlistsSounds.$inferSelect;
+export type NewSceneEntity = typeof scenes.$inferInsert;
+export type SceneEntity = typeof scenes.$inferSelect;
+export type NewSceneSoundEntity = typeof scenesSounds.$inferInsert;
+export type SceneSoundEntity = typeof scenesSounds.$inferSelect;
 export type NewTagEntity = typeof tags.$inferInsert;
 export type TagEntity = typeof tags.$inferSelect;
 export type NewSoundTagEntity = typeof soundsTags.$inferInsert;
