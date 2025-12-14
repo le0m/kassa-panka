@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import type { PageData } from './$types';
 
@@ -14,6 +14,34 @@
 	let availableTags = $state<string[]>([]);
 	let showTagSuggestions = $state(false);
 	let selectedSuggestionIndex = $state(-1);
+	let searchQuery = $state('');
+
+	/**
+	 * Handles search input when Enter is pressed
+	 */
+	async function handleSearch(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			const params = new URLSearchParams();
+			if (searchQuery.trim()) {
+				params.set('q', searchQuery.trim());
+			}
+			const queryString = params.toString();
+			await goto(queryString ? `?${queryString}` : '/', {
+				replaceState: false,
+				invalidateAll: true
+			});
+		}
+	}
+
+	/**
+	 * Initialize search query from URL on mount
+	 */
+	$effect(() => {
+		if (typeof window !== 'undefined') {
+			const url = new URL(window.location.href);
+			searchQuery = url.searchParams.get('q') || '';
+		}
+	});
 
 	/**
 	 * Loads available tags from the database
@@ -158,7 +186,7 @@
 			// Close modal after successful upload
 			setTimeout(() => {
 				closeModal();
-			}, 1500);
+			}, 500);
 		} catch (error) {
 			uploadError = 'Network error occurred';
 			console.error('Upload error:', error);
@@ -181,6 +209,32 @@
 			Upload Sound
 		</button>
 	</header>
+
+	<!-- Search -->
+	<section class="mb-6">
+		<div class="relative">
+			<input
+				type="text"
+				bind:value={searchQuery}
+				onkeydown={handleSearch}
+				class="w-full rounded-md border border-gray-300 px-4 py-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+				placeholder="Search sounds by name or tags... (press Enter)"
+			/>
+			<svg
+				class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+				></path>
+			</svg>
+		</div>
+	</section>
 
 	<!-- Upload Modal -->
 	{#if isModalOpen}
