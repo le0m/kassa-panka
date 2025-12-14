@@ -4,6 +4,7 @@
 	import type { PageData } from './$types';
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
+	import Sidebar from '$lib/elements/Sidebar.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -259,71 +260,77 @@
 	}
 </script>
 
-<div class="container">
-	<header class="mb-8 flex items-center justify-between">
-		<div>
-			<h1 class="mb-2 text-4xl font-bold text-indigo-400">Kassa Panka</h1>
-			<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
-		</div>
-		<button
-			onclick={openModal}
-			class="rounded-md bg-indigo-600 px-6 py-3 font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
-		>
-			Upload Sound
-		</button>
-	</header>
+<!-- Upload Modal -->
+<UploadModal isOpen={isModalOpen} {editSound} onClose={closeModal} />
 
-	<!-- Search -->
-	<section class="mb-6">
-		<div class="relative">
-			<input
-				type="text"
-				bind:value={searchQuery}
-				onkeydown={handleSearch}
-				class="w-full rounded-md border border-slate-700 bg-slate-800 px-4 py-2 pl-10 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-				placeholder="Search sounds by name or tags... (press Enter)"
-			/>
-			<svg
-				class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-				></path>
-			</svg>
-		</div>
-	</section>
-
-	<!-- Upload Modal -->
-	<UploadModal isOpen={isModalOpen} {editSound} onClose={closeModal} />
-
-	<!-- Sound List -->
-	<section>
-		<h2 class="mb-4 text-2xl font-semibold text-slate-100">Sound Library</h2>
-
+<div class="flex h-screen">
+	<!-- Sidebar -->
+	<Sidebar>
 		{#if data.sounds.length === 0}
-			<div class="rounded-lg border border-slate-700 bg-slate-800 p-8 text-center">
-				<p class="mb-4 text-slate-400">No sounds yet. Upload your first sound!</p>
+			<div class="rounded-lg border border-slate-700 bg-slate-800 p-6 text-center">
+				<p class="mb-4 text-sm text-slate-400">No sounds yet. Upload your first sound!</p>
 				<button
 					onclick={openModal}
-					class="rounded-md bg-indigo-600 px-6 py-2 text-white transition-colors hover:bg-indigo-700"
+					class="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white transition-colors hover:bg-indigo-700"
 				>
 					Upload Sound
 				</button>
 			</div>
 		{:else}
-			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-				{#each data.sounds as sound (sound.id)}
-					<SoundCard {sound} {deleting} ondelete={handleDelete} onedit={handleEdit} />
-				{/each}
-			</div>
+			{#each data.sounds as sound (sound.id)}
+				<SoundCard {sound} {deleting} ondelete={handleDelete} onedit={handleEdit} />
+			{/each}
 		{/if}
-	</section>
+	</Sidebar>
+
+	<!-- Main Content -->
+	<main class="flex flex-1 flex-col overflow-y-auto">
+		<div class="container">
+			<header class="mb-8 flex items-center justify-between">
+				<div>
+					<h1 class="mb-2 text-4xl font-bold text-indigo-400">Kassa Panka</h1>
+					<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
+				</div>
+				<button
+					onclick={openModal}
+					class="rounded-md bg-indigo-600 px-6 py-3 font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
+				>
+					Upload Sound
+				</button>
+			</header>
+
+			<!-- Search -->
+			<section class="mb-6">
+				<div class="relative">
+					<input
+						type="text"
+						bind:value={searchQuery}
+						onkeydown={handleSearch}
+						class="w-full rounded-md border border-slate-700 bg-slate-800 px-4 py-2 pl-10 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+						placeholder="Search sounds by name or tags... (press Enter)"
+					/>
+					<svg
+						class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+						></path>
+					</svg>
+				</div>
+			</section>
+
+			<!-- Main content area for future features -->
+			<section class="rounded-lg border border-slate-700 bg-slate-800/30 p-8 text-center">
+				<p class="text-slate-400">Select a sound from the sidebar to play it</p>
+			</section>
+		</div>
+	</main>
 </div>
 
 <style>
