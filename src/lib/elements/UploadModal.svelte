@@ -106,8 +106,15 @@
 			.slice(0, 5)
 	);
 
-	/**
-	 * Handles the form submission for uploading or updating a sound file
+	/**	 * Handles clicking outside the modal to close it
+	 */
+	function handleBackdropClick(event: MouseEvent) {
+		if (event.target === event.currentTarget) {
+			handleClose();
+		}
+	}
+
+	/**	 * Handles the form submission for uploading or updating a sound file
 	 */
 	async function handleUpload(event: Event) {
 		event.preventDefault();
@@ -215,40 +222,24 @@
 </script>
 
 {#if isOpen}
+	<!-- svelte-ignore a11y_interactive_supports_focus -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
-		class="bg-opacity-75 fixed inset-0 z-50 flex items-center justify-center bg-black p-4"
-		onclick={handleClose}
-		onkeydown={(e) => e.key === 'Escape' && handleClose()}
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+		onclick={handleBackdropClick}
 		role="dialog"
 		aria-modal="true"
-		tabindex="-1"
+		aria-labelledby="modal-title"
 	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-		<div
-			class="w-full max-w-md rounded-lg border border-slate-700 bg-slate-800 p-6 shadow-xl"
-			onclick={(e) => e.stopPropagation()}
-			onkeydown={(e) => e.stopPropagation()}
-			role="document"
-			tabindex="0"
-		>
-			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-2xl font-semibold text-slate-100">
-					{isEditMode ? 'Edit Sound' : 'Upload New Sound'}
-				</h2>
-				<button
-					onclick={handleClose}
-					class="text-2xl leading-none text-slate-400 hover:text-slate-200"
-					aria-label="Close modal"
-				>
-					&times;
-				</button>
-			</div>
+		<div class="w-full max-w-md rounded-lg border border-slate-700 bg-slate-800 p-6 shadow-xl">
+			<h2 id="modal-title" class="mb-4 text-2xl font-semibold text-slate-100">
+				{isEditMode ? 'Edit Sound' : 'Upload New Sound'}
+			</h2>
 
 			<form onsubmit={handleUpload} class="space-y-4">
 				<div>
 					<label for="name" class="mb-1 block text-sm font-medium text-slate-300">
-						Sound Name *
+						Sound Name <span class="text-rose-400">*</span>
 					</label>
 					<input
 						type="text"
@@ -256,8 +247,9 @@
 						name="name"
 						bind:value={formName}
 						required
-						class="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-						placeholder="e.g., Thunder Strike"
+						disabled={uploading}
+						class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+						placeholder="Enter sound name"
 					/>
 				</div>
 
@@ -269,16 +261,17 @@
 						id="description"
 						name="description"
 						bind:value={formDescription}
+						disabled={uploading}
 						rows={3}
-						class="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-						placeholder="Optional description..."
+						class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+						placeholder="Enter description (optional)"
 					></textarea>
 				</div>
 
 				{#if !isEditMode}
 					<div>
 						<label for="file" class="mb-1 block text-sm font-medium text-slate-300">
-							Audio File *
+							Audio File <span class="text-rose-400">*</span>
 						</label>
 						<input
 							type="file"
@@ -286,7 +279,8 @@
 							name="file"
 							accept="audio/*"
 							required
-							class="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-slate-100 file:mr-4 file:rounded file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+							disabled={uploading}
+							class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 file:mr-4 file:rounded file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 						/>
 					</div>
 				{/if}
@@ -301,13 +295,14 @@
 							onkeydown={handleTagInput}
 							onfocus={() => (showTagSuggestions = true)}
 							onblur={() => setTimeout(() => (showTagSuggestions = false), 200)}
-							class="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+							disabled={uploading}
+							class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							placeholder="Type and press Enter to add tags..."
 						/>
 
 						{#if showTagSuggestions && filteredTags.length > 0 && tagInput.length >= 3}
 							<div
-								class="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-slate-600 bg-slate-700 shadow-lg"
+								class="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-slate-700 bg-slate-800 shadow-lg"
 							>
 								{#each filteredTags as tag, index (tag)}
 									<button
@@ -346,40 +341,42 @@
 					{/if}
 				</div>
 
+				<!-- Error Message -->
 				{#if uploadError}
-					<div class="rounded border border-rose-800 bg-rose-900/50 px-4 py-3 text-rose-200">
+					<div class="rounded-md border border-rose-400/50 bg-rose-900/20 p-3 text-sm text-rose-400">
 						{uploadError}
 					</div>
 				{/if}
 
+				<!-- Success Message -->
 				{#if uploadSuccess}
 					<div
-						class="rounded border border-emerald-800 bg-emerald-900/50 px-4 py-3 text-emerald-200"
+						class="rounded-md border border-emerald-400/50 bg-emerald-900/20 p-3 text-sm text-emerald-400"
 					>
 						{isEditMode ? 'Sound updated successfully!' : 'Sound uploaded successfully!'}
 					</div>
 				{/if}
 
-				<div class="flex gap-3">
+				<!-- Form Actions -->
+				<div class="flex justify-end gap-3">
 					<button
 						type="button"
 						onclick={handleClose}
-						class="flex-1 rounded-md bg-slate-700 px-4 py-2 text-slate-200 transition-colors hover:bg-slate-600"
+						disabled={uploading}
+						class="rounded-md border border-slate-700 px-4 py-2 text-slate-300 transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Cancel
 					</button>
 					<button
 						type="submit"
 						disabled={uploading}
-						class="flex-1 rounded-md bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-600"
+						class="rounded-md bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						{uploading
-							? isEditMode
-								? 'Saving...'
-								: 'Uploading...'
-							: isEditMode
-								? 'Save'
-								: 'Upload'}
+						{#if uploading}
+							{isEditMode ? 'Saving...' : 'Uploading...'}
+						{:else}
+							{isEditMode ? 'Save Sound' : 'Upload Sound'}
+						{/if}
 					</button>
 				</div>
 			</form>

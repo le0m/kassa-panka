@@ -35,7 +35,7 @@
 </script>
 
 <div
-	class="rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-slate-600 hover:shadow-lg"
+	class="rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
 >
 	<div class="mb-2 flex items-start justify-between">
 		<h3 class="flex-1 text-lg font-semibold text-slate-100">{sound.name}</h3>
