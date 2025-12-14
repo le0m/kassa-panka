@@ -7,7 +7,6 @@ import type { PageServerLoad } from './$types';
  * Load all non-deleted sounds from the database with their tags, optionally filtered by search query
  */
 export const load: PageServerLoad = async ({ url }) => {
-	console.log({ url: url.toString() });
 	const searchQuery = url.searchParams.get('q')?.trim();
 
 	let allSounds;
@@ -40,9 +39,6 @@ export const load: PageServerLoad = async ({ url }) => {
 
 		// Combine and deduplicate results
 		const soundMap = new Map();
-		console.log(
-			`Found ${soundsMatchingName.length} by name and ${soundsWithMatchingTags.length} by tag`
-		);
 		soundsMatchingName.forEach((sound) => soundMap.set(sound.id, sound));
 		soundsWithMatchingTags.forEach((sound) => soundMap.set(sound.id, sound));
 		allSounds = Array.from(soundMap.values()).sort(
