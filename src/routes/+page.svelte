@@ -4,6 +4,7 @@
 	import type { PageData } from './$types';
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
+	import SceneModal from '$lib/elements/SceneModal.svelte';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -17,7 +18,6 @@
 	let availableTags = $state<string[]>([]);
 	let showTagSuggestions = $state(false);
 	let selectedSuggestionIndex = $state(-1);
-	let searchQuery = $state('');
 	let deleting = $state<string | null>(null);
 	let editSound = $state<{
 		id: string;
@@ -25,33 +25,29 @@
 		description?: string | null;
 		tags?: string[];
 	} | null>(null);
+	let isSceneModalOpen = $state(false);
+	let editScene = $state<{
+		id: string;
+		name: string;
+		description?: string | null;
+	} | null>(null);
+	let deletingScene = $state<string | null>(null);
 
 	/**
-	 * Handles search input when Enter is pressed
+	 * Handles search when triggered from Sidebar
+	 * @param query - The search query string
 	 */
-	async function handleSearch(event: KeyboardEvent) {
-		if (event.key === 'Enter') {
-			const params = new URLSearchParams();
-			if (searchQuery.trim()) {
-				params.set('q', searchQuery.trim());
-			}
-			const queryString = params.toString();
-			await goto(queryString ? `?${queryString}` : '/', {
-				replaceState: false,
-				invalidateAll: true
-			});
+	async function handleSearch(query: string) {
+		const params = new URLSearchParams();
+		if (query.trim()) {
+			params.set('q', query.trim());
 		}
+		const queryString = params.toString();
+		await goto(queryString ? `?${queryString}` : '/', {
+			replaceState: false,
+			invalidateAll: true
+		});
 	}
-
-	/**
-	 * Initialize search query from URL on mount
-	 */
-	$effect(() => {
-		if (typeof window !== 'undefined') {
-			const url = new URL(window.location.href);
-			searchQuery = url.searchParams.get('q') || '';
-		}
-	});
 
 	/**
 	 * Loads available tags from the database
@@ -222,6 +218,69 @@
 	}
 
 	/**
+	 * Opens the scene modal for creating a new scene
+	 */
+	function openSceneModal() {
+		editScene = null;
+		isSceneModalOpen = true;
+	}
+
+	/**
+	 * Closes the scene modal
+	 */
+	function closeSceneModal() {
+		isSceneModalOpen = false;
+		editScene = null;
+	}
+
+	/**
+	 * Handles editing a scene
+	 * @param scene - The scene data to edit
+	 */
+	function handleEditScene(scene: { id: string; name: string; description?: string | null }) {
+		editScene = scene;
+		isSceneModalOpen = true;
+	}
+
+	/**
+	 * Handles scene deletion with confirmation
+	 * @param sceneId - The ID of the scene to delete
+	 * @param sceneName - The name of the scene (for confirmation message)
+	 */
+	async function handleDeleteScene(sceneId: string, sceneName: string) {
+		const confirmed = confirm(
+			`Are you sure you want to delete "${sceneName}"?\n\nThis action can be undone by a database administrator.`
+		);
+
+		if (!confirmed) {
+			return;
+		}
+
+		deletingScene = sceneId;
+
+		try {
+			const response = await fetch(`/api/scenes/${sceneId}`, {
+				method: 'DELETE'
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				alert(result.error || 'Failed to delete scene');
+				return;
+			}
+
+			// Refresh the page data to remove the deleted scene
+			await invalidateAll();
+		} catch (error) {
+			console.error('Delete error:', error);
+			alert('Network error occurred while deleting scene');
+		} finally {
+			deletingScene = null;
+		}
+	}
+
+	/**
 	 * Handles sound deletion with confirmation
 	 * @param soundId - The ID of the sound to delete
 	 * @param soundName - The name of the sound (for confirmation message)
@@ -263,9 +322,12 @@
 <!-- Upload Modal -->
 <UploadModal isOpen={isModalOpen} {editSound} onClose={closeModal} />
 
+<!-- Scene Modal -->
+<SceneModal isOpen={isSceneModalOpen} {editScene} onClose={closeSceneModal} />
+
 <div class="flex h-screen">
 	<!-- Sidebar -->
-	<Sidebar>
+	<Sidebar onsearch={handleSearch} onupload={openModal}>
 		{#if data.sounds.length === 0}
 			<div class="rounded-lg border border-slate-700 bg-slate-800 p-6 text-center">
 				<p class="mb-4 text-sm text-slate-400">No sounds yet. Upload your first sound!</p>
@@ -286,48 +348,111 @@
 	<!-- Main Content -->
 	<main class="flex flex-1 flex-col overflow-y-auto">
 		<div class="container">
-			<header class="mb-8 flex items-center justify-between">
-				<div>
-					<h1 class="mb-2 text-4xl font-bold text-indigo-400">Kassa Panka</h1>
-					<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
-				</div>
-				<button
-					onclick={openModal}
-					class="rounded-md bg-indigo-600 px-6 py-3 font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
+			<header class="mb-8">
+				<h1
+					class="mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-4xl font-bold text-transparent"
 				>
-					Upload Sound
-				</button>
+					Kassa Panka
+				</h1>
+				<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
 			</header>
 
-			<!-- Search -->
-			<section class="mb-6">
-				<div class="relative">
-					<input
-						type="text"
-						bind:value={searchQuery}
-						onkeydown={handleSearch}
-						class="w-full rounded-md border border-slate-700 bg-slate-800 px-4 py-2 pl-10 text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-						placeholder="Search sounds by name or tags... (press Enter)"
-					/>
-					<svg
-						class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
+			<!-- Scenes Section -->
+			<section>
+				<div class="mb-4 flex items-center justify-between">
+					<h2 class="text-2xl font-semibold text-slate-100">Scenes</h2>
+					<button
+						onclick={openSceneModal}
+						class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-						></path>
-					</svg>
+						Create Scene
+					</button>
 				</div>
-			</section>
 
-			<!-- Main content area for future features -->
-			<section class="rounded-lg border border-slate-700 bg-slate-800/30 p-8 text-center">
-				<p class="text-slate-400">Select a sound from the sidebar to play it</p>
+				{#if data.scenes.length === 0}
+					<div class="rounded-lg border border-slate-700 bg-slate-800/30 p-8 text-center">
+						<p class="mb-4 text-slate-400">No scenes yet. Create your first scene!</p>
+						<button
+							onclick={openSceneModal}
+							class="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white transition-colors hover:bg-indigo-700"
+						>
+							Create Scene
+						</button>
+					</div>
+				{:else}
+					<div class="flex flex-col gap-4">
+						{#each data.scenes as scene (scene.id)}
+							<div
+								class="rounded-lg border border-slate-700 bg-slate-800/50 p-4 transition-all hover:border-indigo-500/50 hover:bg-slate-800"
+							>
+								<div class="flex items-start justify-between">
+									<div class="flex-1">
+										<h3 class="text-lg font-semibold text-slate-100">{scene.name}</h3>
+										{#if scene.description}
+											<p class="mt-1 text-sm text-slate-400">{scene.description}</p>
+										{/if}
+									</div>
+									<div class="flex gap-1">
+										<button
+											onclick={() => handleEditScene(scene)}
+											class="rounded p-1 text-indigo-400 transition-colors hover:bg-slate-700 hover:text-indigo-300"
+											aria-label="Edit scene"
+											title="Edit scene"
+										>
+											<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+												></path>
+											</svg>
+										</button>
+										<button
+											onclick={() => handleDeleteScene(scene.id, scene.name)}
+											disabled={deletingScene === scene.id}
+											class="ml-2 rounded p-1 text-rose-400 transition-colors hover:bg-slate-700 hover:text-rose-300 disabled:cursor-not-allowed disabled:text-slate-600"
+											aria-label="Delete scene"
+											title="Delete scene"
+										>
+											{#if deletingScene === scene.id}
+												<svg
+													class="h-5 w-5 animate-spin"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<circle
+														class="opacity-25"
+														cx="12"
+														cy="12"
+														r="10"
+														stroke="currentColor"
+														stroke-width="4"
+													></circle>
+													<path
+														class="opacity-75"
+														fill="currentColor"
+														d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+													></path>
+												</svg>
+											{:else}
+												<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+													></path>
+												</svg>
+											{/if}
+										</button>
+									</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</section>
 		</div>
 	</main>

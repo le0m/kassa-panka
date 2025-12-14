@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { sounds, soundsTags, tags } from '$lib/server/db/schema';
+import { sounds, soundsTags, tags, scenes } from '$lib/server/db/schema';
 import { desc, isNull, eq, like, and } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
@@ -68,7 +68,15 @@ export const load: PageServerLoad = async ({ url }) => {
 		})
 	);
 
+	// Fetch all non-deleted scenes
+	const allScenes = await db
+		.select()
+		.from(scenes)
+		.where(isNull(scenes.deletedAt))
+		.orderBy(desc(scenes.createdAt));
+
 	return {
-		sounds: soundsWithTags
+		sounds: soundsWithTags,
+		scenes: allScenes
 	};
 };
