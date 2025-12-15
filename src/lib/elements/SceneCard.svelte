@@ -1,9 +1,21 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
+	import SceneSoundItem from './SceneSoundItem.svelte';
+
 	interface Props {
 		scene: {
 			id: string;
 			name: string;
 			description?: string | null;
+			sounds: Array<{
+				id: string;
+				name: string;
+				description?: string | null;
+				fileName: string;
+				fileSize: number;
+				mediaType: string;
+				createdAt: string;
+			}>;
 		};
 		deleting: string | null;
 		ondelete: (id: string, name: string) => void;
@@ -11,6 +23,10 @@
 	}
 
 	let { scene, deleting, ondelete, onedit }: Props = $props();
+
+	let isDragOver = $state<boolean>(false);
+	let isAddingSound = $state<boolean>(false);
+	let removingSoundId = $state<string | null>(null);
 
 	/**
 	 * Handles the delete button click
@@ -24,6 +40,107 @@
 	 */
 	function handleEditClick() {
 		onedit(scene);
+	}
+
+	/**
+	 * Handles drag over event - allows dropping and provides visual feedback
+	 * @param event - The drag event
+	 */
+	function handleDragOver(event: DragEvent) {
+		event.preventDefault();
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = 'copy';
+		}
+		isDragOver = true;
+	}
+
+	/**
+	 * Handles drag leave event - removes visual feedback
+	 */
+	function handleDragLeave() {
+		isDragOver = false;
+	}
+
+	/**
+	 * Handles drop event - links the sound to the scene
+	 * @param event - The drag event
+	 */
+	async function handleDrop(event: DragEvent) {
+		event.preventDefault();
+		isDragOver = false;
+
+		if (!event.dataTransfer) return;
+
+		try {
+			const data = JSON.parse(event.dataTransfer.getData('application/json'));
+			const { soundId } = data;
+
+			if (!soundId) return;
+
+			// Check if sound is already linked
+			if (scene.sounds.some((s) => s.id === soundId)) {
+				return;
+			}
+
+			isAddingSound = true;
+
+			const response = await fetch(`/api/scenes/${scene.id}/sounds`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ soundId })
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				alert(result.error || 'Failed to link sound to scene');
+				return;
+			}
+
+			// Refresh the data to show the new link
+			await invalidateAll();
+		} catch (error) {
+			console.error('Error linking sound to scene:', error);
+			alert('Failed to link sound to scene');
+		} finally {
+			isAddingSound = false;
+		}
+	}
+
+	/**
+	 * Handles removing a sound from the scene
+	 * @param soundId - The ID of the sound to remove
+	 * @param soundName - The name of the sound for confirmation
+	 */
+	async function handleRemoveSound(soundId: string, soundName: string) {
+		const confirmed = confirm(
+			`Remove "${soundName}" from "${scene.name}"?\n\nThis will not delete the sound, only unlink it from this scene.`
+		);
+
+		if (!confirmed) return;
+
+		removingSoundId = soundId;
+
+		try {
+			const response = await fetch(`/api/scenes/${scene.id}/sounds?soundId=${soundId}`, {
+				method: 'DELETE'
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				alert(result.error || 'Failed to remove sound from scene');
+				return;
+			}
+
+			// Refresh the data to remove the link
+			await invalidateAll();
+		} catch (error) {
+			console.error('Error removing sound from scene:', error);
+			alert('Failed to remove sound from scene');
+		} finally {
+			removingSoundId = null;
+		}
 	}
 </script>
 
@@ -82,5 +199,62 @@
 				{/if}
 			</button>
 		</div>
+	</div>
+
+	<!-- Linked Sounds List -->
+	{#if scene.sounds.length > 0}
+		<div class="mt-4">
+			<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
+				Linked Sounds ({scene.sounds.length})
+			</h4>
+			<div class="space-y-1.5">
+				{#each scene.sounds as sound (sound.id)}
+					<SceneSoundItem {sound} onremove={handleRemoveSound} />
+				{/each}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Drop Zone -->
+	<div
+		role="button"
+		tabindex="0"
+		ondragover={handleDragOver}
+		ondragleave={handleDragLeave}
+		ondrop={handleDrop}
+		class="mt-4 flex min-h-24 items-center justify-center rounded-lg border-2 border-dashed transition-colors"
+		class:border-slate-600={!isDragOver && !isAddingSound}
+		class:bg-slate-800={!isDragOver && !isAddingSound}
+		class:border-indigo-500={isDragOver}
+		class:bg-indigo-900={isDragOver}
+		class:border-emerald-500={isAddingSound}
+		class:bg-emerald-900={isAddingSound}
+	>
+		{#if isAddingSound}
+			<div class="flex items-center gap-2 text-emerald-400">
+				<svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+					></circle>
+					<path
+						class="opacity-75"
+						fill="currentColor"
+						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+					></path>
+				</svg>
+				<span class="text-sm font-medium">Linking sound...</span>
+			</div>
+		{:else}
+			<div class="flex items-center gap-2 text-slate-500">
+				<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+					></path>
+				</svg>
+				<span class="text-sm font-medium">Drop sounds here</span>
+			</div>
+		{/if}
 	</div>
 </div>

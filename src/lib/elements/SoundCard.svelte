@@ -19,6 +19,9 @@
 	let { sound, onedit }: Props = $props();
 
 	let deleting = $state<boolean>(false);
+	let isDragging = $state<boolean>(false);
+	let cardElement: HTMLDivElement;
+	let dragImageElement: HTMLDivElement;
 
 	/**
 	 * Handles sound deletion with confirmation
@@ -64,10 +67,42 @@
 	function handleEditClick() {
 		onedit(sound);
 	}
+
+	/**
+	 * Handles drag start event - sets the sound ID in the data transfer and custom drag image
+	 * @param event - The drag event
+	 */
+	function handleDragStart(event: DragEvent) {
+		isDragging = true;
+		if (event.dataTransfer && cardElement) {
+			event.dataTransfer.effectAllowed = 'copy';
+			event.dataTransfer.setData('application/json', JSON.stringify({ soundId: sound.id }));
+
+			// Create a smaller, transparent copy of the card as drag image
+			if (dragImageElement) {
+				// Set the drag image with offset to center it on cursor
+				event.dataTransfer.setDragImage(dragImageElement, 100, 50);
+			}
+		}
+	}
+
+	/**
+	 * Handles drag end event - resets the dragging state
+	 */
+	function handleDragEnd() {
+		isDragging = false;
+	}
 </script>
 
 <div
-	class="rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
+	bind:this={cardElement}
+	role="button"
+	tabindex="0"
+	draggable={true}
+	ondragstart={handleDragStart}
+	ondragend={handleDragEnd}
+	class="cursor-grab rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800 active:cursor-grabbing"
+	class:opacity-50={isDragging}
 >
 	<div class="mb-2 flex items-start justify-between">
 		<h3 class="flex-1 text-lg font-semibold text-slate-100">{sound.name}</h3>
@@ -143,4 +178,30 @@
 		<div>Size: {(sound.fileSize / 1024).toFixed(2)} KB</div>
 		<div>Added: {new Date(sound.createdAt).toLocaleDateString()}</div>
 	</div>
+</div>
+
+<!-- Hidden drag image: smaller, transparent copy that follows the cursor -->
+<div
+	bind:this={dragImageElement}
+	class="pointer-events-none fixed top-[-9999px] left-[-9999px] w-48 scale-75 rounded-lg border border-slate-500 bg-slate-800 p-3 opacity-70 shadow-xl"
+>
+	<div class="mb-1 flex items-center gap-2">
+		<svg
+			class="h-4 w-4 shrink-0 text-indigo-400"
+			fill="none"
+			viewBox="0 0 24 24"
+			stroke="currentColor"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+			></path>
+		</svg>
+		<h4 class="truncate text-sm font-semibold text-slate-100">{sound.name}</h4>
+	</div>
+	{#if sound.description}
+		<p class="line-clamp-2 text-xs text-slate-400">{sound.description}</p>
+	{/if}
 </div>

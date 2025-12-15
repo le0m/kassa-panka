@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { sounds, soundsTags, tags, scenes } from '$lib/server/db/schema';
+import { sounds, soundsTags, tags, scenes, scenesSounds } from '$lib/server/db/schema';
 import { asc, desc, isNull, eq, like, and } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
@@ -75,6 +75,31 @@ export const load: PageServerLoad = async ({ url }) => {
 		.where(isNull(scenes.deletedAt))
 		.orderBy(desc(scenes.createdAt));
 
+	// Fetch linked sounds for each scene
+	const scenesWithSounds = await Promise.all(
+		allScenes.map(async (scene) => {
+			const linkedSounds = await db
+				.select({
+					id: sounds.id,
+					name: sounds.name,
+					description: sounds.description,
+					fileName: sounds.fileName,
+					fileSize: sounds.fileSize,
+					mediaType: sounds.mediaType,
+					createdAt: sounds.createdAt
+				})
+				.from(sounds)
+				.innerJoin(scenesSounds, eq(sounds.id, scenesSounds.soundId))
+				.where(and(eq(scenesSounds.sceneId, scene.id), isNull(sounds.deletedAt)))
+				.orderBy(asc(sounds.name));
+
+			return {
+				...scene,
+				sounds: linkedSounds
+			};
+		})
+	);
+
 	// Fetch all tags
 	const allTags = (await db.select({ name: tags.name }).from(tags).orderBy(asc(tags.name))).map(
 		(tag) => tag.name
@@ -82,7 +107,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	return {
 		sounds: soundsWithTags,
-		scenes: allScenes,
+		scenes: scenesWithSounds,
 		tags: allTags
 	};
 };
