@@ -343,7 +343,9 @@
 
 				<!-- Error Message -->
 				{#if uploadError}
-					<div class="rounded-md border border-rose-400/50 bg-rose-900/20 p-3 text-sm text-rose-400">
+					<div
+						class="rounded-md border border-rose-400/50 bg-rose-900/20 p-3 text-sm text-rose-400"
+					>
 						{uploadError}
 					</div>
 				{/if}
