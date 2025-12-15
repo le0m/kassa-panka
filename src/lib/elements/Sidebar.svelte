@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
 
@@ -66,6 +67,33 @@
 	}) {
 		editSound = sound;
 		isModalOpen = true;
+	}
+
+	/**
+	 * Handles sound deletion with confirmation
+	 * @param soundId - The ID of the sound to delete
+	 * @param soundName - The name of the sound (for confirmation message)
+	 */
+	async function handleDelete(soundId: string, soundName: string) {
+		const confirmed = confirm(
+			`Are you sure you want to delete "${soundName}"?\n\nThis action can be undone by a database administrator.`
+		);
+
+		if (!confirmed) return;
+
+		const response = await fetch(`/api/sounds/${soundId}`, {
+			method: 'DELETE'
+		});
+
+		const result = await response.json();
+
+		if (!response.ok) {
+			alert(result.error || 'Failed to delete sound');
+			return;
+		}
+
+		// Refresh the page data to remove the deleted sound
+		await invalidateAll();
 	}
 
 	/**
@@ -137,7 +165,7 @@
 				</div>
 			{:else}
 				{#each sounds as sound (sound.id)}
-					<SoundCard {sound} onedit={handleEdit} />
+					<SoundCard {sound} onedit={handleEdit} ondelete={handleDelete} />
 				{/each}
 			{/if}
 		</div>

@@ -93,9 +93,25 @@ export const load: PageServerLoad = async ({ url }) => {
 				.where(and(eq(scenesSounds.sceneId, scene.id), isNull(sounds.deletedAt)))
 				.orderBy(asc(sounds.name));
 
+			// Fetch tags for each linked sound
+			const linkedSoundsWithTags = await Promise.all(
+				linkedSounds.map(async (sound) => {
+					const soundTags = await db
+						.select({ name: tags.name })
+						.from(soundsTags)
+						.innerJoin(tags, eq(soundsTags.tagId, tags.id))
+						.where(eq(soundsTags.soundId, sound.id));
+
+					return {
+						...sound,
+						tags: soundTags.map((t) => t.name)
+					};
+				})
+			);
+
 			return {
 				...scene,
-				sounds: linkedSounds
+				sounds: linkedSoundsWithTags
 			};
 		})
 	);

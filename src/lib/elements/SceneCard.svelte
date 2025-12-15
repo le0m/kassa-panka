@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import SceneSoundItem from './SceneSoundItem.svelte';
+	import SoundCard from './SoundCard.svelte';
 
 	interface Props {
 		scene: {
@@ -26,7 +26,6 @@
 
 	let isDragOver = $state<boolean>(false);
 	let isAddingSound = $state<boolean>(false);
-	let removingSoundId = $state<string | null>(null);
 
 	/**
 	 * Handles the delete button click
@@ -119,28 +118,19 @@
 
 		if (!confirmed) return;
 
-		removingSoundId = soundId;
+		const response = await fetch(`/api/scenes/${scene.id}/sounds?soundId=${soundId}`, {
+			method: 'DELETE'
+		});
 
-		try {
-			const response = await fetch(`/api/scenes/${scene.id}/sounds?soundId=${soundId}`, {
-				method: 'DELETE'
-			});
+		const result = await response.json();
 
-			const result = await response.json();
-
-			if (!response.ok) {
-				alert(result.error || 'Failed to remove sound from scene');
-				return;
-			}
-
-			// Refresh the data to remove the link
-			await invalidateAll();
-		} catch (error) {
-			console.error('Error removing sound from scene:', error);
-			alert('Failed to remove sound from scene');
-		} finally {
-			removingSoundId = null;
+		if (!response.ok) {
+			alert(result.error || 'Failed to remove sound from scene');
+			return;
 		}
+
+		// Refresh the data to remove the link
+		await invalidateAll();
 	}
 </script>
 
@@ -209,7 +199,7 @@
 			</h4>
 			<div class="space-y-1.5">
 				{#each scene.sounds as sound (sound.id)}
-					<SceneSoundItem {sound} onremove={handleRemoveSound} />
+					<SoundCard {sound} draggable={false} ondelete={handleRemoveSound} />
 				{/each}
 			</div>
 		</div>
