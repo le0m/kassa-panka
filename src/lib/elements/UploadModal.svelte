@@ -10,37 +10,22 @@
 			description?: string | null;
 			tags?: string[];
 		} | null;
+		tags: string[];
 	}
 
-	let { isOpen, onClose, editSound = null }: Props = $props();
+	let { isOpen, onClose, editSound = null, tags = [] }: Props = $props();
 
 	let uploading = $state(false);
 	let uploadError = $state<string | null>(null);
 	let uploadSuccess = $state(false);
 	let tagInput = $state('');
 	let selectedTags = $state<string[]>([]);
-	let availableTags = $state<string[]>([]);
 	let showTagSuggestions = $state(false);
 	let selectedSuggestionIndex = $state(-1);
 	let formName = $state('');
 	let formDescription = $state('');
 
 	let isEditMode = $derived(editSound !== null);
-
-	/**
-	 * Loads available tags from the database
-	 */
-	async function loadTags() {
-		try {
-			const response = await fetch('/api/tags');
-			const result = await response.json();
-			if (result.tags) {
-				availableTags = result.tags.map((tag: { name: string }) => tag.name);
-			}
-		} catch (error) {
-			console.error('Error loading tags:', error);
-		}
-	}
 
 	/**
 	 * Adds a tag to the selected tags list
@@ -97,7 +82,7 @@
 	 * Filtered tag suggestions based on input
 	 */
 	let filteredTags = $derived(
-		availableTags
+		tags
 			.filter(
 				(tag) =>
 					tag.toLowerCase().includes(tagInput.toLowerCase()) &&
@@ -205,8 +190,6 @@
 	 */
 	$effect(() => {
 		if (isOpen) {
-			loadTags();
-
 			// Populate form with edit data if in edit mode
 			if (editSound) {
 				formName = editSound.name;

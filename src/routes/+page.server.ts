@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { sounds, soundsTags, tags, scenes } from '$lib/server/db/schema';
-import { desc, isNull, eq, like, and } from 'drizzle-orm';
+import { asc, desc, isNull, eq, like, and } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
 /**
@@ -75,8 +75,14 @@ export const load: PageServerLoad = async ({ url }) => {
 		.where(isNull(scenes.deletedAt))
 		.orderBy(desc(scenes.createdAt));
 
+	// Fetch all tags
+	const allTags = (await db.select({ name: tags.name }).from(tags).orderBy(asc(tags.name))).map(
+		(tag) => tag.name
+	);
+
 	return {
 		sounds: soundsWithTags,
-		scenes: allScenes
+		scenes: allScenes,
+		tags: allTags
 	};
 };

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import { base } from '$app/paths';
 
 	interface Props {
@@ -12,18 +13,49 @@
 			createdAt: string;
 			tags?: string[];
 		};
-		deleting: string | null;
-		ondelete: (id: string, name: string) => void;
 		onedit: (sound: Props['sound']) => void;
 	}
 
-	let { sound, deleting, ondelete, onedit }: Props = $props();
+	let { sound, onedit }: Props = $props();
+
+	let deleting = $state<boolean>(false);
 
 	/**
-	 * Handles the delete button click
+	 * Handles sound deletion with confirmation
+	 * @param soundId - The ID of the sound to delete
+	 * @param soundName - The name of the sound (for confirmation message)
 	 */
-	function handleDeleteClick() {
-		ondelete(sound.id, sound.name);
+	async function handleDelete() {
+		const confirmed = confirm(
+			`Are you sure you want to delete "${sound.name}"?\n\nThis action can be undone by a database administrator.`
+		);
+
+		if (!confirmed) {
+			return;
+		}
+
+		deleting = true;
+
+		try {
+			const response = await fetch(`/api/sounds/${sound.id}`, {
+				method: 'DELETE'
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				alert(result.error || 'Failed to delete sound');
+				return;
+			}
+
+			// Refresh the page data to remove the deleted sound
+			await invalidateAll();
+		} catch (error) {
+			console.error('Delete error:', error);
+			alert('Network error occurred while deleting sound');
+		} finally {
+			deleting = false;
+		}
 	}
 
 	/**
@@ -56,13 +88,13 @@
 				</svg>
 			</button>
 			<button
-				onclick={handleDeleteClick}
-				disabled={deleting === sound.id}
+				onclick={handleDelete}
+				disabled={deleting}
 				class="ml-2 rounded p-1 text-rose-400 transition-colors hover:bg-slate-700 hover:text-rose-300 disabled:cursor-not-allowed disabled:text-slate-600"
 				aria-label="Delete sound"
 				title="Delete sound"
 			>
-				{#if deleting === sound.id}
+				{#if deleting}
 					<svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 						></circle>

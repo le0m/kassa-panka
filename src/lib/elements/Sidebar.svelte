@@ -1,13 +1,32 @@
 <script lang="ts">
+	import SoundCard from '$lib/elements/SoundCard.svelte';
+	import UploadModal from '$lib/elements/UploadModal.svelte';
+
 	interface Props {
-		children: import('svelte').Snippet;
+		sounds: {
+			id: string;
+			name: string;
+			description?: string | null;
+			fileName: string;
+			fileSize: number;
+			mediaType: string;
+			createdAt: string;
+			tags?: string[];
+		}[];
+		tags: string[];
 		onsearch: (query: string) => void;
-		onupload: () => void;
 	}
 
-	let { children, onsearch, onupload }: Props = $props();
+	let { sounds = [], tags = [], onsearch }: Props = $props();
 
 	let searchQuery = $state('');
+	let isModalOpen = $state(false);
+	let editSound = $state<{
+		id: string;
+		name: string;
+		description?: string | null;
+		tags?: string[];
+	} | null>(null);
 
 	/**
 	 * Initialize search query from URL on mount
@@ -18,6 +37,36 @@
 			searchQuery = url.searchParams.get('q') || '';
 		}
 	});
+
+	/**
+	 * Opens the upload modal
+	 */
+	function openModal() {
+		editSound = null;
+		isModalOpen = true;
+	}
+
+	/**
+	 * Closes the upload modal
+	 */
+	function closeModal() {
+		isModalOpen = false;
+		editSound = null;
+	}
+
+	/**
+	 * Handles editing a sound
+	 * @param sound - The sound data to edit
+	 */
+	function handleEdit(sound: {
+		id: string;
+		name: string;
+		description?: string | null;
+		tags?: string[];
+	}) {
+		editSound = sound;
+		isModalOpen = true;
+	}
 
 	/**
 	 * Handles search input changes
@@ -37,6 +86,9 @@
 	}
 </script>
 
+<!-- Upload Modal -->
+<UploadModal isOpen={isModalOpen} {editSound} onClose={closeModal} {tags} />
+
 <aside class="flex h-full w-80 flex-col border-r border-slate-700 bg-slate-800/50 backdrop-blur-sm">
 	<!-- Fixed Header Section -->
 	<div class="border-b border-slate-700 p-4">
@@ -44,7 +96,7 @@
 
 		<!-- Upload Button -->
 		<button
-			onclick={onupload}
+			onclick={openModal}
 			class="mb-3 w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
 		>
 			Upload Sound
@@ -79,7 +131,15 @@
 	<!-- Scrollable Sound List -->
 	<div class="flex-1 overflow-y-auto p-4">
 		<div class="flex flex-col gap-3">
-			{@render children()}
+			{#if sounds.length === 0}
+				<div class="rounded-lg border border-slate-700 bg-slate-800 p-6 text-center">
+					<p class="mb-4 text-sm text-slate-400">No sounds yet. Upload your first sound!</p>
+				</div>
+			{:else}
+				{#each sounds as sound (sound.id)}
+					<SoundCard {sound} onedit={handleEdit} />
+				{/each}
+			{/if}
 		</div>
 	</div>
 </aside>
