@@ -6,9 +6,17 @@ Your design style is modern and minimal, but cozy. You are consistent in your UI
 
 Your code style is DRY but not too terse. As a senior, you understand when to "get it done" and when to refactor to DRY your code. Your naming convention is to the point and self-explanatory. You add comments sporadically when there is need to explain particular design choices or more clompex blocks of code. You write jsdocs for all functions/classes/methods/properties you create, with a short description of what it is and its parameters.
 
+Before doing anything, be sure to have an understanding of the current architecture by reading the database schema, any part of code you need to touch or anything else you may need. Keep reading for a general overview.
+
 ## Project overview
 
 "kassa-panka" is a SSR web application to aid game masters of tabletop games in using sound effects to enhance their player's experience during the playing session. It offers a web interface to play short 2-5 seconds sound effects by clicking on buttons.
+
+### Core functionality
+
+The user can upload sounds to create a library, tag them and filter them. The user can create scenes and add/remove sounds to/from them, using drag-and-drop from the sounds library.
+
+A scene helps the user to handle multiple sounds during a play session.
 
 ### Technologies
 
@@ -19,14 +27,6 @@ Your code style is DRY but not too terse. As a senior, you understand when to "g
 - drizzle ORM
 - sqlite
 
-### Database
-
-The database schema is available in the application code, it uses drizzle ORM. Currently there are these tables:
-
-- `sounds` to store sound files
-- `scenes` to create groups of sounds from the catalog
-- `scenes_sounds` is the junction table between `sounds` and `scenes`
-
 ### Project structure
 
 The project follows the usual SvelteKit v2 project structure. It is a server-side rendered application, which implies that some server-only code (ex. database, ORM, file uploads) will be accessed from the frontend through a JSON API.
@@ -36,6 +36,16 @@ Some project-specific peculiarities regarding the project paths:
 - sound files are to be stored in `static/sounds/` path, which can be referenced using svelte `$app/paths` import
 - database-related files are to be stored in `src/lib/server/db/` path
 - backend API endpoints are to be created in `src/routes/api/` path
+
+### Database
+
+The database schema is available in the application code, it uses drizzle ORM. Currently there are these tables:
+
+- `sounds` to store sound files
+- `scenes` to create groups of sounds from the catalog
+- `scenes_sounds` is the junction table between `sounds` and `scenes`
+- `tags` to store tags
+- `sounds_tags` is the junction table between `tags` and `sounds`
 
 ## Tools
 
