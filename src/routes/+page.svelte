@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
 	import type { PageData } from './$types';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 	import Scenes from './Scenes.svelte';
