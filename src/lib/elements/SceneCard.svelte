@@ -1,25 +1,13 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import SoundCard from './SoundCard.svelte';
+	import type { SceneWithSounds } from '$lib/server/db';
 
 	interface Props {
-		scene: {
-			id: string;
-			name: string;
-			description?: string | null;
-			sounds: Array<{
-				id: string;
-				name: string;
-				description?: string | null;
-				fileName: string;
-				fileSize: number;
-				mediaType: string;
-				createdAt: string;
-			}>;
-		};
+		scene: SceneWithSounds;
 		deleting: string | null;
 		ondelete: (id: string, name: string) => void;
-		onedit: (scene: Props['scene']) => void;
+		onedit: (scene: SceneWithSounds) => void;
 	}
 
 	let { scene, deleting, ondelete, onedit }: Props = $props();

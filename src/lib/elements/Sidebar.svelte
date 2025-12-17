@@ -2,19 +2,11 @@
 	import { invalidateAll } from '$app/navigation';
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
+	import type { SoundWithTags, TagEntity } from '$lib/server/db';
 
 	interface Props {
-		sounds: {
-			id: string;
-			name: string;
-			description?: string | null;
-			fileName: string;
-			fileSize: number;
-			mediaType: string;
-			createdAt: string;
-			tags?: string[];
-		}[];
-		tags: string[];
+		sounds: SoundWithTags[];
+		tags: TagEntity[];
 		onsearch: (query: string) => void;
 	}
 
@@ -22,12 +14,7 @@
 
 	let searchQuery = $state('');
 	let isModalOpen = $state(false);
-	let editSound = $state<{
-		id: string;
-		name: string;
-		description?: string | null;
-		tags?: string[];
-	} | null>(null);
+	let editSound = $state<SoundWithTags | null>(null);
 
 	/**
 	 * Initialize search query from URL on mount
@@ -59,12 +46,7 @@
 	 * Handles editing a sound
 	 * @param sound - The sound data to edit
 	 */
-	function handleEdit(sound: {
-		id: string;
-		name: string;
-		description?: string | null;
-		tags?: string[];
-	}) {
+	function handleEdit(sound: SoundWithTags) {
 		editSound = sound;
 		isModalOpen = true;
 	}
@@ -115,7 +97,7 @@
 </script>
 
 <!-- Upload Modal -->
-<UploadModal isOpen={isModalOpen} {editSound} onClose={closeModal} {tags} />
+<UploadModal isOpen={isModalOpen} {editSound} onclose={closeModal} {tags} />
 
 <aside class="flex h-full w-80 flex-col border-r border-slate-700 bg-slate-800/50 backdrop-blur-sm">
 	<!-- Fixed Header Section -->

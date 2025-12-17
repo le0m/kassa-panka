@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-import { relations } from 'drizzle-orm';
 import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const sounds = sqliteTable('sounds', {
@@ -21,11 +20,6 @@ export const sounds = sqliteTable('sounds', {
 	deletedAt: text('deleted_at')
 });
 
-export const soundsRelations = relations(sounds, ({ many }) => ({
-	soundScenes: many(scenesSounds),
-	soundTags: many(soundsTags)
-}));
-
 export const scenes = sqliteTable('scenes', {
 	id: text('id', { length: 128 })
 		.primaryKey()
@@ -42,10 +36,6 @@ export const scenes = sqliteTable('scenes', {
 	deletedAt: text('deleted_at')
 });
 
-export const scenesRelations = relations(scenes, ({ many }) => ({
-	sceneSounds: many(scenesSounds)
-}));
-
 export const scenesSounds = sqliteTable(
 	'scenes_sounds',
 	{
@@ -59,17 +49,6 @@ export const scenesSounds = sqliteTable(
 	(table) => [primaryKey({ columns: [table.sceneId, table.soundId] })]
 );
 
-export const scenesSoundsRelations = relations(scenesSounds, ({ one }) => ({
-	scene: one(scenes, {
-		fields: [scenesSounds.sceneId],
-		references: [scenes.id]
-	}),
-	sound: one(sounds, {
-		fields: [scenesSounds.soundId],
-		references: [sounds.id]
-	})
-}));
-
 export const tags = sqliteTable('tags', {
 	id: text('id', { length: 128 })
 		.primaryKey()
@@ -79,10 +58,6 @@ export const tags = sqliteTable('tags', {
 		.notNull()
 		.$defaultFn(() => new Date().toISOString())
 });
-
-export const tagsRelations = relations(tags, ({ many }) => ({
-	tagSounds: many(soundsTags)
-}));
 
 export const soundsTags = sqliteTable(
 	'sounds_tags',
@@ -97,17 +72,6 @@ export const soundsTags = sqliteTable(
 	(table) => [primaryKey({ columns: [table.soundId, table.tagId] })]
 );
 
-export const soundsTagsRelations = relations(soundsTags, ({ one }) => ({
-	sound: one(sounds, {
-		fields: [soundsTags.soundId],
-		references: [sounds.id]
-	}),
-	tag: one(tags, {
-		fields: [soundsTags.tagId],
-		references: [tags.id]
-	})
-}));
-
 export type SoundsTable = typeof sounds;
 export type ScenesTable = typeof scenes;
 export type ScenesSoundsTable = typeof scenesSounds;
@@ -116,11 +80,17 @@ export type SoundsTagsTable = typeof soundsTags;
 
 export type NewSoundEntity = typeof sounds.$inferInsert;
 export type SoundEntity = typeof sounds.$inferSelect;
+export type SoundWithTags = SoundEntity & { tags: TagEntity[] };
+
 export type NewSceneEntity = typeof scenes.$inferInsert;
 export type SceneEntity = typeof scenes.$inferSelect;
+export type SceneWithSounds = SceneEntity & { sounds: SoundWithTags[] };
+
 export type NewSceneSoundEntity = typeof scenesSounds.$inferInsert;
 export type SceneSoundEntity = typeof scenesSounds.$inferSelect;
+
 export type NewTagEntity = typeof tags.$inferInsert;
 export type TagEntity = typeof tags.$inferSelect;
+
 export type NewSoundTagEntity = typeof soundsTags.$inferInsert;
 export type SoundTagEntity = typeof soundsTags.$inferSelect;

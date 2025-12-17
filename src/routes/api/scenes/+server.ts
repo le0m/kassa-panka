@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { scenes } from '$lib/server/db/schema';
+import { scenes } from '$lib/server/db';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { desc, isNull } from 'drizzle-orm';

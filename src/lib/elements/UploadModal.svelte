@@ -1,19 +1,15 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import type { SoundWithTags, TagEntity } from '$lib/server/db';
 
 	interface Props {
 		isOpen: boolean;
-		onClose: () => void;
-		editSound?: {
-			id: string;
-			name: string;
-			description?: string | null;
-			tags?: string[];
-		} | null;
-		tags: string[];
+		onclose: () => void;
+		editSound?: SoundWithTags | null;
+		tags: TagEntity[];
 	}
 
-	let { isOpen, onClose, editSound = null, tags = [] }: Props = $props();
+	let { isOpen, onclose, editSound = null, tags = [] }: Props = $props();
 
 	let uploading = $state(false);
 	let uploadError = $state<string | null>(null);
@@ -54,7 +50,7 @@
 			event.preventDefault();
 			if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < filteredTags.length) {
 				// Add the selected suggestion
-				addTag(filteredTags[selectedSuggestionIndex]);
+				addTag(filteredTags[selectedSuggestionIndex].name);
 			} else if (tagInput.trim()) {
 				// Add the typed tag
 				addTag(tagInput);
@@ -85,8 +81,8 @@
 		tags
 			.filter(
 				(tag) =>
-					tag.toLowerCase().includes(tagInput.toLowerCase()) &&
-					!selectedTags.includes(tag.toLowerCase())
+					tag.name.toLowerCase().includes(tagInput.toLowerCase()) &&
+					!selectedTags.includes(tag.name.toLowerCase())
 			)
 			.slice(0, 5)
 	);
@@ -161,7 +157,7 @@
 			// Close modal after successful operation
 			setTimeout(() => {
 				handleClose();
-			}, 500);
+			}, 100);
 		} catch (error) {
 			uploadError = 'Network error occurred';
 			console.error('Upload/update error:', error);
@@ -182,7 +178,7 @@
 		selectedSuggestionIndex = -1;
 		formName = '';
 		formDescription = '';
-		onClose();
+		onclose();
 	}
 
 	/**
@@ -194,7 +190,7 @@
 			if (editSound) {
 				formName = editSound.name;
 				formDescription = editSound.description || '';
-				selectedTags = editSound.tags || [];
+				selectedTags = editSound.tags.map((tag) => tag.name) || [];
 			} else {
 				formName = '';
 				formDescription = '';
@@ -277,7 +273,7 @@
 							bind:value={tagInput}
 							onkeydown={handleTagInput}
 							onfocus={() => (showTagSuggestions = true)}
-							onblur={() => setTimeout(() => (showTagSuggestions = false), 200)}
+							onblur={() => setTimeout(() => (showTagSuggestions = false), 100)}
 							disabled={uploading}
 							class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							placeholder="Type and press Enter to add tags..."
@@ -294,7 +290,7 @@
 										index
 											? 'bg-indigo-600'
 											: 'hover:bg-slate-600'}"
-										onclick={() => addTag(tag)}
+										onclick={() => addTag(tag.name)}
 									>
 										{tag}
 									</button>

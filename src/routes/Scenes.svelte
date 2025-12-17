@@ -2,30 +2,23 @@
 	import { invalidateAll } from '$app/navigation';
 	import SceneModal from '$lib/elements/SceneModal.svelte';
 	import SceneCard from '$lib/elements/SceneCard.svelte';
+	import type { SceneWithSounds } from '$lib/server/db';
 
 	interface Props {
-		scenes: {
-			id: string;
-			name: string;
-			description?: string | null;
-		}[];
+		scenes: SceneWithSounds[];
 	}
 
 	const { scenes }: Props = $props();
 
 	let isModalOpen = $state(false);
-	let editScene = $state<{
-		id: string;
-		name: string;
-		description?: string | null;
-	} | null>(null);
+	let editScene = $state<SceneWithSounds | null>(null);
 	let deletingScene = $state<string | null>(null);
 
 	/**
 	 * Handles editing a scene
 	 * @param scene - The scene data to edit
 	 */
-	function handleEditScene(scene: { id: string; name: string; description?: string | null }) {
+	function handleEditScene(scene: SceneWithSounds) {
 		editScene = scene;
 		isModalOpen = true;
 	}

@@ -29,7 +29,6 @@
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^24",
 		"drizzle-kit": "^0.31.8",
-		"drizzle-orm": "^0.45.0",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.1",
@@ -45,6 +44,7 @@
 		"vite": "^7.2.6"
 	},
 	"dependencies": {
-		"better-sqlite3": "^12.5.0"
+		"better-sqlite3": "^12.5.0",
+		"drizzle-orm": "1.0.0-beta.3-36e9b9e"
 	}
 }

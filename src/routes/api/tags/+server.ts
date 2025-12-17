@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { tags } from '$lib/server/db/schema';
+import { tags } from '$lib/server/db';
 import { asc } from 'drizzle-orm';
 
 /**

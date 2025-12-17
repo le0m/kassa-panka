@@ -1,14 +1,11 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import type { SceneWithSounds } from '$lib/server/db';
 
 	interface Props {
 		isOpen: boolean;
 		onClose: () => void;
-		editScene?: {
-			id: string;
-			name: string;
-			description?: string | null;
-		} | null;
+		editScene?: SceneWithSounds | null;
 	}
 
 	let { isOpen, onClose, editScene = null }: Props = $props();
@@ -84,7 +81,7 @@
 			// Close modal after successful submission
 			setTimeout(() => {
 				onClose();
-			}, 500);
+			}, 100);
 		} catch (error) {
 			submitError = 'Network error occurred';
 			console.error('Submit error:', error);

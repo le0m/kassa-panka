@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { sounds, tags, soundsTags } from '$lib/server/db/schema';
+import { sounds, tags, soundsTags } from '$lib/server/db';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { eq } from 'drizzle-orm';

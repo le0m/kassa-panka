@@ -24,7 +24,7 @@ A scene helps the user to handle multiple sounds during a play session.
 - svelte v5 (runes mode)
 - sveltekit v2
 - tailwindcss v4
-- drizzle ORM
+- drizzle ORM v1 beta (relational queries v2 mode)
 - sqlite
 
 ### Project structure

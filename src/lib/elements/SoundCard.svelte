@@ -1,16 +1,10 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import type { SoundWithTags } from '$lib/server/db';
 
 	interface Props {
-		sound: {
-			id: string;
-			name: string;
-			description?: string | null;
-			fileName: string;
-			mediaType?: string;
-			tags?: string[];
-		};
-		onedit?: (sound: Props['sound']) => void;
+		sound: SoundWithTags;
+		onedit?: (sound: SoundWithTags) => void;
 		ondelete?: (soundId: string, soundName: string) => Promise<void> | void;
 		draggable?: boolean;
 	}
@@ -157,11 +151,11 @@
 
 	{#if sound.tags && sound.tags.length > 0}
 		<div class="mb-3 flex flex-wrap gap-1.5">
-			{#each sound.tags as tag (tag)}
+			{#each sound.tags as tag (tag.id)}
 				<span
 					class="inline-flex items-center rounded-full border border-cyan-700/50 bg-cyan-900/40 px-2.5 py-0.5 text-xs text-cyan-300"
 				>
-					{tag}
+					{tag.name}
 				</span>
 			{/each}
 		</div>
