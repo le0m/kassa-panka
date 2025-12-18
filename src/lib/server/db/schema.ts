@@ -36,18 +36,18 @@ export const scenes = sqliteTable('scenes', {
 	deletedAt: text('deleted_at')
 });
 
-export const scenesSounds = sqliteTable(
-	'scenes_sounds',
-	{
-		sceneId: text('scene_id', { length: 128 })
-			.notNull()
-			.references(() => scenes.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-		soundId: text('sound_id', { length: 128 })
-			.notNull()
-			.references(() => sounds.id, { onDelete: 'cascade', onUpdate: 'cascade' })
-	},
-	(table) => [primaryKey({ columns: [table.sceneId, table.soundId] })]
-);
+export const scenesSounds = sqliteTable('scenes_sounds', {
+	id: text('id', { length: 128 })
+		.primaryKey()
+		.$defaultFn(() => randomUUID()),
+	sceneId: text('scene_id', { length: 128 })
+		.notNull()
+		.references(() => scenes.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+	soundId: text('sound_id', { length: 128 })
+		.notNull()
+		.references(() => sounds.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+	position: integer('position').notNull().default(0)
+});
 
 export const tags = sqliteTable('tags', {
 	id: text('id', { length: 128 })
@@ -81,13 +81,16 @@ export type SoundsTagsTable = typeof soundsTags;
 export type NewSoundEntity = typeof sounds.$inferInsert;
 export type SoundEntity = typeof sounds.$inferSelect;
 export type SoundWithTags = SoundEntity & { tags: TagEntity[] };
+export type SoundWithPosition = SoundWithTags & { position: number };
 
 export type NewSceneEntity = typeof scenes.$inferInsert;
 export type SceneEntity = typeof scenes.$inferSelect;
 export type SceneWithSounds = SceneEntity & { sounds: SoundWithTags[] };
+export type SceneWithSoundsPositions = SceneEntity & { sounds: SoundWithPosition[] };
 
 export type NewSceneSoundEntity = typeof scenesSounds.$inferInsert;
 export type SceneSoundEntity = typeof scenesSounds.$inferSelect;
+export type SceneSoundWithTags = SceneSoundEntity & { sound: SoundWithTags | null };
 
 export type NewTagEntity = typeof tags.$inferInsert;
 export type TagEntity = typeof tags.$inferSelect;

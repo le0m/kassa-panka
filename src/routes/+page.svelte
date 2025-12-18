@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
-	import Scenes from './Scenes.svelte';
+	import Scenes from '$lib/elements/Scenes.svelte';
 
 	let { data }: { data: PageData } = $props();
 

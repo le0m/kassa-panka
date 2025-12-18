@@ -45,7 +45,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 				// Find or create tag
 				let tag = await db.query.tags.findFirst({
-					where: eq(tags.name, trimmedTag)
+					where: { name: trimmedTag }
 				});
 
 				if (!tag) {

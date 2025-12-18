@@ -10,12 +10,24 @@ export const relations = defineRelations(schema, (r) => ({
 		scenes: r.many.scenes({
 			from: r.sounds.id.through(r.scenesSounds.soundId),
 			to: r.scenes.id.through(r.scenesSounds.sceneId)
-		})
+		}),
+		soundScenes: r.many.scenesSounds() // this is the junction table, which has metadata
 	},
 	scenes: {
-		sounds: r.many.sounds()
+		sounds: r.many.sounds(),
+		sceneSounds: r.many.scenesSounds() // this is the junction table, which has metadata
 	},
 	tags: {
 		sounds: r.many.sounds()
+	},
+	scenesSounds: {
+		scene: r.one.scenes({
+			from: r.scenesSounds.sceneId,
+			to: r.scenes.id
+		}),
+		sound: r.one.sounds({
+			from: r.scenesSounds.soundId,
+			to: r.sounds.id
+		})
 	}
 }));

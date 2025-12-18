@@ -16,7 +16,7 @@ Before doing anything, be sure to have an understanding of the current architect
 
 The user can upload sounds to create a library, tag them and filter them. The user can create scenes and add/remove sounds to/from them, using drag-and-drop from the sounds library.
 
-A scene helps the user to handle multiple sounds during a play session.
+A scene helps the user to handle multiple sounds during a play session. A sound can be in a scene more than one times. Sounds can be reordered by the user.
 
 ### Technologies
 
@@ -43,7 +43,7 @@ The database schema is available in the application code, it uses drizzle ORM. C
 
 - `sounds` to store sound files
 - `scenes` to create groups of sounds from the catalog
-- `scenes_sounds` is the junction table between `sounds` and `scenes`
+- `scenes_sounds` is the junction table between `sounds` and `scenes`; it includes extra metadata, like `position` to sort the sounds of the scene
 - `tags` to store tags
 - `sounds_tags` is the junction table between `tags` and `sounds`
 

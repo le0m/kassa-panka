@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { scenesSounds, scenes, sounds } from '$lib/server/db';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, desc } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 
 /**
@@ -38,21 +38,19 @@ export const POST: RequestHandler = async ({ params, request }) => {
 			return json({ error: 'Sound not found' }, { status: 404 });
 		}
 
-		// Check if relation already exists
-		const existing = await db
-			.select()
+		// Get latest sound position
+		const latestSound = await db
+			.select({ position: scenesSounds.position })
 			.from(scenesSounds)
 			.where(and(eq(scenesSounds.sceneId, sceneId), eq(scenesSounds.soundId, soundId)))
+			.orderBy(desc(scenesSounds.position))
 			.limit(1);
-
-		if (existing.length > 0) {
-			return json({ error: 'Sound already linked to this scene' }, { status: 400 });
-		}
 
 		// Create the relation
 		await db.insert(scenesSounds).values({
 			sceneId,
-			soundId
+			soundId,
+			position: latestSound[0].position ?? 0
 		});
 
 		return json({ success: true, sceneId, soundId });

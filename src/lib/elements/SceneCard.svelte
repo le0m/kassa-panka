@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import SceneSoundCard from './SceneSoundCard.svelte';
-	import type { SceneWithSounds } from '$lib/server/db';
+	import type { SceneWithSoundsPositions } from '$lib/server/db';
 
 	interface Props {
-		scene: SceneWithSounds;
+		scene: SceneWithSoundsPositions;
 		deleting: string | null;
 		ondelete: (id: string, name: string) => void;
-		onedit: (scene: SceneWithSounds) => void;
+		onedit: (scene: SceneWithSoundsPositions) => void;
 	}
 
 	let { scene, deleting, ondelete, onedit }: Props = $props();
@@ -63,11 +63,6 @@
 			const { soundId } = data;
 
 			if (!soundId) return;
-
-			// Check if sound is already linked
-			if (scene.sounds.some((s) => s.id === soundId)) {
-				return;
-			}
 
 			isAddingSound = true;
 

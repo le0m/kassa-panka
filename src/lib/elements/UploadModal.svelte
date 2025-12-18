@@ -292,7 +292,7 @@
 											: 'hover:bg-slate-600'}"
 										onclick={() => addTag(tag.name)}
 									>
-										{tag}
+										{tag.name}
 									</button>
 								{/each}
 							</div>
