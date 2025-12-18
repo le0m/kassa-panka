@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import SoundCard from './SoundCard.svelte';
+	import SceneSoundCard from './SceneSoundCard.svelte';
 	import type { SceneWithSounds } from '$lib/server/db';
 
 	interface Props {
@@ -185,9 +185,9 @@
 			<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
 				Linked Sounds ({scene.sounds.length})
 			</h4>
-			<div class="space-y-1.5">
+			<div class="grid grid-cols-5 gap-2">
 				{#each scene.sounds as sound (sound.id)}
-					<SoundCard {sound} draggable={false} ondelete={handleRemoveSound} />
+					<SceneSoundCard {sound} ondelete={handleRemoveSound} />
 				{/each}
 			</div>
 		</div>

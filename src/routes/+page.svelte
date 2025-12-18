@@ -6,10 +6,6 @@
 
 	let { data }: { data: PageData } = $props();
 
-	$effect(() => {
-		console.log(data.scenes[0].sounds, `scenes "${data.scenes[0].name}"`);
-	});
-
 	/**
 	 * Handles search when triggered from Sidebar
 	 * @param query - The search query string

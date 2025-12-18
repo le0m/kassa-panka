@@ -40,14 +40,6 @@
 	}
 
 	/**
-	 * Handles the play button click - plays the sound
-	 */
-	function handlePlay() {
-		const audio = new Audio(`${base}/sounds/${sound.fileName}`);
-		audio.play();
-	}
-
-	/**
 	 * Handles drag start event - sets the sound ID in the data transfer and custom drag image
 	 * @param event - The drag event
 	 */
