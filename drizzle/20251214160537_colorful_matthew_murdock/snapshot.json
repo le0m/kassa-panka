@@ -1,0 +1,251 @@
+{
+  "dialect": "sqlite",
+  "id": "b19e6e9a-d45d-4b7a-9607-65721ee3b3cc",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "version": "7",
+  "ddl": [
+    {
+      "name": "playlists",
+      "entityType": "tables"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "table": "playlists",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "playlists_pk",
+      "table": "playlists",
+      "entityType": "pks"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "table": "playlists",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "table": "playlists",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "table": "playlists",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "table": "playlists",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "deleted_at",
+      "table": "playlists",
+      "entityType": "columns"
+    },
+    {
+      "name": "playlists_sounds",
+      "entityType": "tables"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "playlist_id",
+      "table": "playlists_sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "sound_id",
+      "table": "playlists_sounds",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        "playlist_id",
+        "sound_id"
+      ],
+      "nameExplicit": false,
+      "name": "playlists_sounds_playlist_id_sound_id_pk",
+      "table": "playlists_sounds",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "playlist_id"
+      ],
+      "tableTo": "playlists",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "cascade",
+      "onDelete": "cascade",
+      "nameExplicit": false,
+      "name": "playlists_sounds_playlist_id_playlists_id_fk",
+      "table": "playlists_sounds",
+      "entityType": "fks"
+    },
+    {
+      "columns": [
+        "sound_id"
+      ],
+      "tableTo": "sounds",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "cascade",
+      "onDelete": "cascade",
+      "nameExplicit": false,
+      "name": "playlists_sounds_sound_id_sounds_id_fk",
+      "table": "playlists_sounds",
+      "entityType": "fks"
+    },
+    {
+      "name": "sounds",
+      "entityType": "tables"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "sounds_pk",
+      "table": "sounds",
+      "entityType": "pks"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "file_name",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "file_size",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text(64)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "media_type",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "deleted_at",
+      "table": "sounds",
+      "entityType": "columns"
+    }
+  ],
+  "renames": []
+}

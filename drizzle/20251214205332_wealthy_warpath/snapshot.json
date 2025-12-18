@@ -1,0 +1,376 @@
+{
+  "dialect": "sqlite",
+  "id": "bd0f1d0d-e0a4-4392-a385-00fde746b340",
+  "prevIds": [
+    "5c6dd081-54d3-4027-96b8-6720bcc3d6cb"
+  ],
+  "version": "7",
+  "ddl": [
+    {
+      "name": "scenes",
+      "entityType": "tables"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "table": "scenes",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "scenes_pk",
+      "table": "scenes",
+      "entityType": "pks"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "table": "scenes",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "table": "scenes",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "table": "scenes",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "table": "scenes",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "deleted_at",
+      "table": "scenes",
+      "entityType": "columns"
+    },
+    {
+      "name": "scenes_sounds",
+      "entityType": "tables"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "scene_id",
+      "table": "scenes_sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "sound_id",
+      "table": "scenes_sounds",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        "scene_id",
+        "sound_id"
+      ],
+      "nameExplicit": false,
+      "name": "scenes_sounds_scene_id_sound_id_pk",
+      "table": "scenes_sounds",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "scene_id"
+      ],
+      "tableTo": "scenes",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "cascade",
+      "onDelete": "cascade",
+      "nameExplicit": false,
+      "name": "scenes_sounds_scene_id_scenes_id_fk",
+      "table": "scenes_sounds",
+      "entityType": "fks"
+    },
+    {
+      "columns": [
+        "sound_id"
+      ],
+      "tableTo": "sounds",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "cascade",
+      "onDelete": "cascade",
+      "nameExplicit": false,
+      "name": "scenes_sounds_sound_id_sounds_id_fk",
+      "table": "scenes_sounds",
+      "entityType": "fks"
+    },
+    {
+      "name": "sounds",
+      "entityType": "tables"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "sounds_pk",
+      "table": "sounds",
+      "entityType": "pks"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "file_name",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "file_size",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text(64)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "media_type",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "deleted_at",
+      "table": "sounds",
+      "entityType": "columns"
+    },
+    {
+      "name": "sounds_tags",
+      "entityType": "tables"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "sound_id",
+      "table": "sounds_tags",
+      "entityType": "columns"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "tag_id",
+      "table": "sounds_tags",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        "sound_id",
+        "tag_id"
+      ],
+      "nameExplicit": false,
+      "name": "sounds_tags_sound_id_tag_id_pk",
+      "table": "sounds_tags",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "sound_id"
+      ],
+      "tableTo": "sounds",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "cascade",
+      "onDelete": "cascade",
+      "nameExplicit": false,
+      "name": "sounds_tags_sound_id_sounds_id_fk",
+      "table": "sounds_tags",
+      "entityType": "fks"
+    },
+    {
+      "columns": [
+        "tag_id"
+      ],
+      "tableTo": "tags",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "cascade",
+      "onDelete": "cascade",
+      "nameExplicit": false,
+      "name": "sounds_tags_tag_id_tags_id_fk",
+      "table": "sounds_tags",
+      "entityType": "fks"
+    },
+    {
+      "name": "tags",
+      "entityType": "tables"
+    },
+    {
+      "type": "text(128)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "table": "tags",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "tags_pk",
+      "table": "tags",
+      "entityType": "pks"
+    },
+    {
+      "type": "text(64)",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "table": "tags",
+      "entityType": "columns"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "table": "tags",
+      "entityType": "columns"
+    },
+    {
+      "columns": [
+        {
+          "value": "name",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "tags_name_unique",
+      "table": "tags",
+      "entityType": "indexes"
+    }
+  ],
+  "renames": [
+    "\"playlists\"->\"scenes\"",
+    "\"playlists_sounds\"->\"scenes_sounds\"",
+    "\"scenes_sounds\".\"playlist_id\"->\"scenes_sounds\".\"scene_id\""
+  ]
+}
