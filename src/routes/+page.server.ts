@@ -1,8 +1,6 @@
 import {
 	db,
 	type SceneWithSoundsFull,
-	type SceneWithSoundsPositions,
-	type SoundWithPosition,
 	type TagEntity
 } from '$lib/server/db';
 import { type SoundWithTags, type SceneWithSounds } from '$lib/server/db';
@@ -36,6 +34,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		with: {
 			sceneSounds: {
 				where: { sound: { deletedAt: { isNull: true } } },
+				orderBy: { position: 'asc' },
 				with: { sound: { with: { tags: true } } }
 			}
 		}

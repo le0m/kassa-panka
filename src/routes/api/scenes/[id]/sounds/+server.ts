@@ -61,6 +61,44 @@ export const POST: RequestHandler = async ({ params, request }) => {
 };
 
 /**
+ * Update positions of sounds in a scene
+ */
+export const PATCH: RequestHandler = async ({ params, request }) => {
+	const sceneId = params.id;
+	const { sounds: soundsToUpdate } = await request.json();
+
+	if (!soundsToUpdate || !Array.isArray(soundsToUpdate)) {
+		return json({ error: 'Sounds array is required' }, { status: 400 });
+	}
+
+	try {
+		// Verify scene exists and is not deleted
+		const scene = await db
+			.select()
+			.from(scenes)
+			.where(and(eq(scenes.id, sceneId), isNull(scenes.deletedAt)))
+			.limit(1);
+
+		if (scene.length === 0) {
+			return json({ error: 'Scene not found' }, { status: 404 });
+		}
+
+		// Update each sound's position
+		for (const sound of soundsToUpdate) {
+			await db
+				.update(scenesSounds)
+				.set({ position: sound.position })
+				.where(eq(scenesSounds.id, sound.id));
+		}
+
+		return json({ success: true, sceneId });
+	} catch (error) {
+		console.error('Error updating sound positions:', error);
+		return json({ error: 'Failed to update sound positions' }, { status: 500 });
+	}
+};
+
+/**
  * Remove a sound from a scene (delete relation from scenes_sounds table)
  */
 export const DELETE: RequestHandler = async ({ params, url }) => {

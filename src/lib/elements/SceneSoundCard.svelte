@@ -5,15 +5,28 @@
 	interface Props {
 		sceneSound: SceneSoundWithTags;
 		ondelete?: (sceneSound: SceneSoundWithTags) => Promise<void> | void;
+		draggable?: boolean;
+		ondragstart?: (event: DragEvent, sceneSound: SceneSoundWithTags) => void;
+		ondragend?: () => void;
+		isDragging?: boolean;
 	}
 
-	let { sceneSound, ondelete }: Props = $props();
+	let {
+		sceneSound,
+		ondelete,
+		draggable = false,
+		ondragstart,
+		ondragend,
+		isDragging = false
+	}: Props = $props();
 
 	let deleting = $state<boolean>(false);
 	let audioElement: HTMLAudioElement | undefined = $state();
 	let isPlaying = $state<boolean>(false);
 	let currentTime = $state<number>(0);
 	let duration = $state<number>(0);
+	let cardElement: HTMLDivElement;
+	let dragImageElement: HTMLDivElement;
 
 	$effect(() => {
 		if (audioElement) {
@@ -83,15 +96,48 @@
 		const secs = Math.floor(seconds % 60);
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}
+
+	/**
+	 * Handles drag start event - sets the sceneSound data and custom drag image
+	 * @param event - The drag event
+	 */
+	function handleDragStart(event: DragEvent) {
+		if (ondragstart) {
+			ondragstart(event, sceneSound);
+
+			// Create a smaller, transparent copy of the card as drag image
+			if (event.dataTransfer && dragImageElement) {
+				event.dataTransfer.effectAllowed = 'move';
+				// Set the drag image with offset to center it on cursor
+				event.dataTransfer.setDragImage(dragImageElement, 100, 50);
+			}
+		}
+	}
+
+	/**
+	 * Handles drag end event - resets the dragging state
+	 */
+	function handleDragEnd() {
+		if (ondragend) {
+			ondragend();
+		}
+	}
 </script>
 
 <!-- Unified layout for all instances -->
 <div
+	bind:this={cardElement}
 	role="button"
 	tabindex="0"
+	{draggable}
+	ondragstart={handleDragStart}
+	ondragend={handleDragEnd}
 	onclick={togglePlayPause}
 	onkeydown={(e) => (e.key === 'Enter' || e.key === ' ' ? togglePlayPause() : null)}
 	class="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
+	class:cursor-grab={draggable}
+	class:active:cursor-grabbing={draggable}
+	class:opacity-50={isDragging}
 >
 	<div class="mb-2 flex items-start justify-between">
 		<h3 class="flex-1 text-lg font-semibold text-slate-100">{sceneSound.sound!.name}</h3>
@@ -185,5 +231,33 @@
 				<span class="font-mono">{formatTime(currentTime)} / {formatTime(duration)}</span>
 			</div>
 		</div>
+	{/if}
+</div>
+
+<!-- Hidden drag image: smaller, transparent copy that follows the cursor -->
+<div
+	bind:this={dragImageElement}
+	class="pointer-events-none fixed top-[-9999px] left-[-9999px] w-48 scale-75 rounded-lg border border-slate-500 bg-slate-800 p-3 opacity-70 shadow-xl"
+>
+	<div class="mb-1 flex items-center gap-2">
+		<svg
+			class="h-4 w-4 shrink-0 text-indigo-400"
+			fill="none"
+			viewBox="0 0 24 24"
+			stroke="currentColor"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+			></path>
+		</svg>
+		<h4 class="truncate text-sm font-semibold text-slate-100">
+			{sceneSound.sound?.name || 'Sound'}
+		</h4>
+	</div>
+	{#if sceneSound.sound?.description}
+		<p class="line-clamp-2 text-xs text-slate-400">{sceneSound.sound.description}</p>
 	{/if}
 </div>

@@ -14,6 +14,32 @@
 
 	let isDragOver = $state<boolean>(false);
 	let isAddingSound = $state<boolean>(false);
+	let draggingSceneSound: SceneSoundWithTags | null = $state(null);
+	let dragOverIndex: number | null = $state(null);
+	let optimisticOrder: SceneSoundWithTags[] | null = $state(null);
+
+	// Computed: reordered sounds for display during drag or optimistic update
+	let displaySounds = $derived.by(() => {
+		// If we have an optimistic order (after drop, before API response), use it
+		if (optimisticOrder) {
+			return optimisticOrder;
+		}
+
+		const sorted = [...scene.sceneSounds].sort((a, b) => a.position - b.position);
+
+		// If dragging, show live reordering preview
+		if (draggingSceneSound && dragOverIndex !== null) {
+			const draggedIndex = sorted.findIndex((s) => s.id === draggingSceneSound!.id);
+			if (draggedIndex !== -1 && draggedIndex !== dragOverIndex) {
+				const reordered = [...sorted];
+				const [removed] = reordered.splice(draggedIndex, 1);
+				reordered.splice(dragOverIndex, 0, removed);
+				return reordered;
+			}
+		}
+
+		return sorted;
+	});
 
 	/**
 	 * Handles the delete button click
@@ -114,6 +140,106 @@
 		// Refresh the data to remove the link
 		await invalidateAll();
 	}
+
+	/**
+	 * Handles drag start for reordering scene sounds
+	 * @param event - The drag event
+	 * @param sceneSound - The scene sound being dragged
+	 */
+	function handleSoundDragStart(event: DragEvent, sceneSound: SceneSoundWithTags) {
+		draggingSceneSound = sceneSound;
+		if (event.dataTransfer) {
+			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.setData(
+				'application/json',
+				JSON.stringify({ sceneSoundId: sceneSound.id })
+			);
+		}
+	}
+
+	/**
+	 * Handles drag end for reordering scene sounds
+	 */
+	function handleSoundDragEnd() {
+		draggingSceneSound = null;
+		dragOverIndex = null;
+	}
+
+	/**
+	 * Handles drag over event for reordering - determines drop position
+	 * @param event - The drag event
+	 * @param index - The index being hovered over
+	 */
+	function handleSoundDragOver(event: DragEvent, index: number) {
+		if (!draggingSceneSound) return;
+		event.preventDefault();
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = 'move';
+		}
+		dragOverIndex = index;
+	}
+
+	/**
+	 * Handles drop event for reordering - updates positions
+	 * @param event - The drag event
+	 * @param targetIndex - The index where the sound was dropped
+	 */
+	async function handleSoundDrop(event: DragEvent, targetIndex: number) {
+		event.preventDefault();
+		if (!draggingSceneSound) return;
+
+		const sorted = [...scene.sceneSounds].sort((a, b) => a.position - b.position);
+		const draggedIndex = sorted.findIndex((s) => s.id === draggingSceneSound!.id);
+
+		if (draggedIndex === -1 || draggedIndex === targetIndex) {
+			draggingSceneSound = null;
+			dragOverIndex = null;
+			return;
+		}
+
+		// Create new array with reordered sounds
+		const newOrder = [...sorted];
+		const [removed] = newOrder.splice(draggedIndex, 1);
+		newOrder.splice(targetIndex, 0, removed);
+
+		// Optimistically update the UI immediately
+		optimisticOrder = newOrder;
+		draggingSceneSound = null;
+		dragOverIndex = null;
+
+		// Update positions (0-indexed)
+		const soundsToUpdate = newOrder.map((sound, index) => ({
+			id: sound.id,
+			position: index
+		}));
+
+		try {
+			const response = await fetch(`/api/scenes/${scene.id}/sounds`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ sounds: soundsToUpdate })
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				alert(result.error || 'Failed to reorder sounds');
+				// Revert optimistic update on error
+				optimisticOrder = null;
+				return;
+			}
+
+			// Refresh the data to show the new order from server
+			await invalidateAll();
+			// Clear optimistic order after server confirms
+			optimisticOrder = null;
+		} catch (error) {
+			console.error('Error reordering sounds:', error);
+			alert('Failed to reorder sounds');
+			// Revert optimistic update on error
+			optimisticOrder = null;
+		}
+	}
 </script>
 
 <div
@@ -174,14 +300,28 @@
 	</div>
 
 	<!-- Linked Sounds List -->
-	{#if scene.sceneSounds.length > 0}
+	{#if displaySounds.length > 0}
 		<div class="mt-4">
 			<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
-				Linked Sounds ({scene.sceneSounds.length})
+				Linked Sounds ({displaySounds.length})
 			</h4>
 			<div class="grid grid-cols-5 gap-2">
-				{#each scene.sceneSounds as sceneSound (sceneSound.id)}
-					<SceneSoundCard {sceneSound} ondelete={handleRemoveSound} />
+				{#each displaySounds as sceneSound, index (sceneSound.id)}
+					<div
+						role="button"
+						tabindex="-1"
+						ondragover={(e) => handleSoundDragOver(e, index)}
+						ondrop={(e) => handleSoundDrop(e, index)}
+					>
+						<SceneSoundCard
+							{sceneSound}
+							ondelete={handleRemoveSound}
+							draggable={true}
+							ondragstart={handleSoundDragStart}
+							ondragend={handleSoundDragEnd}
+							isDragging={draggingSceneSound?.id === sceneSound.id}
+						/>
+					</div>
 				{/each}
 			</div>
 		</div>
