@@ -42,7 +42,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		const latestSound = await db
 			.select({ position: scenesSounds.position })
 			.from(scenesSounds)
-			.where(and(eq(scenesSounds.sceneId, sceneId), eq(scenesSounds.soundId, soundId)))
+			.where(eq(scenesSounds.sceneId, sceneId))
 			.orderBy(desc(scenesSounds.position))
 			.limit(1);
 
@@ -50,7 +50,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		await db.insert(scenesSounds).values({
 			sceneId,
 			soundId,
-			position: latestSound[0].position ?? 0
+			position: latestSound?.[0].position ?? 0
 		});
 
 		return json({ success: true, sceneId, soundId });
@@ -64,25 +64,24 @@ export const POST: RequestHandler = async ({ params, request }) => {
  * Remove a sound from a scene (delete relation from scenes_sounds table)
  */
 export const DELETE: RequestHandler = async ({ params, url }) => {
-	const sceneId = params.id;
-	const soundId = url.searchParams.get('soundId');
+	const sceneSoundId = url.searchParams.get('sceneSoundId');
 
-	if (!soundId) {
-		return json({ error: 'Sound ID is required' }, { status: 400 });
+	if (!sceneSoundId) {
+		return json({ error: 'Scene-Sound ID is required' }, { status: 400 });
 	}
 
 	try {
 		// Delete the relation
 		const result = await db
 			.delete(scenesSounds)
-			.where(and(eq(scenesSounds.sceneId, sceneId), eq(scenesSounds.soundId, soundId)))
+			.where(eq(scenesSounds.id, sceneSoundId))
 			.returning();
 
 		if (result.length === 0) {
 			return json({ error: 'Relation not found' }, { status: 404 });
 		}
 
-		return json({ success: true, sceneId, soundId });
+		return json({ success: true, sceneSoundId });
 	} catch (error) {
 		console.error('Error removing sound from scene:', error);
 		return json({ error: 'Failed to remove sound from scene' }, { status: 500 });

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import SceneSoundCard from './SceneSoundCard.svelte';
-	import type { SceneWithSoundsPositions } from '$lib/server/db';
+	import type { SceneSoundWithTags, SceneWithSoundsFull } from '$lib/server/db';
 
 	interface Props {
-		scene: SceneWithSoundsPositions;
+		scene: SceneWithSoundsFull;
 		deleting: string | null;
 		ondelete: (id: string, name: string) => void;
-		onedit: (scene: SceneWithSoundsPositions) => void;
+		onedit: (scene: SceneWithSoundsFull) => void;
 	}
 
 	let { scene, deleting, ondelete, onedit }: Props = $props();
@@ -91,17 +91,16 @@
 
 	/**
 	 * Handles removing a sound from the scene
-	 * @param soundId - The ID of the sound to remove
-	 * @param soundName - The name of the sound for confirmation
+	 * @param sceneSound - The scene-sound relation to remove
 	 */
-	async function handleRemoveSound(soundId: string, soundName: string) {
+	async function handleRemoveSound(sceneSound: SceneSoundWithTags) {
 		const confirmed = confirm(
-			`Remove "${soundName}" from "${scene.name}"?\n\nThis will not delete the sound, only unlink it from this scene.`
+			`Remove "${sceneSound.sound!.name}" from "${scene.name}"?\n\nThis will not delete the sound, only remove it from this scene.`
 		);
 
 		if (!confirmed) return;
 
-		const response = await fetch(`/api/scenes/${scene.id}/sounds?soundId=${soundId}`, {
+		const response = await fetch(`/api/scenes/${scene.id}/sounds?sceneSoundId=${sceneSound.id}`, {
 			method: 'DELETE'
 		});
 
@@ -175,14 +174,14 @@
 	</div>
 
 	<!-- Linked Sounds List -->
-	{#if scene.sounds.length > 0}
+	{#if scene.sceneSounds.length > 0}
 		<div class="mt-4">
 			<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
-				Linked Sounds ({scene.sounds.length})
+				Linked Sounds ({scene.sceneSounds.length})
 			</h4>
 			<div class="grid grid-cols-5 gap-2">
-				{#each scene.sounds as sound (sound.id)}
-					<SceneSoundCard {sound} ondelete={handleRemoveSound} />
+				{#each scene.sceneSounds as sceneSound (sceneSound.id)}
+					<SceneSoundCard {sceneSound} ondelete={handleRemoveSound} />
 				{/each}
 			</div>
 		</div>

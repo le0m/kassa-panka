@@ -86,6 +86,7 @@ export type SoundWithPosition = SoundWithTags & { position: number };
 export type NewSceneEntity = typeof scenes.$inferInsert;
 export type SceneEntity = typeof scenes.$inferSelect;
 export type SceneWithSounds = SceneEntity & { sounds: SoundWithTags[] };
+export type SceneWithSoundsFull = SceneEntity & { sceneSounds: SceneSoundWithTags[] };
 export type SceneWithSoundsPositions = SceneEntity & { sounds: SoundWithPosition[] };
 
 export type NewSceneSoundEntity = typeof scenesSounds.$inferInsert;

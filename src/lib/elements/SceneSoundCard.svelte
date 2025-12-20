@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import type { SoundWithTags } from '$lib/server/db';
+	import type { SoundWithTags, SceneSoundWithTags } from '$lib/server/db';
 
 	interface Props {
-		sound: SoundWithTags;
-		ondelete?: (soundId: string, soundName: string) => Promise<void> | void;
+		sceneSound: SceneSoundWithTags;
+		ondelete?: (sceneSound: SceneSoundWithTags) => Promise<void> | void;
 	}
 
-	let { sound, ondelete }: Props = $props();
+	let { sceneSound, ondelete }: Props = $props();
 
 	let deleting = $state<boolean>(false);
 	let audioElement: HTMLAudioElement | undefined = $state();
@@ -29,7 +29,7 @@
 		if (ondelete) {
 			deleting = true;
 			try {
-				await ondelete(sound.id, sound.name);
+				await ondelete(sceneSound);
 			} finally {
 				deleting = false;
 			}
@@ -94,7 +94,7 @@
 	class="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
 >
 	<div class="mb-2 flex items-start justify-between">
-		<h3 class="flex-1 text-lg font-semibold text-slate-100">{sound.name}</h3>
+		<h3 class="flex-1 text-lg font-semibold text-slate-100">{sceneSound.sound!.name}</h3>
 		<div class="flex gap-1">
 			{#if ondelete}
 				<button
@@ -138,13 +138,13 @@
 		</div>
 	</div>
 
-	{#if sound.description}
-		<p class="mb-3 text-sm text-slate-400">{sound.description}</p>
+	{#if sceneSound.sound?.description}
+		<p class="mb-3 text-sm text-slate-400">{sceneSound.sound.description}</p>
 	{/if}
 
-	{#if sound.tags && sound.tags.length > 0}
+	{#if sceneSound.sound?.tags && sceneSound.sound.tags.length > 0}
 		<div class="mb-3 flex flex-wrap gap-1.5">
-			{#each sound.tags as tag (tag.id)}
+			{#each sceneSound.sound.tags as tag (tag.id)}
 				<span
 					class="inline-flex items-center rounded-full border border-cyan-700/50 bg-cyan-900/40 px-2.5 py-0.5 text-xs text-cyan-300"
 				>
@@ -154,7 +154,7 @@
 		</div>
 	{/if}
 
-	{#if sound.mediaType}
+	{#if sceneSound.sound?.mediaType}
 		<!-- Hidden audio element -->
 		<audio
 			bind:this={audioElement}
@@ -164,7 +164,7 @@
 			onended={handlePause}
 			class="hidden"
 		>
-			<source src="{base}/sounds/{sound.fileName}" type={sound.mediaType} />
+			<source src="{base}/sounds/{sceneSound.sound.fileName}" type={sceneSound.sound.mediaType} />
 			Your browser does not support the audio element.
 		</audio>
 

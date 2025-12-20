@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import type { SceneWithSounds } from '$lib/server/db';
+	import type { SceneWithSoundsFull } from '$lib/server/db';
 
 	interface Props {
 		isOpen: boolean;
 		onClose: () => void;
-		editScene?: SceneWithSounds | null;
+		editScene?: SceneWithSoundsFull | null;
 	}
 
 	let { isOpen, onClose, editScene = null }: Props = $props();

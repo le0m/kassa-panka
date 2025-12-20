@@ -1,5 +1,6 @@
 import {
 	db,
+	type SceneWithSoundsFull,
 	type SceneWithSoundsPositions,
 	type SoundWithPosition,
 	type TagEntity
@@ -30,43 +31,15 @@ export const load: PageServerLoad = async ({ url }) => {
 	});
 
 	// Fetch all non-deleted scenes
-	const allScenes: SceneWithSounds[] = await db.query.scenes.findMany({
+	const allScenesFull: SceneWithSoundsFull[] = await db.query.scenes.findMany({
 		where: { deletedAt: { isNull: true } },
-		orderBy: { updatedAt: 'desc' },
-		with: { sounds: { where: { deletedAt: { isNull: true } }, with: { tags: true } } }
+		with: {
+			sceneSounds: {
+				where: { sound: { deletedAt: { isNull: true } } },
+				with: { sound: { with: { tags: true } } }
+			}
+		}
 	});
-	const allScenesFull: SceneWithSoundsPositions[] = await Promise.all(
-		allScenes.map(async (scene) => ({
-			...scene,
-			sounds: (
-				await db.query.scenesSounds.findMany({
-					columns: {
-						soundId: true,
-						position: true
-					},
-					where: {
-						sceneId: scene.id,
-						soundId: { in: scene.sounds.map((s) => s.id) }
-					}
-				})
-			)
-				.reduce((sounds, sceSo) => {
-					const idx = sounds.findIndex((s) => s.id === sceSo.soundId);
-					if (idx === -1) {
-						console.log(
-							`Position of sound ${sceSo.soundId} in scene ${scene.id} not found, ignoring`
-						);
-
-						return sounds;
-					}
-
-					sounds[idx].position = sceSo.position;
-
-					return sounds;
-				}, scene.sounds as SoundWithPosition[])
-				.sort((a, b) => a.position - b.position)
-		}))
-	);
 
 	// Fetch all tags
 	const allTags: TagEntity[] = await db.query.tags.findMany({ orderBy: { name: 'asc' } });
