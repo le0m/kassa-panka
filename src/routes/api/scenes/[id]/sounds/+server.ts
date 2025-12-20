@@ -9,7 +9,7 @@ import type { RequestHandler } from './$types';
  */
 export const POST: RequestHandler = async ({ params, request }) => {
 	const sceneId = params.id;
-	const { soundId } = await request.json();
+	const { soundId, position } = await request.json();
 
 	if (!soundId) {
 		return json({ error: 'Sound ID is required' }, { status: 400 });
@@ -38,19 +38,45 @@ export const POST: RequestHandler = async ({ params, request }) => {
 			return json({ error: 'Sound not found' }, { status: 404 });
 		}
 
-		// Get latest sound position
-		const latestSound = await db
-			.select({ position: scenesSounds.position })
-			.from(scenesSounds)
-			.where(eq(scenesSounds.sceneId, sceneId))
-			.orderBy(desc(scenesSounds.position))
-			.limit(1);
+		// Determine position
+		let insertPosition: number;
+		if (position !== undefined && position !== null) {
+			// Position specified - we'll need to shift existing sounds
+			insertPosition = position;
+
+			// Get all sounds at or after this position
+			const existingSounds = await db
+				.select()
+				.from(scenesSounds)
+				.where(eq(scenesSounds.sceneId, sceneId))
+				.orderBy(scenesSounds.position);
+
+			// Shift positions of sounds at or after the insert position
+			for (const existingSound of existingSounds) {
+				if (existingSound.position >= insertPosition) {
+					await db
+						.update(scenesSounds)
+						.set({ position: existingSound.position + 1 })
+						.where(eq(scenesSounds.id, existingSound.id));
+				}
+			}
+		} else {
+			// No position specified - add at the end
+			const latestSound = await db
+				.select({ position: scenesSounds.position })
+				.from(scenesSounds)
+				.where(eq(scenesSounds.sceneId, sceneId))
+				.orderBy(desc(scenesSounds.position))
+				.limit(1);
+
+			insertPosition = (latestSound?.[0]?.position ?? -1) + 1;
+		}
 
 		// Create the relation
 		await db.insert(scenesSounds).values({
 			sceneId,
 			soundId,
-			position: latestSound?.[0].position ?? 0
+			position: insertPosition
 		});
 
 		return json({ success: true, sceneId, soundId });

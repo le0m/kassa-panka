@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import SceneSoundCard from './SceneSoundCard.svelte';
-	import type { SceneSoundWithTags, SceneWithSoundsFull } from '$lib/server/db';
+	import type { SceneSoundWithTags, SceneWithSoundsFull, SoundWithTags } from '$lib/server/db';
 
 	interface Props {
 		scene: SceneWithSoundsFull;
@@ -12,9 +12,8 @@
 
 	let { scene, deleting, ondelete, onedit }: Props = $props();
 
-	let isDragOver = $state<boolean>(false);
-	let isAddingSound = $state<boolean>(false);
 	let draggingSceneSound: SceneSoundWithTags | null = $state(null);
+	let draggingNewSound: SoundWithTags | null = $state(null); // sound data when dragging from sidebar
 	let dragOverIndex: number | null = $state(null);
 	let optimisticOrder: SceneSoundWithTags[] | null = $state(null);
 
@@ -27,7 +26,7 @@
 
 		const sorted = [...scene.sceneSounds].sort((a, b) => a.position - b.position);
 
-		// If dragging, show live reordering preview
+		// If dragging an existing sound, show live reordering preview
 		if (draggingSceneSound && dragOverIndex !== null) {
 			const draggedIndex = sorted.findIndex((s) => s.id === draggingSceneSound!.id);
 			if (draggedIndex !== -1 && draggedIndex !== dragOverIndex) {
@@ -36,6 +35,20 @@
 				reordered.splice(dragOverIndex, 0, removed);
 				return reordered;
 			}
+		}
+
+		// If dragging a new sound from sidebar, show placeholder with sound data
+		if (draggingNewSound && dragOverIndex !== null) {
+			const reordered = [...sorted];
+			// Insert a placeholder at the dragOverIndex with full sound data
+			reordered.splice(dragOverIndex, 0, {
+				id: 'placeholder',
+				sceneId: scene.id,
+				soundId: draggingNewSound.id,
+				position: dragOverIndex,
+				sound: draggingNewSound
+			} as SceneSoundWithTags);
+			return reordered;
 		}
 
 		return sorted;
@@ -56,46 +69,88 @@
 	}
 
 	/**
-	 * Handles drag over event - allows dropping and provides visual feedback
+	 * Handles drag over event for the sounds list container
 	 * @param event - The drag event
 	 */
-	function handleDragOver(event: DragEvent) {
+	function handleListDragOver(event: DragEvent) {
 		event.preventDefault();
-		if (event.dataTransfer) {
-			event.dataTransfer.dropEffect = 'copy';
+		// Don't set dragOverIndex here - let individual cards handle it
+	}
+
+	/**
+	 * Handles drag leave event for the sounds list container
+	 * Clears the placeholder when drag leaves the list area
+	 * @param event - The drag event
+	 */
+	function handleListDragLeave(event: DragEvent) {
+		const target = event.currentTarget as HTMLElement;
+		const relatedTarget = event.relatedTarget as Node | null;
+
+		// Only clear if we're truly leaving the container (not moving to a child element)
+		if (!relatedTarget || !target.contains(relatedTarget)) {
+			draggingNewSound = null;
+			dragOverIndex = null;
 		}
-		isDragOver = true;
 	}
 
 	/**
-	 * Handles drag leave event - removes visual feedback
-	 */
-	function handleDragLeave() {
-		isDragOver = false;
-	}
-
-	/**
-	 * Handles drop event - links the sound to the scene
+	 * Handles drop event on the empty list area (when there are no sounds yet)
 	 * @param event - The drag event
 	 */
-	async function handleDrop(event: DragEvent) {
+	async function handleEmptyListDrop(event: DragEvent) {
 		event.preventDefault();
-		isDragOver = false;
 
 		if (!event.dataTransfer) return;
 
 		try {
 			const data = JSON.parse(event.dataTransfer.getData('application/json'));
-			const { soundId } = data;
 
-			if (!soundId) return;
+			// Check if it's a new sound from sidebar (has soundId and sound data)
+			if (data.soundId && !data.sceneSoundId && data.sound) {
+				// Create optimistic entry for new sound
+				const optimisticSceneSound: SceneSoundWithTags = {
+					id: `optimistic-${Date.now()}`,
+					sceneId: scene.id,
+					soundId: data.soundId,
+					position: 0,
+					sound: data.sound
+				};
 
-			isAddingSound = true;
+				// Set optimistic order and clear drag state
+				optimisticOrder = [optimisticSceneSound];
+				draggingNewSound = null;
+				dragOverIndex = null;
 
+				// Make API call
+				try {
+					await addSoundToScene(data.soundId, 0);
+				} catch (error) {
+					// Revert optimistic update on error
+					optimisticOrder = null;
+					throw error;
+				} finally {
+					// Clear optimistic order after server confirms
+					optimisticOrder = null;
+				}
+			}
+		} catch (error) {
+			console.error('Error processing drop:', error);
+			draggingNewSound = null;
+			dragOverIndex = null;
+		}
+	}
+
+	/**
+	 * Adds a sound to the scene at the specified position
+	 * @param soundId - The ID of the sound to add
+	 * @param position - The position to insert the sound at
+	 */
+	async function addSoundToScene(soundId: string, position: number) {
+		try {
 			const response = await fetch(`/api/scenes/${scene.id}/sounds`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ soundId })
+				body: JSON.stringify({ soundId, position })
 			});
 
 			const result = await response.json();
@@ -110,8 +165,6 @@
 		} catch (error) {
 			console.error('Error linking sound to scene:', error);
 			alert('Failed to link sound to scene');
-		} finally {
-			isAddingSound = false;
 		}
 	}
 
@@ -171,49 +224,126 @@
 	 * @param index - The index being hovered over
 	 */
 	function handleSoundDragOver(event: DragEvent, index: number) {
-		if (!draggingSceneSound) return;
 		event.preventDefault();
-		if (event.dataTransfer) {
-			event.dataTransfer.dropEffect = 'move';
+		event.stopPropagation();
+
+		if (!event.dataTransfer) return;
+
+		// Check what kind of drag this is
+		const dataTypes = event.dataTransfer.types;
+
+		// Try to parse the data to determine if it's a new sound or reorder
+		try {
+			const jsonData = event.dataTransfer.getData('application/json');
+			if (jsonData) {
+				const data = JSON.parse(jsonData);
+
+				if (data.sceneSoundId) {
+					// Reordering existing sound
+					if (!draggingSceneSound) return;
+					event.dataTransfer.dropEffect = 'move';
+				} else if (data.soundId && data.sound) {
+					// New sound from sidebar - store full sound data
+					draggingNewSound = data.sound;
+					event.dataTransfer.dropEffect = 'copy';
+				}
+			}
+		} catch (e) {
+			// getData might not work during dragover in some browsers
+			// In that case, check if we already know what's being dragged
+			if (draggingSceneSound) {
+				event.dataTransfer.dropEffect = 'move';
+			} else if (dataTypes.includes('application/json')) {
+				// Assume it's a new sound from sidebar
+				event.dataTransfer.dropEffect = 'copy';
+			}
 		}
+
 		dragOverIndex = index;
 	}
 
 	/**
-	 * Handles drop event for reordering - updates positions
+	 * Handles drop event for reordering or adding - updates positions
 	 * @param event - The drag event
 	 * @param targetIndex - The index where the sound was dropped
 	 */
 	async function handleSoundDrop(event: DragEvent, targetIndex: number) {
 		event.preventDefault();
-		if (!draggingSceneSound) return;
+		event.stopPropagation();
 
-		const sorted = [...scene.sceneSounds].sort((a, b) => a.position - b.position);
-		const draggedIndex = sorted.findIndex((s) => s.id === draggingSceneSound!.id);
-
-		if (draggedIndex === -1 || draggedIndex === targetIndex) {
-			draggingSceneSound = null;
-			dragOverIndex = null;
-			return;
-		}
-
-		// Create new array with reordered sounds
-		const newOrder = [...sorted];
-		const [removed] = newOrder.splice(draggedIndex, 1);
-		newOrder.splice(targetIndex, 0, removed);
-
-		// Optimistically update the UI immediately
-		optimisticOrder = newOrder;
-		draggingSceneSound = null;
-		dragOverIndex = null;
-
-		// Update positions (0-indexed)
-		const soundsToUpdate = newOrder.map((sound, index) => ({
-			id: sound.id,
-			position: index
-		}));
+		if (!event.dataTransfer) return;
 
 		try {
+			const data = JSON.parse(event.dataTransfer.getData('application/json'));
+
+			// Check if it's a new sound from sidebar
+			if (data.soundId && !data.sceneSoundId && data.sound) {
+				// Create optimistic entry for new sound
+				const sortedSounds = [...scene.sceneSounds].sort((a, b) => a.position - b.position);
+				const newSoundsOrder = [...sortedSounds];
+
+				// Insert new sound at target position
+				const optimisticSceneSound: SceneSoundWithTags = {
+					id: `optimistic-${Date.now()}`,
+					sceneId: scene.id,
+					soundId: data.soundId,
+					position: targetIndex,
+					sound: data.sound
+				};
+				newSoundsOrder.splice(targetIndex, 0, optimisticSceneSound);
+
+				// Update positions for all sounds after insertion
+				for (let i = 0; i < newSoundsOrder.length; i++) {
+					newSoundsOrder[i] = { ...newSoundsOrder[i], position: i };
+				}
+
+				// Set optimistic order and clear drag state
+				optimisticOrder = newSoundsOrder;
+				draggingNewSound = null;
+				dragOverIndex = null;
+
+				// Make API call
+				try {
+					await addSoundToScene(data.soundId, targetIndex);
+				} catch (error) {
+					// Revert optimistic update on error
+					optimisticOrder = null;
+					throw error;
+				} finally {
+					// Clear optimistic order after server confirms
+					optimisticOrder = null;
+				}
+				return;
+			}
+
+			// Otherwise, handle reordering existing sounds
+			if (!draggingSceneSound) return;
+
+			const sorted = [...scene.sceneSounds].sort((a, b) => a.position - b.position);
+			const draggedIndex = sorted.findIndex((s) => s.id === draggingSceneSound!.id);
+
+			if (draggedIndex === -1 || draggedIndex === targetIndex) {
+				draggingSceneSound = null;
+				dragOverIndex = null;
+				return;
+			}
+
+			// Create new array with reordered sounds
+			const newOrder = [...sorted];
+			const [removed] = newOrder.splice(draggedIndex, 1);
+			newOrder.splice(targetIndex, 0, removed);
+
+			// Optimistically update the UI immediately
+			optimisticOrder = newOrder;
+			draggingSceneSound = null;
+			dragOverIndex = null;
+
+			// Update positions (0-indexed)
+			const soundsToUpdate = newOrder.map((sound, index) => ({
+				id: sound.id,
+				position: index
+			}));
+
 			const response = await fetch(`/api/scenes/${scene.id}/sounds`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
@@ -234,10 +364,13 @@
 			// Clear optimistic order after server confirms
 			optimisticOrder = null;
 		} catch (error) {
-			console.error('Error reordering sounds:', error);
-			alert('Failed to reorder sounds');
+			console.error('Error handling drop:', error);
+			alert('Failed to update scene');
 			// Revert optimistic update on error
 			optimisticOrder = null;
+			draggingSceneSound = null;
+			draggingNewSound = null;
+			dragOverIndex = null;
 		}
 	}
 </script>
@@ -300,73 +433,101 @@
 	</div>
 
 	<!-- Linked Sounds List -->
-	{#if displaySounds.length > 0}
+	{#if displaySounds.length > 0 || draggingNewSound}
 		<div class="mt-4">
 			<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
-				Linked Sounds ({displaySounds.length})
+				Linked Sounds ({scene.sceneSounds.length})
 			</h4>
-			<div class="grid grid-cols-5 gap-2">
-				{#each displaySounds as sceneSound, index (sceneSound.id)}
+			<div
+				role="group"
+				class="grid grid-cols-5 gap-2"
+				ondragover={handleListDragOver}
+				ondragleave={handleListDragLeave}
+			>
+				{#if displaySounds.length === 0 && draggingNewSound}
+					<!-- Empty list drop zone when dragging new sound -->
 					<div
 						role="button"
 						tabindex="-1"
-						ondragover={(e) => handleSoundDragOver(e, index)}
-						ondrop={(e) => handleSoundDrop(e, index)}
+						ondragover={(e) => handleSoundDragOver(e, 0)}
+						ondrop={handleEmptyListDrop}
+						class="col-span-5 flex min-h-24 items-center justify-center rounded-lg border-2 border-dashed border-indigo-500 bg-indigo-900/20 transition-colors"
 					>
-						<SceneSoundCard
-							{sceneSound}
-							ondelete={handleRemoveSound}
-							draggable={true}
-							ondragstart={handleSoundDragStart}
-							ondragend={handleSoundDragEnd}
-							isDragging={draggingSceneSound?.id === sceneSound.id}
-						/>
+						<span class="text-sm font-medium text-indigo-400">Drop sound here</span>
 					</div>
-				{/each}
+				{:else}
+					{#each displaySounds as sceneSound, index (sceneSound.id)}
+						<div
+							role="button"
+							tabindex="-1"
+							ondragover={(e) => handleSoundDragOver(e, index)}
+							ondrop={(e) => handleSoundDrop(e, index)}
+						>
+							{#if sceneSound.id === 'placeholder'}
+								<!-- Placeholder for new sound being dragged -->
+								<div
+									class="rounded-lg border-2 border-dashed border-indigo-500 bg-indigo-900/20 p-4 opacity-50"
+								>
+									<div class="mb-2 flex items-center justify-center">
+										<svg
+											class="h-8 w-8 text-indigo-400"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 4v16m8-8H4"
+											></path>
+										</svg>
+									</div>
+									<p class="text-center text-xs text-indigo-400">Add sound</p>
+								</div>
+							{:else}
+								<SceneSoundCard
+									{sceneSound}
+									ondelete={handleRemoveSound}
+									draggable={true}
+									ondragstart={handleSoundDragStart}
+									ondragend={handleSoundDragEnd}
+									isDragging={draggingSceneSound?.id === sceneSound.id}
+								/>
+							{/if}
+						</div>
+					{/each}
+				{/if}
+			</div>
+		</div>
+	{:else}
+		<!-- Empty state with drop target -->
+		<div class="mt-4">
+			<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
+				Linked Sounds (0)
+			</h4>
+			<div
+				role="button"
+				tabindex="0"
+				ondragover={(e) => {
+					e.preventDefault();
+					if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+				}}
+				ondrop={handleEmptyListDrop}
+				class="flex min-h-24 items-center justify-center rounded-lg border-2 border-dashed border-slate-600 bg-slate-800 transition-colors hover:border-indigo-500/50 hover:bg-slate-800"
+			>
+				<div class="flex items-center gap-2 text-slate-500">
+					<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+						></path>
+					</svg>
+					<span class="text-sm font-medium">Drop sounds here</span>
+				</div>
 			</div>
 		</div>
 	{/if}
-
-	<!-- Drop Zone -->
-	<div
-		role="button"
-		tabindex="0"
-		ondragover={handleDragOver}
-		ondragleave={handleDragLeave}
-		ondrop={handleDrop}
-		class="mt-4 flex min-h-24 items-center justify-center rounded-lg border-2 border-dashed transition-colors"
-		class:border-slate-600={!isDragOver && !isAddingSound}
-		class:bg-slate-800={!isDragOver && !isAddingSound}
-		class:border-indigo-500={isDragOver}
-		class:bg-indigo-900={isDragOver}
-		class:border-emerald-500={isAddingSound}
-		class:bg-emerald-900={isAddingSound}
-	>
-		{#if isAddingSound}
-			<div class="flex items-center gap-2 text-emerald-400">
-				<svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
-					></circle>
-					<path
-						class="opacity-75"
-						fill="currentColor"
-						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-					></path>
-				</svg>
-				<span class="text-sm font-medium">Linking sound...</span>
-			</div>
-		{:else}
-			<div class="flex items-center gap-2 text-slate-500">
-				<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-					></path>
-				</svg>
-				<span class="text-sm font-medium">Drop sounds here</span>
-			</div>
-		{/if}
-	</div>
 </div>

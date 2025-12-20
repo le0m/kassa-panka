@@ -40,14 +40,14 @@
 	}
 
 	/**
-	 * Handles drag start event - sets the sound ID in the data transfer and custom drag image
+	 * Handles drag start event - sets the sound data in the data transfer and custom drag image
 	 * @param event - The drag event
 	 */
 	function handleDragStart(event: DragEvent) {
 		isDragging = true;
 		if (event.dataTransfer && cardElement) {
 			event.dataTransfer.effectAllowed = 'copy';
-			event.dataTransfer.setData('application/json', JSON.stringify({ soundId: sound.id }));
+			event.dataTransfer.setData('application/json', JSON.stringify({ soundId: sound.id, sound }));
 
 			// Create a smaller, transparent copy of the card as drag image
 			if (dragImageElement) {
