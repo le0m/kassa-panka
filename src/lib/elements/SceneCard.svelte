@@ -8,14 +8,27 @@
 		deleting: string | null;
 		ondelete: (id: string, name: string) => void;
 		onedit: (scene: SceneWithSoundsFull) => void;
+		updateSuccess?: boolean;
+		updateError?: boolean;
 	}
 
-	let { scene, deleting, ondelete, onedit }: Props = $props();
+	let {
+		scene,
+		deleting,
+		ondelete,
+		onedit,
+		updateSuccess = false,
+		updateError = false
+	}: Props = $props();
 
 	let draggingSceneSound: SceneSoundWithTags | null = $state(null);
 	let draggingNewSound: SoundWithTags | null = $state(null); // sound data when dragging from sidebar
 	let dragOverIndex: number | null = $state(null);
 	let optimisticOrder: SceneSoundWithTags[] | null = $state(null);
+	let savingSound: string | null = $state(null); // ID of sound being saved via API
+	let saveSuccess: boolean = $state(false);
+	let saveError: boolean = $state(false);
+	let removingSound: string | null = $state(null); // ID of sound being removed
 
 	// Computed: reordered sounds for display during drag or optimistic update
 	let displaySounds = $derived.by(() => {
@@ -108,8 +121,9 @@
 			// Check if it's a new sound from sidebar (has soundId and sound data)
 			if (data.soundId && !data.sceneSoundId && data.sound) {
 				// Create optimistic entry for new sound
+				const optimisticId = `optimistic-${Date.now()}`;
 				const optimisticSceneSound: SceneSoundWithTags = {
-					id: `optimistic-${Date.now()}`,
+					id: optimisticId,
 					sceneId: scene.id,
 					soundId: data.soundId,
 					position: 0,
@@ -120,17 +134,26 @@
 				optimisticOrder = [optimisticSceneSound];
 				draggingNewSound = null;
 				dragOverIndex = null;
+				savingSound = optimisticId;
 
 				// Make API call
 				try {
 					await addSoundToScene(data.soundId, 0);
+					// Show success state
+					saveSuccess = true;
+					setTimeout(() => {
+						saveSuccess = false;
+					}, 1000);
 				} catch (error) {
 					// Revert optimistic update on error
 					optimisticOrder = null;
+					// Show error state
+					saveError = true;
 					throw error;
 				} finally {
-					// Clear optimistic order after server confirms
+					// Clear optimistic order and saving state after server confirms
 					optimisticOrder = null;
+					savingSound = null;
 				}
 			}
 		} catch (error) {
@@ -179,19 +202,36 @@
 
 		if (!confirmed) return;
 
-		const response = await fetch(`/api/scenes/${scene.id}/sounds?sceneSoundId=${sceneSound.id}`, {
-			method: 'DELETE'
-		});
+		removingSound = sceneSound.id;
+		saveError = false;
 
-		const result = await response.json();
+		try {
+			const response = await fetch(`/api/scenes/${scene.id}/sounds?sceneSoundId=${sceneSound.id}`, {
+				method: 'DELETE'
+			});
 
-		if (!response.ok) {
-			alert(result.error || 'Failed to remove sound from scene');
-			return;
+			const result = await response.json();
+
+			if (!response.ok) {
+				saveError = true;
+				console.error('Failed to remove sound:', result.error);
+				return;
+			}
+
+			// Show success state
+			saveSuccess = true;
+			setTimeout(() => {
+				saveSuccess = false;
+			}, 1000);
+
+			// Refresh the data to remove the link
+			await invalidateAll();
+		} catch (error) {
+			console.error('Error removing sound from scene:', error);
+			saveError = true;
+		} finally {
+			removingSound = null;
 		}
-
-		// Refresh the data to remove the link
-		await invalidateAll();
 	}
 
 	/**
@@ -283,8 +323,9 @@
 				const newSoundsOrder = [...sortedSounds];
 
 				// Insert new sound at target position
+				const optimisticId = `optimistic-${Date.now()}`;
 				const optimisticSceneSound: SceneSoundWithTags = {
-					id: `optimistic-${Date.now()}`,
+					id: optimisticId,
 					sceneId: scene.id,
 					soundId: data.soundId,
 					position: targetIndex,
@@ -301,17 +342,26 @@
 				optimisticOrder = newSoundsOrder;
 				draggingNewSound = null;
 				dragOverIndex = null;
+				savingSound = optimisticId;
 
 				// Make API call
 				try {
 					await addSoundToScene(data.soundId, targetIndex);
+					// Show success state
+					saveSuccess = true;
+					setTimeout(() => {
+						saveSuccess = false;
+					}, 1000);
 				} catch (error) {
 					// Revert optimistic update on error
 					optimisticOrder = null;
+					// Show error state
+					saveError = true;
 					throw error;
 				} finally {
-					// Clear optimistic order after server confirms
+					// Clear optimistic order and saving state after server confirms
 					optimisticOrder = null;
+					savingSound = null;
 				}
 				return;
 			}
@@ -335,8 +385,10 @@
 
 			// Optimistically update the UI immediately
 			optimisticOrder = newOrder;
+			const movedSoundId = draggingSceneSound.id;
 			draggingSceneSound = null;
 			dragOverIndex = null;
+			savingSound = movedSoundId;
 
 			// Update positions (0-indexed)
 			const soundsToUpdate = newOrder.map((sound, index) => ({
@@ -356,13 +408,23 @@
 				alert(result.error || 'Failed to reorder sounds');
 				// Revert optimistic update on error
 				optimisticOrder = null;
+				savingSound = null;
+				// Show error state
+				saveError = true;
 				return;
 			}
 
+			// Show success state
+			saveSuccess = true;
+			setTimeout(() => {
+				saveSuccess = false;
+			}, 1000);
+
 			// Refresh the data to show the new order from server
 			await invalidateAll();
-			// Clear optimistic order after server confirms
+			// Clear optimistic order and saving state after server confirms
 			optimisticOrder = null;
+			savingSound = null;
 		} catch (error) {
 			console.error('Error handling drop:', error);
 			alert('Failed to update scene');
@@ -380,7 +442,56 @@
 >
 	<div class="flex items-start justify-between">
 		<div class="flex-1">
-			<h3 class="text-lg font-semibold text-slate-100">{scene.name}</h3>
+			<div class="flex items-center gap-2">
+				<h3 class="text-lg font-semibold text-slate-100">{scene.name}</h3>
+				{#if saveError || updateError}
+					<!-- Error X icon -->
+					<svg class="h-4 w-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						></path>
+					</svg>
+				{:else if savingSound || removingSound}
+					<!-- Loading spinner -->
+					<svg
+						class="h-4 w-4 animate-spin text-indigo-400"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+						></path>
+					</svg>
+				{:else if saveSuccess || updateSuccess}
+					<!-- Success floppy disk icon -->
+					<svg
+						class="h-4 w-4 text-emerald-400"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4z"
+						></path>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 3v4h8V3M7 21v-6h10v6"
+						></path>
+					</svg>
+				{/if}
+			</div>
 			{#if scene.description}
 				<p class="mt-1 text-sm text-slate-400">{scene.description}</p>
 			{/if}
@@ -493,6 +604,7 @@
 									ondragstart={handleSoundDragStart}
 									ondragend={handleSoundDragEnd}
 									isDragging={draggingSceneSound?.id === sceneSound.id}
+									isSaving={savingSound === sceneSound.id}
 								/>
 							{/if}
 						</div>

@@ -6,9 +6,11 @@
 		isOpen: boolean;
 		onClose: () => void;
 		editScene?: SceneWithSoundsFull | null;
+		onSuccess?: (sceneId: string) => void;
+		onError?: (sceneId: string) => void;
 	}
 
-	let { isOpen, onClose, editScene = null }: Props = $props();
+	let { isOpen, onClose, editScene = null, onSuccess, onError }: Props = $props();
 
 	let submitting = $state(false);
 	let submitError = $state<string | null>(null);
@@ -70,6 +72,9 @@
 
 			if (!response.ok) {
 				submitError = result.error || `Failed to ${isEditMode ? 'update' : 'create'} scene`;
+				if (onError && editScene) {
+					onError(editScene.id);
+				}
 				return;
 			}
 
@@ -78,13 +83,22 @@
 			// Refresh the page data to show the new/updated scene
 			await invalidateAll();
 
-			// Close modal after successful submission
-			setTimeout(() => {
-				onClose();
-			}, 100);
+			// Notify parent of success
+			if (onSuccess) {
+				const sceneId = isEditMode ? editScene!.id : result.scene?.id;
+				if (sceneId) {
+					onSuccess(sceneId);
+				}
+			}
+
+			// Close modal immediately after successful submission
+			onClose();
 		} catch (error) {
 			submitError = 'Network error occurred';
 			console.error('Submit error:', error);
+			if (onError && editScene) {
+				onError(editScene.id);
+			}
 		} finally {
 			submitting = false;
 		}

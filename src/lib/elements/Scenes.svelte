@@ -13,6 +13,8 @@
 	let isModalOpen = $state(false);
 	let editScene = $state<SceneWithSoundsFull | null>(null);
 	let deletingScene = $state<string | null>(null);
+	let sceneSuccess = $state<string | null>(null); // ID of scene that was successfully saved
+	let sceneError = $state<string | null>(null); // ID of scene that had an error
 
 	/**
 	 * Handles editing a scene
@@ -76,10 +78,37 @@
 		isModalOpen = false;
 		editScene = null;
 	}
+
+	/**
+	 * Handles successful scene save/update
+	 * @param sceneId - The ID of the saved scene
+	 */
+	function handleSceneSuccess(sceneId: string) {
+		sceneSuccess = sceneId;
+		sceneError = null;
+		setTimeout(() => {
+			sceneSuccess = null;
+		}, 1000);
+	}
+
+	/**
+	 * Handles scene save/update error
+	 * @param sceneId - The ID of the scene that failed
+	 */
+	function handleSceneError(sceneId: string) {
+		sceneError = sceneId;
+		sceneSuccess = null;
+	}
 </script>
 
 <!-- Scene Modal -->
-<SceneModal isOpen={isModalOpen} {editScene} onClose={closeModal} />
+<SceneModal
+	isOpen={isModalOpen}
+	{editScene}
+	onClose={closeModal}
+	onSuccess={handleSceneSuccess}
+	onError={handleSceneError}
+/>
 
 <div class="mb-4 flex items-center justify-between">
 	<h2 class="text-2xl font-semibold text-slate-100">Scenes</h2>
@@ -103,6 +132,8 @@
 				deleting={deletingScene}
 				ondelete={handleDeleteScene}
 				onedit={handleEditScene}
+				updateSuccess={sceneSuccess === scene.id}
+				updateError={sceneError === scene.id}
 			/>
 		{/each}
 	</div>

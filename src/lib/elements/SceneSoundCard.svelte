@@ -9,6 +9,7 @@
 		ondragstart?: (event: DragEvent, sceneSound: SceneSoundWithTags) => void;
 		ondragend?: () => void;
 		isDragging?: boolean;
+		isSaving?: boolean;
 	}
 
 	let {
@@ -17,7 +18,8 @@
 		draggable = false,
 		ondragstart,
 		ondragend,
-		isDragging = false
+		isDragging = false,
+		isSaving = false
 	}: Props = $props();
 
 	let deleting = $state<boolean>(false);
@@ -137,7 +139,7 @@
 	class="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
 	class:cursor-grab={draggable}
 	class:active:cursor-grabbing={draggable}
-	class:opacity-50={isDragging}
+	class:opacity-50={isDragging || isSaving}
 >
 	<div class="mb-2 flex items-start justify-between">
 		<h3 class="flex-1 text-lg font-semibold text-slate-100">{sceneSound.sound!.name}</h3>
