@@ -522,83 +522,59 @@
 	</div>
 
 	<!-- Linked Sounds List -->
-	{#if displaySounds.length > 0 || draggingNewSound}
-		<div class="mt-4">
-			<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
-				Linked Sounds ({scene.sceneSounds.length})
-			</h4>
-			<div
-				role="group"
-				class="grid grid-cols-5 gap-2"
-				ondragover={handleListDragOver}
-				ondragleave={handleListDragLeave}
-			>
-				{#if displaySounds.length === 0 && draggingNewSound}
-					<!-- Empty list drop zone when dragging new sound -->
+	<div class="mt-4">
+		<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
+			Linked Sounds ({scene.sceneSounds.length})
+		</h4>
+		<div
+			role="group"
+			class="grid grid-cols-5 gap-2"
+			ondragover={handleListDragOver}
+			ondragleave={handleListDragLeave}
+		>
+			{#if displaySounds.length === 0}
+				<!-- Empty list drop zone when dragging new sound -->
+				<div
+					role="button"
+					tabindex="-1"
+					ondragover={(e) => handleSoundDragOver(e, 0)}
+					ondrop={handleEmptyListDrop}
+					class="col-span-5 flex min-h-24 items-center justify-center rounded-lg border-2 border-dashed border-slate-600 bg-slate-800 transition-colors hover:border-indigo-500/50 hover:bg-slate-800"
+				>
+					<span class="text-sm font-medium text-slate-500">Drop sound here</span>
+				</div>
+			{:else}
+				{#each displaySounds as sceneSound, index (sceneSound.id)}
 					<div
 						role="button"
 						tabindex="-1"
-						ondragover={(e) => handleSoundDragOver(e, 0)}
-						ondrop={handleEmptyListDrop}
-						class="col-span-5 flex min-h-24 items-center justify-center rounded-lg border-2 border-dashed border-indigo-500 bg-indigo-900/20 transition-colors"
+						ondragover={(e) => handleSoundDragOver(e, index)}
+						ondrop={(e) => handleSoundDrop(e, index)}
 					>
-						<span class="text-sm font-medium text-indigo-400">Drop sound here</span>
-					</div>
-				{:else}
-					{#each displaySounds as sceneSound, index (sceneSound.id)}
-						<div
-							role="button"
-							tabindex="-1"
-							ondragover={(e) => handleSoundDragOver(e, index)}
-							ondrop={(e) => handleSoundDrop(e, index)}
-						>
-							{#if sceneSound.id === 'placeholder'}
-								<!-- Placeholder for new sound being dragged -->
-								<div
-									class="rounded-lg border-2 border-dashed border-indigo-500 bg-indigo-900/20 p-4 opacity-50"
-								>
-									<div class="mb-2 flex items-center justify-center">
-										<IconPlus class="h-8 w-8 text-indigo-400" />
-									</div>
-									<p class="text-center text-xs text-indigo-400">Add sound</p>
+						{#if sceneSound.id === 'placeholder'}
+							<!-- Placeholder for new sound being dragged -->
+							<div
+								class="rounded-lg border-2 border-dashed border-indigo-500 bg-indigo-900/20 p-4 opacity-50"
+							>
+								<div class="mb-2 flex items-center justify-center">
+									<IconPlus class="h-8 w-8 text-indigo-400" />
 								</div>
-							{:else}
-								<SceneSoundCard
-									{sceneSound}
-									ondelete={handleRemoveSound}
-									draggable={true}
-									ondragstart={handleSoundDragStart}
-									ondragend={handleSoundDragEnd}
-									isDragging={draggingSceneSound?.id === sceneSound.id}
-									isSaving={savingSound === sceneSound.id}
-								/>
-							{/if}
-						</div>
-					{/each}
-				{/if}
-			</div>
+								<p class="text-center text-xs text-indigo-400">Add sound</p>
+							</div>
+						{:else}
+							<SceneSoundCard
+								{sceneSound}
+								ondelete={handleRemoveSound}
+								draggable={true}
+								ondragstart={handleSoundDragStart}
+								ondragend={handleSoundDragEnd}
+								isDragging={draggingSceneSound?.id === sceneSound.id}
+								isSaving={savingSound === sceneSound.id}
+							/>
+						{/if}
+					</div>
+				{/each}
+			{/if}
 		</div>
-	{:else}
-		<!-- Empty state with drop target -->
-		<div class="mt-4">
-			<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
-				Linked Sounds (0)
-			</h4>
-			<div
-				role="button"
-				tabindex="0"
-				ondragover={(e) => {
-					e.preventDefault();
-					if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
-				}}
-				ondrop={handleEmptyListDrop}
-				class="flex min-h-24 items-center justify-center rounded-lg border-2 border-dashed border-slate-600 bg-slate-800 transition-colors hover:border-indigo-500/50 hover:bg-slate-800"
-			>
-				<div class="flex items-center gap-2 text-slate-500">
-					<IconUpload />
-					<span class="text-sm font-medium">Drop sounds here</span>
-				</div>
-			</div>
-		</div>
-	{/if}
+	</div>
 </div>
