@@ -7,6 +7,9 @@ export const sounds = sqliteTable('sounds', {
 		.$defaultFn(() => randomUUID()),
 	name: text('name', { length: 128 }).notNull(),
 	description: text('description'),
+	type: text('type', { enum: ['ambience', 'music', 'sfx'] })
+		.notNull()
+		.default('sfx'),
 	fileName: text('file_name', { length: 128 }).notNull(),
 	fileSize: integer('file_size').notNull(),
 	mediaType: text('media_type', { length: 64 }).notNull(),
