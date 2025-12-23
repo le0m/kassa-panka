@@ -7,7 +7,7 @@
 	/**
 	 * Audio player controls component
 	 */
-	type Props = {
+	interface Props {
 		/** Whether audio is currently playing */
 		isPlaying?: boolean;
 		/** Callback when play/pause button is clicked */
@@ -16,7 +16,7 @@
 		onskipback?: () => void;
 		/** Callback when skip forward button is clicked */
 		onskipforward?: () => void;
-	};
+	}
 
 	let { isPlaying = false, onplaypause, onskipback, onskipforward }: Props = $props();
 </script>

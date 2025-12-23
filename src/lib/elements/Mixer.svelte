@@ -1,9 +1,23 @@
 <script lang="ts">
 	import { AudioChannel, AudioMixer } from '$lib/muses-mixer';
-	import type { SoundType } from '$lib/server/db';
+	import type { SceneWithSoundsFull, SoundType } from '$lib/server/db';
 	import MixerChannel from './MixerChannel.svelte';
 	import MixerPlayer from './MixerPlayer.svelte';
 	import MixerPlaylist from './MixerPlaylist.svelte';
+
+	interface Props {
+		scene?: SceneWithSoundsFull;
+	}
+
+	let { scene }: Props = $props();
+
+	let ambienceSounds = $derived(
+		scene?.sceneSounds.filter((sceSo) => sceSo.sound?.type === 'ambience') ?? []
+	);
+	let musicSounds = $derived(
+		scene?.sceneSounds.filter((sceSo) => sceSo.sound?.type === 'music') ?? []
+	);
+	let sfxSounds = $derived(scene?.sceneSounds.filter((sceSo) => sceSo.sound?.type === 'sfx') ?? []);
 
 	let mixer: AudioMixer;
 	let channels: Record<SoundType, AudioChannel> = {};
@@ -45,14 +59,16 @@
 <div
 	class="fixed right-0 bottom-0 left-0 flex h-[15vh] items-stretch border-t border-neutral-700 bg-neutral-900"
 >
-	<!-- Left: Audio controls -->
-	<div class="flex min-w-fit items-center gap-3 px-6">
+	<!-- Left: Audio controls, IGNORE FOR NOW -->
+	<!--<div class="flex min-w-fit items-center gap-3 px-6">
 		<MixerPlayer {isPlaying} />
-	</div>
+	</div>-->
 
 	<!-- Center: Current sound metadata -->
-	<div class="flex min-w-0 flex-1 flex-col justify-center px-6">
-		<MixerPlaylist />
+	<div class="flex min-w-0 flex-1 flex-col justify-center gap-3 overflow-hidden px-6">
+		<MixerPlaylist name="Ambience" color="amber" sceneSounds={ambienceSounds} />
+		<MixerPlaylist name="Music" color="purple" sceneSounds={musicSounds} />
+		<MixerPlaylist name="SFX" color="emerald" sceneSounds={sfxSounds} />
 	</div>
 
 	<!-- Right: Volume controls for 3 channels -->

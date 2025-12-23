@@ -48,7 +48,7 @@
 	</main>
 
 	<!-- Mixer -->
-	<Mixer />
+	<Mixer scene={data.scenes.find((s) => s.sceneSounds.length > 0)} />
 </div>
 
 <style>
