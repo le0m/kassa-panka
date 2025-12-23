@@ -100,41 +100,43 @@
 <!-- Upload Modal -->
 <UploadModal isOpen={isModalOpen} {editSound} onclose={closeModal} {tags} />
 
-<aside class="flex h-full w-80 flex-col border-r border-slate-700 bg-slate-800/50 backdrop-blur-sm">
-	<!-- Fixed Header Section -->
-	<div class="border-b border-slate-700 p-4">
-		<h2 class="mb-3 text-lg font-semibold text-slate-100">Sound Library</h2>
+<!-- Sidebar -->
+<aside class="flex h-full flex-col border-r border-slate-700 bg-slate-800/50 backdrop-blur-sm">
+	<!-- Header Section -->
+	<div class="flex flex-col gap-2 border-b border-slate-700 p-4">
+		<div class="flex items-center justify-center">
+			<h2 class="flex-1 text-lg font-semibold text-slate-100">Sound Library</h2>
 
-		<!-- Upload Button -->
-		<button
-			onclick={openModal}
-			class="mb-3 w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
-		>
-			Upload Sound
-		</button>
+			<!-- Upload Button -->
+			<button
+				onclick={openModal}
+				class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
+			>
+				New Sound
+			</button>
+		</div>
 
 		<!-- Search -->
-		<div class="relative">
-			<input
-				type="text"
-				bind:value={searchQuery}
-				oninput={handleInput}
-				onkeydown={handleKeydown}
-				class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 pl-9 text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-				placeholder="Search sounds..."
-			/>
-			<IconSearch class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
-			<div class="flex flex-col gap-3">
-				{#if sounds.length === 0}
-					<div class="rounded-lg border border-slate-700 bg-slate-800 p-6 text-center">
-						<p class="mb-4 text-sm text-slate-400">No sounds yet. Upload your first sound!</p>
-					</div>
-				{:else}
-					{#each sounds as sound (sound.id)}
-						<SoundCard {sound} onedit={handleEdit} ondelete={handleDelete} />
-					{/each}
-				{/if}
+		<input
+			type="text"
+			bind:value={searchQuery}
+			oninput={handleInput}
+			onkeydown={handleKeydown}
+			class="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 pl-9 text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+			placeholder="Search sounds..."
+		/>
+	</div>
+
+	<!-- Scrollable Sound List -->
+	<div class="min-h-0 flex-1 overflow-y-auto">
+		{#if sounds.length === 0}
+			<div class="m-4 rounded-lg border border-slate-700 bg-slate-800 p-6 text-center">
+				<p class="text-sm text-slate-400">No sounds yet. Upload your first sound!</p>
 			</div>
-		</div>
+		{:else}
+			{#each sounds as sound (sound.id)}
+				<SoundCard {sound} onedit={handleEdit} ondelete={handleDelete} />
+			{/each}
+		{/if}
 	</div>
 </aside>

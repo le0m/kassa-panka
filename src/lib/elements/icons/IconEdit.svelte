@@ -2,10 +2,10 @@
 	/**
 	 * Pencil/Edit icon component
 	 */
-	type Props = {
+	interface Props {
 		/** CSS class for the SVG element */
 		class?: string;
-	};
+	}
 
 	let { class: className = 'h-5 w-5' }: Props = $props();
 </script>

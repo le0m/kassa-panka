@@ -54,13 +54,10 @@
 </script>
 
 <div class="flex items-center gap-2">
-	<span class="w-20 shrink-0 text-xs font-medium tracking-wide uppercase {colorClasses.text}"
-		>{name}</span
-	>
-	<div class="flex flex-1 gap-2 overflow-x-auto">
+	<div class="flex gap-2 overflow-x-auto">
 		{#if sceneSounds.length === 0}
 			<div
-				class="flex min-w-[120px] items-center justify-center rounded border px-3 py-2 text-xs {colorClasses.border} {colorClasses.bg} {colorClasses.text}"
+				class="flex min-w-[120px] justify-center rounded border px-3 py-2 text-xs {colorClasses.border} {colorClasses.bg} {colorClasses.text}"
 			>
 				No sounds
 			</div>
@@ -69,9 +66,9 @@
 				{@const sound = sceneSound.sound}
 				{#if sound}
 					<div
-						class="flex min-w-[120px] shrink-0 flex-col gap-1 rounded border p-2 {colorClasses.border} {colorClasses.bg}"
+						class="flex min-w-[120px] flex-col gap-1 rounded border p-2 {colorClasses.border} {colorClasses.bg}"
 					>
-						<h4 class="truncate text-xs font-medium text-white">{sound.name}</h4>
+						<h4 class="text-xs font-medium text-white">{sound.name}</h4>
 						{#if sound.tags && sound.tags.length > 0}
 							<div class="flex flex-wrap gap-1">
 								{#each sound.tags.slice(0, 2) as tag}

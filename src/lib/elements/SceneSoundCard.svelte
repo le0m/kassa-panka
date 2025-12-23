@@ -141,14 +141,14 @@
 	ondragend={handleDragEnd}
 	onclick={togglePlayPause}
 	onkeydown={(e) => (e.key === 'Enter' || e.key === ' ' ? togglePlayPause() : null)}
-	class="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
+	class="flex cursor-pointer flex-col gap-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
 	class:cursor-grab={draggable}
 	class:active:cursor-grabbing={draggable}
 	class:opacity-50={isDragging || isSaving}
 >
-	<div class="mb-2 flex items-start justify-between">
+	<div class="flex gap-2">
 		<h3 class="flex-1 text-lg font-semibold text-slate-100">{sceneSound.sound!.name}</h3>
-		<div class="flex gap-1">
+		<div class="flex">
 			{#if ondelete}
 				<button
 					onclick={(e) => {
@@ -171,14 +171,14 @@
 	</div>
 
 	{#if sceneSound.sound?.description}
-		<p class="mb-3 text-sm text-slate-400">{sceneSound.sound.description}</p>
+		<p class="text-sm text-slate-400">{sceneSound.sound.description}</p>
 	{/if}
 
 	{#if sceneSound.sound?.tags && sceneSound.sound.tags.length > 0}
-		<div class="mb-3 flex flex-wrap gap-1.5">
+		<div class="flex flex-wrap gap-2">
 			{#each sceneSound.sound.tags as tag (tag.id)}
 				<span
-					class="inline-flex items-center rounded-full border border-cyan-700/50 bg-cyan-900/40 px-2.5 py-0.5 text-xs text-cyan-300"
+					class="rounded-full border border-cyan-700/50 bg-cyan-900/40 px-2.5 py-0.5 text-xs text-cyan-300"
 				>
 					{tag.name}
 				</span>
@@ -201,9 +201,9 @@
 		</audio>
 
 		<!-- Custom timing display -->
-		<div class="flex items-center justify-between text-sm text-slate-400">
+		<div class="flex text-sm text-slate-400">
 			<div class="flex items-center gap-2">
-				<div class="flex h-6 w-6 items-center justify-center">
+				<div class="flex h-6 w-6">
 					{#if isPlaying}
 						<IconPause class="h-5 w-5 text-indigo-400" />
 					{:else}

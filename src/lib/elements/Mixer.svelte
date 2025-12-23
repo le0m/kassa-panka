@@ -44,8 +44,8 @@
 
 <svelte:document onclick={handleUserGesture} />
 
-<!-- Fixed bottom player -->
-<div class="fixed right-0 bottom-0 left-0 flex items-stretch border-neutral-700 bg-neutral-900">
+<!-- Player -->
+<div class="flex flex-col gap-4 border-neutral-700 bg-neutral-900 p-4">
 	<!-- Left: Audio controls, IGNORE FOR NOW -->
 	<!--<div class="flex min-w-fit items-center gap-3 px-6">
 		<MixerPlayer {isPlaying} />

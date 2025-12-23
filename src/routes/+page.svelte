@@ -24,37 +24,32 @@
 	}
 </script>
 
-<div class="flex h-screen">
-	<!-- Sidebar -->
-	<Sidebar onsearch={handleSearch} sounds={data.sounds} tags={data.tags}></Sidebar>
+<div class="grid h-screen grid-cols-[minmax(200px,25%)_1fr] grid-rows-[1fr_auto]">
+	<!-- Sidebar (left, spanning top row only) -->
+	<div class="overflow-hidden">
+		<Sidebar onsearch={handleSearch} sounds={data.sounds} tags={data.tags}></Sidebar>
+	</div>
 
-	<!-- Main Content -->
-	<main class="flex flex-1 flex-col overflow-y-auto">
-		<div class="container">
-			<header class="mb-8">
+	<!-- Main Content (right, spanning top row only) -->
+	<main class="flex flex-col overflow-hidden">
+		<div class="p-4">
+			<header>
 				<h1
-					class="mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-4xl font-bold text-transparent"
+					class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-4xl font-bold text-transparent"
 				>
 					Kassa Panka
 				</h1>
 				<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
 			</header>
-
-			<!-- Scenes Section -->
-			<section>
-				<Scenes scenes={data.scenes} />
-			</section>
 		</div>
+
+		<section class="min-h-0 flex-1 overflow-hidden">
+			<Scenes scenes={data.scenes} />
+		</section>
 	</main>
 
-	<!-- Mixer -->
-	<Mixer scene={data.scenes.find((s) => s.sceneSounds.length > 0)} />
+	<!-- Mixer (bottom, spanning both columns) -->
+	<div class="col-span-2">
+		<Mixer scene={data.scenes.find((s) => s.sceneSounds.length > 0)} />
+	</div>
 </div>
-
-<style>
-	.container {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 2rem 1rem;
-	}
-</style>

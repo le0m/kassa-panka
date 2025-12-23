@@ -2,10 +2,10 @@
 	/**
 	 * Skip forward / Next track icon component
 	 */
-	type Props = {
+	interface Props {
 		/** CSS class for the SVG element */
 		class?: string;
-	};
+	}
 
 	let { class: className = 'h-6 w-6' }: Props = $props();
 </script>

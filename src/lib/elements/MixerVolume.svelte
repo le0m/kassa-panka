@@ -23,22 +23,28 @@
 		{
 			amber: {
 				text: 'text-amber-400',
-				thumb: 'bg-amber-400'
+				track: 'bg-amber-600',
+				thumb: '[&::-webkit-slider-thumb]:bg-amber-400 [&::-moz-range-thumb]:bg-amber-400'
 			},
 			purple: {
 				text: 'text-purple-400',
-				thumb: 'bg-purple-400'
+				track: 'bg-purple-600',
+				thumb: '[&::-webkit-slider-thumb]:bg-purple-400 [&::-moz-range-thumb]:bg-purple-400'
 			},
 			emerald: {
 				text: 'text-emerald-400',
-				thumb: 'bg-emerald-400'
+				track: 'bg-emerald-600',
+				thumb: '[&::-webkit-slider-thumb]:bg-emerald-400 [&::-moz-range-thumb]:bg-emerald-400'
 			}
-		}[color] ?? { text: 'text-neutral-400', thumb: 'bg-neutral-400' }
+		}[color] ?? {
+			text: 'text-neutral-400',
+			track: 'bg-neutral-600',
+			thumb: '[&::-webkit-slider-thumb]:bg-neutral-400 [&::-moz-range-thumb]:bg-neutral-400'
+		}
 	);
 </script>
 
 <div class="flex items-center gap-3">
-	<span class="w-20 text-xs font-medium tracking-wide uppercase {colorClasses.text}">{name}</span>
 	<input
 		type="range"
 		min="0"
@@ -46,7 +52,7 @@
 		step="0.01"
 		bind:value={volume}
 		oninput={handleInput}
-		class="h-1.5 flex-1 cursor-pointer appearance-none rounded-lg bg-neutral-700 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:{colorClasses.thumb} [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:{colorClasses.thumb}"
+		class="h-1.5 cursor-pointer appearance-none rounded-lg {colorClasses.track} {colorClasses.thumb} [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full"
 	/>
-	<span class="w-10 text-right text-xs text-neutral-400">{Math.round(volume * 100)}%</span>
+	<span class="text-right text-xs text-neutral-400">{Math.round(volume * 100)}%</span>
 </div>

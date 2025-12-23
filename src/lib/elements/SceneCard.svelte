@@ -445,94 +445,98 @@
 </script>
 
 <div
-	class="rounded-lg border border-slate-700 bg-slate-800/50 p-4 transition-all hover:border-indigo-500/50 hover:bg-slate-800"
+	class="m-4 flex flex-col gap-4 rounded-lg border border-slate-700 bg-slate-800/50 p-4 transition-all hover:border-indigo-500/50 hover:bg-slate-800"
 >
-	<div class="flex items-start justify-between">
-		<div class="flex-1">
-			<div class="flex items-center gap-2">
+	<div class="flex flex-col gap-2">
+		<!-- Header -->
+		<div class="flex">
+			<div class="flex flex-1 gap-2">
 				<h3 class="text-lg font-semibold text-slate-100">{scene.name}</h3>
 				{#if saveError || updateError}
 					<!-- Error X icon -->
 					<IconX class="h-4 w-4 text-rose-400" />
 				{:else if savingSound || removingSound}
 					<!-- Loading spinner -->
-					<svg
-						class="h-4 w-4 animate-spin text-indigo-400"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-						></path>
-					</svg>
+					<IconSpinner class="h-4 w-4 animate-spin text-indigo-400" />
 				{:else if saveSuccess || updateSuccess}
 					<!-- Success floppy disk icon -->
-					<svg
-						class="h-4 w-4 text-emerald-400"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4z"
-						></path>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M7 3v4h8V3M7 21v-6h10v6"
-						></path>
-					</svg>
+					<IconSave class="h-4 w-4 text-emerald-400" />
 				{/if}
 			</div>
-			{#if scene.description}
-				<p class="mt-1 text-sm text-slate-400">{scene.description}</p>
-			{/if}
+
+			<div class="flex gap-2">
+				<button
+					onclick={handleEditClick}
+					class="rounded p-1 text-indigo-400 transition-colors hover:bg-slate-700 hover:text-indigo-300"
+					aria-label="Edit scene"
+					title="Edit scene"
+				>
+					<IconEdit />
+				</button>
+				<button
+					onclick={handleDeleteClick}
+					disabled={deleting === scene.id}
+					class="ml-2 rounded p-1 text-rose-400 transition-colors hover:bg-slate-700 hover:text-rose-300 disabled:cursor-not-allowed disabled:text-slate-600"
+					aria-label="Delete scene"
+					title="Delete scene"
+				>
+					{#if deleting === scene.id}
+						<IconSpinner />
+					{:else}
+						<IconTrash />
+					{/if}
+				</button>
+			</div>
 		</div>
-		<div class="flex gap-1">
-			<button
-				onclick={handleEditClick}
-				class="rounded p-1 text-indigo-400 transition-colors hover:bg-slate-700 hover:text-indigo-300"
-				aria-label="Edit scene"
-				title="Edit scene"
-			>
-				<IconEdit />
-			</button>
-			<button
-				onclick={handleDeleteClick}
-				disabled={deleting === scene.id}
-				class="ml-2 rounded p-1 text-rose-400 transition-colors hover:bg-slate-700 hover:text-rose-300 disabled:cursor-not-allowed disabled:text-slate-600"
-				aria-label="Delete scene"
-				title="Delete scene"
-			>
-				{#if deleting === scene.id}
-					<IconSpinner />
-				{:else}
-					<IconTrash />
-				{/if}
-			</button>
-		</div>
+
+		<!-- Description -->
+		{#if scene.description}
+			<p class="mt-1 text-sm text-slate-400">{scene.description}</p>
+		{/if}
 	</div>
 
 	<!-- Linked Sounds List -->
-	<div class="mt-4">
+	<div class="flex flex-col">
 		<h4 class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
 			Linked Sounds ({scene.sceneSounds.length})
 		</h4>
+
 		<div
 			role="group"
-			class="grid grid-cols-5 gap-2"
+			class="grid grid-cols-4 gap-2"
 			ondragover={handleListDragOver}
 			ondragleave={handleListDragLeave}
 		>
-			{#if displaySounds.length === 0}
+			{#each displaySounds as sceneSound, index (sceneSound.id)}
+				<div
+					role="button"
+					tabindex="-1"
+					ondragover={(e) => handleSoundDragOver(e, index)}
+					ondrop={(e) => handleSoundDrop(e, index)}
+				>
+					{#if sceneSound.id === 'placeholder'}
+						<!-- Placeholder for new sound being dragged -->
+						<div
+							class="rounded-lg border-2 border-dashed border-indigo-500 bg-indigo-900/20 p-4 opacity-50"
+						>
+							<div class="flex items-center justify-center">
+								<IconPlus class="h-8 w-8 text-indigo-400" />
+							</div>
+							<p class="text-center text-xs text-indigo-400">Add sound</p>
+						</div>
+					{:else}
+						<SceneSoundCard
+							{sceneSound}
+							ondelete={handleRemoveSound}
+							draggable={true}
+							ondragstart={handleSoundDragStart}
+							ondragend={handleSoundDragEnd}
+							isDragging={draggingSceneSound?.id === sceneSound.id}
+							isSaving={savingSound === sceneSound.id}
+						/>
+					{/if}
+				</div>
+			{:else}
 				<!-- Empty list drop zone when dragging new sound -->
 				<div
 					role="button"
@@ -543,38 +547,7 @@
 				>
 					<span class="text-sm font-medium text-slate-500">Drop sound here</span>
 				</div>
-			{:else}
-				{#each displaySounds as sceneSound, index (sceneSound.id)}
-					<div
-						role="button"
-						tabindex="-1"
-						ondragover={(e) => handleSoundDragOver(e, index)}
-						ondrop={(e) => handleSoundDrop(e, index)}
-					>
-						{#if sceneSound.id === 'placeholder'}
-							<!-- Placeholder for new sound being dragged -->
-							<div
-								class="rounded-lg border-2 border-dashed border-indigo-500 bg-indigo-900/20 p-4 opacity-50"
-							>
-								<div class="mb-2 flex items-center justify-center">
-									<IconPlus class="h-8 w-8 text-indigo-400" />
-								</div>
-								<p class="text-center text-xs text-indigo-400">Add sound</p>
-							</div>
-						{:else}
-							<SceneSoundCard
-								{sceneSound}
-								ondelete={handleRemoveSound}
-								draggable={true}
-								ondragstart={handleSoundDragStart}
-								ondragend={handleSoundDragEnd}
-								isDragging={draggingSceneSound?.id === sceneSound.id}
-								isSaving={savingSound === sceneSound.id}
-							/>
-						{/if}
-					</div>
-				{/each}
-			{/if}
+			{/each}
 		</div>
 	</div>
 </div>

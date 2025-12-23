@@ -110,31 +110,33 @@
 	onError={handleSceneError}
 />
 
-<div class="mb-4 flex items-center justify-between">
-	<h2 class="text-2xl font-semibold text-slate-100">Scenes</h2>
-	<button
-		onclick={openModal}
-		class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
-	>
-		Create Scene
-	</button>
-</div>
+<div class="flex h-full flex-col gap-1">
+	<div class="flex px-6">
+		<h2 class="flex-1 text-2xl font-semibold text-slate-100">Scenes</h2>
+		<button
+			onclick={openModal}
+			class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
+		>
+			Create Scene
+		</button>
+	</div>
 
-{#if scenes.length === 0}
-	<div class="rounded-lg border border-slate-700 bg-slate-800/30 p-8 text-center">
-		<p class="mb-4 text-slate-400">No scenes yet. Create your first scene!</p>
-	</div>
-{:else}
-	<div class="flex flex-col gap-4">
-		{#each scenes as scene (scene.id)}
-			<SceneCard
-				{scene}
-				deleting={deletingScene}
-				ondelete={handleDeleteScene}
-				onedit={handleEditScene}
-				updateSuccess={sceneSuccess === scene.id}
-				updateError={sceneError === scene.id}
-			/>
-		{/each}
-	</div>
-{/if}
+	{#if scenes.length === 0}
+		<div class="m-6 rounded-lg border border-slate-700 bg-slate-800/30 p-8 text-center">
+			<p class="text-slate-400">No scenes yet. Create your first scene!</p>
+		</div>
+	{:else}
+		<div class="min-h-0 flex-1 overflow-y-auto px-2">
+			{#each scenes as scene (scene.id)}
+				<SceneCard
+					{scene}
+					deleting={deletingScene}
+					ondelete={handleDeleteScene}
+					onedit={handleEditScene}
+					updateSuccess={sceneSuccess === scene.id}
+					updateError={sceneError === scene.id}
+				/>
+			{/each}
+		</div>
+	{/if}
+</div>
