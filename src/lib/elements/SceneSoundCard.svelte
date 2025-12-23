@@ -5,7 +5,7 @@
 	import IconPlay from './icons/IconPlay.svelte';
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
-	import type { SoundWithTags, SceneSoundWithTags } from '$lib/server/db';
+	import type { SceneSoundWithTags } from '$lib/server/db';
 
 	interface Props {
 		sceneSound: SceneSoundWithTags;

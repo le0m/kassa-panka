@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 	import Scenes from '$lib/elements/Scenes.svelte';
+	import Mixer from '$lib/elements/Mixer.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -45,6 +46,9 @@
 			</section>
 		</div>
 	</main>
+
+	<!-- Mixer -->
+	<Mixer />
 </div>
 
 <style>

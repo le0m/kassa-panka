@@ -1,13 +1,20 @@
 import { randomUUID } from 'node:crypto';
 import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
+export const SoundType = {
+	ambience: 'ambiente',
+	music: 'music',
+	sfx: 'sfx'
+};
+export type SoundType = (typeof SoundType)[keyof typeof SoundType];
+
 export const sounds = sqliteTable('sounds', {
 	id: text('id', { length: 128 })
 		.primaryKey()
 		.$defaultFn(() => randomUUID()),
 	name: text('name', { length: 128 }).notNull(),
 	description: text('description'),
-	type: text('type', { enum: ['ambience', 'music', 'sfx'] })
+	type: text('type', { enum: Object.values(SoundType) as [string, ...string[]] })
 		.notNull()
 		.default('sfx'),
 	fileName: text('file_name', { length: 128 }).notNull(),

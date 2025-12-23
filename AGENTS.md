@@ -34,6 +34,7 @@ The project follows the usual SvelteKit v2 project structure. It is a server-sid
 Some project-specific peculiarities regarding the project paths:
 
 - sound files are to be stored in `static/sounds/` path, which can be referenced using svelte `$app/paths` import
+- component files are stored in `src/lib/elements`, with SVG icons as svelte components in the subfolder `icons`
 - database-related files are to be stored in `src/lib/server/db/` path
 - backend API endpoints are to be created in `src/routes/api/` path
 
