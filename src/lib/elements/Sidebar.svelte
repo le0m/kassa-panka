@@ -3,15 +3,17 @@
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
 	import IconSearch from './icons/IconSearch.svelte';
-	import type { SoundFull, TagEntity } from '$lib/server/db';
+	import type { SoundFull, TagEntity, CategoryEntity, GenreEntity } from '$lib/server/db';
 
 	interface Props {
 		sounds: SoundFull[];
 		tags: TagEntity[];
+		categories: CategoryEntity[];
+		genres: GenreEntity[];
 		onsearch: (query: string) => void;
 	}
 
-	let { sounds = [], tags = [], onsearch }: Props = $props();
+	let { sounds = [], tags = [], categories = [], genres = [], onsearch }: Props = $props();
 
 	let searchQuery = $state('');
 	let isModalOpen = $state(false);
@@ -98,7 +100,7 @@
 </script>
 
 <!-- Upload Modal -->
-<UploadModal isOpen={isModalOpen} {editSound} onclose={closeModal} {tags} />
+<UploadModal isOpen={isModalOpen} {editSound} onclose={closeModal} {tags} {categories} {genres} />
 
 <!-- Sidebar -->
 <aside class="flex h-full flex-col border-r border-slate-700 bg-slate-800/50 backdrop-blur-sm">

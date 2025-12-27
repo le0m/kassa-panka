@@ -1,15 +1,25 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import type { SoundFull, TagEntity } from '$lib/server/db';
+	import type { SoundFull, TagEntity, CategoryEntity, GenreEntity } from '$lib/server/db';
+	import { getAudioDuration } from '$lib/utils';
 
 	interface Props {
 		isOpen: boolean;
 		onclose: () => void;
 		editSound?: SoundFull | null;
 		tags: TagEntity[];
+		categories: CategoryEntity[];
+		genres: GenreEntity[];
 	}
 
-	let { isOpen, onclose, editSound = null, tags = [] }: Props = $props();
+	let {
+		isOpen,
+		onclose,
+		editSound = null,
+		tags = [],
+		categories = [],
+		genres = []
+	}: Props = $props();
 
 	let uploading = $state(false);
 	let uploadError = $state<string | null>(null);
@@ -20,6 +30,8 @@
 	let selectedSuggestionIndex = $state(-1);
 	let formName = $state('');
 	let formDescription = $state('');
+	let selectedCategoryId = $state<string>('');
+	let selectedGenreId = $state<string>('');
 
 	let isEditMode = $derived(editSound !== null);
 
@@ -114,7 +126,9 @@
 					body: JSON.stringify({
 						name: formName,
 						description: formDescription,
-						tags: selectedTags
+						tags: selectedTags,
+						categoryId: selectedCategoryId || null,
+						genreId: selectedGenreId || null
 					})
 				});
 
@@ -135,6 +149,26 @@
 					formData.append('tags', JSON.stringify(selectedTags));
 				}
 
+				// Add category and genre to form data
+				if (selectedCategoryId) {
+					formData.append('categoryId', selectedCategoryId);
+				}
+				if (selectedGenreId) {
+					formData.append('genreId', selectedGenreId);
+				}
+
+				// Get file duration
+				const file: File | string | null = formData.get('file');
+				if (file === null || typeof file === 'string') {
+					uploadError = 'No file selected';
+
+					return;
+				}
+
+				const duration = await getAudioDuration(file, file.type);
+				formData.set('duration', duration.toString());
+
+				// Upload form
 				const response = await fetch('/api/sounds/upload', {
 					method: 'POST',
 					body: formData
@@ -178,6 +212,8 @@
 		selectedSuggestionIndex = -1;
 		formName = '';
 		formDescription = '';
+		selectedCategoryId = '';
+		selectedGenreId = '';
 		onclose();
 	}
 
@@ -191,10 +227,14 @@
 				formName = editSound.name;
 				formDescription = editSound.description || '';
 				selectedTags = editSound.tags.map((tag) => tag.name) || [];
+				selectedCategoryId = editSound.categories?.[0]?.id || '';
+				selectedGenreId = editSound.genres?.[0]?.id || '';
 			} else {
 				formName = '';
 				formDescription = '';
 				selectedTags = [];
+				selectedCategoryId = '';
+				selectedGenreId = '';
 			}
 		}
 	});
@@ -245,6 +285,40 @@
 						class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 						placeholder="Enter description (optional)"
 					></textarea>
+				</div>
+
+				<div>
+					<label for="category" class="mb-1 block text-sm font-medium text-slate-300">
+						Category
+					</label>
+					<select
+						id="category"
+						name="category"
+						bind:value={selectedCategoryId}
+						disabled={uploading}
+						class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						<option value="">-- Select Category --</option>
+						{#each categories as category (category.id)}
+							<option value={category.id}>{category.name}</option>
+						{/each}
+					</select>
+				</div>
+
+				<div>
+					<label for="genre" class="mb-1 block text-sm font-medium text-slate-300"> Genre </label>
+					<select
+						id="genre"
+						name="genre"
+						bind:value={selectedGenreId}
+						disabled={uploading}
+						class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						<option value="">-- Select Genre --</option>
+						{#each genres as genre (genre.id)}
+							<option value={genre.id}>{genre.name}</option>
+						{/each}
+					</select>
 				</div>
 
 				{#if !isEditMode}

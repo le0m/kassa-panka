@@ -186,8 +186,9 @@
 
 	{#if sound.description}
 		<p class="text-sm text-slate-400">{@html sound.description}</p>
-		<p class="font-mono text-sm text-slate-300">{humanTimeInterval(sound.duration * 1000)}</p>
 	{/if}
+
+	<p class="font-mono text-sm text-slate-300">{humanTimeInterval(sound.duration * 1000)}</p>
 
 	{#if sound.tags && sound.tags.length > 0}
 		<div class="flex flex-wrap gap-2">

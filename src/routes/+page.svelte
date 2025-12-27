@@ -65,7 +65,13 @@
 <div class="grid h-screen grid-cols-[minmax(200px,25%)_1fr] grid-rows-[1fr_auto]">
 	<!-- Sidebar (left, spanning top row only) -->
 	<div class="overflow-hidden">
-		<Sidebar onsearch={handleSearch} sounds={data.sounds} tags={data.tags}></Sidebar>
+		<Sidebar
+			onsearch={handleSearch}
+			sounds={data.sounds}
+			tags={data.tags}
+			categories={data.categories}
+			genres={data.genres}
+		></Sidebar>
 	</div>
 
 	<!-- Main Content (right, spanning top row only) -->

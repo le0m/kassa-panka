@@ -1,10 +1,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { sounds, tags, soundsTags } from '$lib/server/db';
+import { sounds, tags, soundsTags, soundsCategories, soundsGenres } from '$lib/server/db';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { eq } from 'drizzle-orm';
+import { getAudioDuration } from '$lib';
 
 /**
  * POST endpoint to upload a new sound file
@@ -17,6 +18,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		const name = formData.get('name') as string | null;
 		const description = formData.get('description') as string | null;
 		const tagsJson = formData.get('tags') as string | null;
+		const categoryId = formData.get('categoryId') as string | null;
+		const genreId = formData.get('genreId') as string | null;
+		const duration = formData.get('duration') as string | null;
 
 		if (!file) {
 			return json({ error: 'No file provided' }, { status: 400 });
@@ -24,6 +28,10 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		if (!name) {
 			return json({ error: 'Name is required' }, { status: 400 });
+		}
+
+		if (!duration) {
+			return json({ error: 'Duration is required' }, { status: 400 });
 		}
 
 		// Validate file type (audio only)
@@ -53,6 +61,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				description: description || null,
 				fileName,
 				fileSize: file.size,
+				duration: parseInt(duration, 10),
 				mediaType: file.type
 			})
 			.returning();
@@ -109,6 +118,32 @@ export const POST: RequestHandler = async ({ request }) => {
 			} catch (error) {
 				console.error('Error processing tags:', error);
 				// Continue without tags rather than failing the entire upload
+			}
+		}
+
+		// Handle category if provided
+		if (categoryId) {
+			try {
+				await db.insert(soundsCategories).values({
+					soundId: newSound.id,
+					categoryId
+				});
+			} catch (error) {
+				console.error('Error associating category:', error);
+				// Continue without category rather than failing the entire upload
+			}
+		}
+
+		// Handle genre if provided
+		if (genreId) {
+			try {
+				await db.insert(soundsGenres).values({
+					soundId: newSound.id,
+					genreId
+				});
+			} catch (error) {
+				console.error('Error associating genre:', error);
+				// Continue without genre rather than failing the entire upload
 			}
 		}
 

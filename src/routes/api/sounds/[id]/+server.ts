@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { sounds, soundsTags, tags } from '$lib/server/db';
+import { sounds, soundsTags, tags, soundsCategories, soundsGenres } from '$lib/server/db';
 import { eq, and } from 'drizzle-orm';
 
 /**
@@ -17,7 +17,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 		}
 
 		const body = await request.json();
-		const { name, description, tags: newTags } = body;
+		const { name, description, tags: newTags, categoryId, genreId } = body;
 
 		// Update sound basic info
 		const updateData: { name?: string; description?: string; updatedAt: string } = {
@@ -57,6 +57,40 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 				await db.insert(soundsTags).values({
 					soundId: id,
 					tagId: tag.id
+				});
+			}
+		}
+
+		// Handle category if provided
+		if (categoryId) {
+			// Check if sound is already related to category
+			const exists = await db.$count(
+				soundsCategories,
+				and(eq(soundsCategories.soundId, id), eq(soundsCategories.categoryId, categoryId))
+			);
+
+			// Add new category
+			if (!exists) {
+				await db.insert(soundsCategories).values({
+					soundId: id,
+					categoryId
+				});
+			}
+		}
+
+		// Handle genre if provided
+		if (genreId) {
+			// Check if sound is already related to genre
+			const exists = await db.$count(
+				soundsGenres,
+				and(eq(soundsGenres.soundId, id), eq(soundsGenres.genreId, genreId))
+			);
+
+			// Add new genre
+			if (!exists) {
+				await db.insert(soundsGenres).values({
+					soundId: id,
+					genreId
 				});
 			}
 		}
