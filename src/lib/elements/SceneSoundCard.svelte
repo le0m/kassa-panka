@@ -171,7 +171,7 @@
 	</div>
 
 	{#if sceneSound.sound?.description}
-		<p class="text-sm text-slate-400">{sceneSound.sound.description}</p>
+		<p class="text-sm text-slate-400">{@html sceneSound.sound.description}</p>
 	{/if}
 
 	{#if sceneSound.sound?.tags && sceneSound.sound.tags.length > 0}

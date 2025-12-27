@@ -22,6 +22,45 @@
 			invalidateAll: true
 		});
 	}
+
+	/** FUNCTIONALITY CURRENTLY DISABLED
+	let importing = $state(false);
+	let perc = $state(0);
+	const handleImport = async () => {
+		if (importing) {
+			return;
+		}
+
+		importing = true;
+
+		const response = await fetch('/api/sounds/import');
+		const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader();
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) {
+				break;
+			}
+
+			// Handle multiple messages in one read, use last
+			const messages = value.split('}{');
+			let message = messages[messages.length - 1];
+			if (messages.length > 1) {
+				message = `{${message}`;
+			} else {
+				message = messages[0];
+			}
+
+			try {
+				const progress = JSON.parse(message) as { count: number; total: number };
+				perc = (progress.count * 100) / progress.total;
+			} catch (e) {
+				console.error('Error receiving import update', e);
+			}
+		}
+
+		importing = false;
+	};
+	*/
 </script>
 
 <div class="grid h-screen grid-cols-[minmax(200px,25%)_1fr] grid-rows-[1fr_auto]">
@@ -40,6 +79,10 @@
 					Kassa Panka
 				</h1>
 				<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
+				<!-- FUNCTIONALITY CURRENTLY DISABLED
+				<button disabled={importing} onclick={handleImport}>import</button>
+				<progress class={{ hidden: !importing }} max="100" value={perc}></progress>
+				-->
 			</header>
 		</div>
 

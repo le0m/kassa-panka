@@ -113,7 +113,7 @@
 	</div>
 
 	{#if sound.description}
-		<p class="text-sm text-slate-400">{sound.description}</p>
+		<p class="text-sm text-slate-400">{@html sound.description}</p>
 	{/if}
 
 	{#if sound.tags && sound.tags.length > 0}
@@ -126,13 +126,6 @@
 				</span>
 			{/each}
 		</div>
-	{/if}
-
-	{#if sound.mediaType}
-		<audio controls class="w-full">
-			<source src="{base}/sounds/{sound.fileName}" type={sound.mediaType} />
-			Your browser does not support the audio element.
-		</audio>
 	{/if}
 </div>
 

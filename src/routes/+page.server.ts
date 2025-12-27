@@ -1,8 +1,4 @@
-import {
-	db,
-	type SceneWithSoundsFull,
-	type TagEntity
-} from '$lib/server/db';
+import { db, type SceneWithSoundsFull, type TagEntity } from '$lib/server/db';
 import { type SoundWithTags, type SceneWithSounds } from '$lib/server/db';
 import type { PageServerLoad } from './$types';
 
@@ -25,7 +21,8 @@ export const load: PageServerLoad = async ({ url }) => {
 				: {})
 		},
 		orderBy: { updatedAt: 'desc' },
-		with: { tags: true }
+		with: { tags: true },
+		limit: 50
 	});
 
 	// Fetch all non-deleted scenes
