@@ -1,0 +1,1 @@
+ALTER TABLE `sounds` DROP COLUMN `type`;

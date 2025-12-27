@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import type { SoundWithTags, TagEntity } from '$lib/server/db';
+	import type { SoundFull, TagEntity } from '$lib/server/db';
 
 	interface Props {
 		isOpen: boolean;
 		onclose: () => void;
-		editSound?: SoundWithTags | null;
+		editSound?: SoundFull | null;
 		tags: TagEntity[];
 	}
 

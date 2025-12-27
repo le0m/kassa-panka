@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { AudioChannel, AudioMixer } from '$lib/muses-mixer';
-	import type { SceneWithSoundsFull, SoundType } from '$lib/server/db';
+	import { type SceneWithSoundsFull } from '$lib/server/db';
+	import { SoundCategory } from '$lib';
 	import MixerChannel from './MixerChannel.svelte';
-	import MixerPlayer from './MixerPlayer.svelte';
-	import MixerPlaylist from './MixerPlaylist.svelte';
 
 	interface Props {
 		scene?: SceneWithSoundsFull;
@@ -12,15 +11,23 @@
 	let { scene }: Props = $props();
 
 	let ambienceSounds = $derived(
-		scene?.sceneSounds.filter((sceSo) => sceSo.sound?.type === 'ambience') ?? []
+		scene?.sceneSounds.filter((sceSo) =>
+			sceSo.sound?.categories.some((c) => c.name === SoundCategory.Ambience)
+		) ?? []
 	);
 	let musicSounds = $derived(
-		scene?.sceneSounds.filter((sceSo) => sceSo.sound?.type === 'music') ?? []
+		scene?.sceneSounds.filter((sceSo) =>
+			sceSo.sound?.categories.some((c) => c.name === SoundCategory.Music)
+		) ?? []
 	);
-	let sfxSounds = $derived(scene?.sceneSounds.filter((sceSo) => sceSo.sound?.type === 'sfx') ?? []);
+	let sfxSounds = $derived(
+		scene?.sceneSounds.filter((sceSo) =>
+			sceSo.sound?.categories.some((c) => c.name === SoundCategory.SFX)
+		) ?? []
+	);
 
 	let mixer: AudioMixer;
-	let channels: Record<SoundType, AudioChannel> = $state({});
+	let channels: Record<SoundCategory, AudioChannel> = $state({});
 
 	// Initialize mixer and channels on first user gesture, as required by WebAudioAPI
 	const handleUserGesture = () => {

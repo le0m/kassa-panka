@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { AudioChannel } from '$lib/muses-mixer';
-	import type { SceneSoundWithTags } from '$lib/server/db';
+	import type { SceneSoundWithSoundFull } from '$lib/server/db';
 	import MixerPlaylist from './MixerPlaylist.svelte';
 	import MixerVolume from './MixerVolume.svelte';
 
@@ -15,7 +15,7 @@
 		/** The channel connected to the mixer */
 		channel?: AudioChannel;
 		/** Array of scene sounds to display */
-		sceneSounds?: SceneSoundWithTags[];
+		sceneSounds?: SceneSoundWithSoundFull[];
 	}
 
 	let { name, color, channel, sceneSounds }: Props = $props();

@@ -8,7 +8,7 @@
 	import IconTrash from './icons/IconTrash.svelte';
 	import IconUpload from './icons/IconUpload.svelte';
 	import IconX from './icons/IconX.svelte';
-	import type { SceneSoundWithTags, SceneWithSoundsFull, SoundWithTags } from '$lib/server/db';
+	import type { SceneSoundWithSoundFull, SceneWithSoundsFull, SoundFull } from '$lib/server/db';
 
 	interface Props {
 		scene: SceneWithSoundsFull;
@@ -28,10 +28,10 @@
 		updateError = false
 	}: Props = $props();
 
-	let draggingSceneSound: SceneSoundWithTags | null = $state(null);
-	let draggingNewSound: SoundWithTags | null = $state(null); // sound data when dragging from sidebar
+	let draggingSceneSound: SceneSoundWithSoundFull | null = $state(null);
+	let draggingNewSound: SoundFull | null = $state(null); // sound data when dragging from sidebar
 	let dragOverIndex: number | null = $state(null);
-	let optimisticOrder: SceneSoundWithTags[] | null = $state(null);
+	let optimisticOrder: SceneSoundWithSoundFull[] | null = $state(null);
 	let savingSound: string | null = $state(null); // ID of sound being saved via API
 	let saveSuccess: boolean = $state(false);
 	let saveError: boolean = $state(false);
@@ -67,7 +67,7 @@
 				soundId: draggingNewSound.id,
 				position: dragOverIndex,
 				sound: draggingNewSound
-			} as SceneSoundWithTags);
+			} as SceneSoundWithSoundFull);
 			return reordered;
 		}
 
@@ -129,7 +129,7 @@
 			if (data.soundId && !data.sceneSoundId && data.sound) {
 				// Create optimistic entry for new sound
 				const optimisticId = `optimistic-${Date.now()}`;
-				const optimisticSceneSound: SceneSoundWithTags = {
+				const optimisticSceneSound: SceneSoundWithSoundFull = {
 					id: optimisticId,
 					sceneId: scene.id,
 					soundId: data.soundId,
@@ -202,7 +202,7 @@
 	 * Handles removing a sound from the scene
 	 * @param sceneSound - The scene-sound relation to remove
 	 */
-	async function handleRemoveSound(sceneSound: SceneSoundWithTags) {
+	async function handleRemoveSound(sceneSound: SceneSoundWithSoundFull) {
 		const confirmed = confirm(
 			`Remove "${sceneSound.sound!.name}" from "${scene.name}"?\n\nThis will not delete the sound, only remove it from this scene.`
 		);
@@ -246,7 +246,7 @@
 	 * @param event - The drag event
 	 * @param sceneSound - The scene sound being dragged
 	 */
-	function handleSoundDragStart(event: DragEvent, sceneSound: SceneSoundWithTags) {
+	function handleSoundDragStart(event: DragEvent, sceneSound: SceneSoundWithSoundFull) {
 		draggingSceneSound = sceneSound;
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';
@@ -331,7 +331,7 @@
 
 				// Insert new sound at target position
 				const optimisticId = `optimistic-${Date.now()}`;
-				const optimisticSceneSound: SceneSoundWithTags = {
+				const optimisticSceneSound: SceneSoundWithSoundFull = {
 					id: optimisticId,
 					sceneId: scene.id,
 					soundId: data.soundId,

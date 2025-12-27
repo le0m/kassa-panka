@@ -7,6 +7,14 @@ export const relations = defineRelations(schema, (r) => ({
 			from: r.sounds.id.through(r.soundsTags.soundId),
 			to: r.tags.id.through(r.soundsTags.tagId)
 		}),
+		categories: r.many.categories({
+			from: r.sounds.id.through(r.soundsCategories.soundId),
+			to: r.categories.id.through(r.soundsCategories.categoryId)
+		}),
+		genres: r.many.genres({
+			from: r.sounds.id.through(r.soundsGenres.soundId),
+			to: r.genres.id.through(r.soundsGenres.genreId)
+		}),
 		scenes: r.many.scenes({
 			from: r.sounds.id.through(r.scenesSounds.soundId),
 			to: r.scenes.id.through(r.scenesSounds.sceneId)
@@ -18,6 +26,12 @@ export const relations = defineRelations(schema, (r) => ({
 		sceneSounds: r.many.scenesSounds() // this is the junction table, which has metadata
 	},
 	tags: {
+		sounds: r.many.sounds()
+	},
+	categories: {
+		sounds: r.many.sounds()
+	},
+	genres: {
 		sounds: r.many.sounds()
 	},
 	scenesSounds: {

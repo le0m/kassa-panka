@@ -3,10 +3,10 @@
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
 	import IconSearch from './icons/IconSearch.svelte';
-	import type { SoundWithTags, TagEntity } from '$lib/server/db';
+	import type { SoundFull, TagEntity } from '$lib/server/db';
 
 	interface Props {
-		sounds: SoundWithTags[];
+		sounds: SoundFull[];
 		tags: TagEntity[];
 		onsearch: (query: string) => void;
 	}
@@ -15,7 +15,7 @@
 
 	let searchQuery = $state('');
 	let isModalOpen = $state(false);
-	let editSound = $state<SoundWithTags | null>(null);
+	let editSound = $state<SoundFull | null>(null);
 
 	/**
 	 * Initialize search query from URL on mount
@@ -47,7 +47,7 @@
 	 * Handles editing a sound
 	 * @param sound - The sound data to edit
 	 */
-	function handleEdit(sound: SoundWithTags) {
+	function handleEdit(sound: SoundFull) {
 		editSound = sound;
 		isModalOpen = true;
 	}

@@ -5,13 +5,13 @@
 	import IconPlay from './icons/IconPlay.svelte';
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
-	import type { SceneSoundWithTags } from '$lib/server/db';
+	import type { SceneSoundWithSoundFull } from '$lib/server/db';
 
 	interface Props {
-		sceneSound: SceneSoundWithTags;
-		ondelete?: (sceneSound: SceneSoundWithTags) => Promise<void> | void;
+		sceneSound: SceneSoundWithSoundFull;
+		ondelete?: (sceneSound: SceneSoundWithSoundFull) => Promise<void> | void;
 		draggable?: boolean;
-		ondragstart?: (event: DragEvent, sceneSound: SceneSoundWithTags) => void;
+		ondragstart?: (event: DragEvent, sceneSound: SceneSoundWithSoundFull) => void;
 		ondragend?: () => void;
 		isDragging?: boolean;
 		isSaving?: boolean;

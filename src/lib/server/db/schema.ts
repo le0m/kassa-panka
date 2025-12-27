@@ -1,22 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-export const SoundType = {
-	ambience: 'ambiente',
-	music: 'music',
-	sfx: 'sfx'
-};
-export type SoundType = (typeof SoundType)[keyof typeof SoundType];
-
 export const sounds = sqliteTable('sounds', {
 	id: text('id', { length: 128 })
 		.primaryKey()
 		.$defaultFn(() => randomUUID()),
 	name: text('name', { length: 128 }).notNull(),
 	description: text('description'),
-	type: text('type', { enum: Object.values(SoundType) as [string, ...string[]] })
-		.notNull()
-		.default('sfx'),
 	fileName: text('file_name', { length: 128 }).notNull(),
 	fileSize: integer('file_size').notNull(),
 	mediaType: text('media_type', { length: 64 }).notNull(),
@@ -82,28 +72,86 @@ export const soundsTags = sqliteTable(
 	(table) => [primaryKey({ columns: [table.soundId, table.tagId] })]
 );
 
+export const categories = sqliteTable('categories', {
+	id: text('id', { length: 128 })
+		.primaryKey()
+		.$defaultFn(() => randomUUID()),
+	name: text('name', { length: 64 }).notNull().unique(),
+	createdAt: text('created_at')
+		.notNull()
+		.$defaultFn(() => new Date().toISOString())
+});
+
+export const soundsCategories = sqliteTable(
+	'sounds_categories',
+	{
+		soundId: text('sound_id', { length: 128 })
+			.notNull()
+			.references(() => sounds.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+		categoryId: text('category_id', { length: 128 })
+			.notNull()
+			.references(() => categories.id, { onDelete: 'cascade', onUpdate: 'cascade' })
+	},
+	(table) => [primaryKey({ columns: [table.soundId, table.categoryId] })]
+);
+
+export const genres = sqliteTable('genres', {
+	id: text('id', { length: 128 })
+		.primaryKey()
+		.$defaultFn(() => randomUUID()),
+	name: text('name', { length: 64 }).notNull().unique(),
+	createdAt: text('created_at')
+		.notNull()
+		.$defaultFn(() => new Date().toISOString())
+});
+
+export const soundsGenres = sqliteTable(
+	'sounds_genres',
+	{
+		soundId: text('sound_id', { length: 128 })
+			.notNull()
+			.references(() => sounds.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+		genreId: text('genre_id', { length: 128 })
+			.notNull()
+			.references(() => genres.id, { onDelete: 'cascade', onUpdate: 'cascade' })
+	},
+	(table) => [primaryKey({ columns: [table.soundId, table.genreId] })]
+);
+
 export type SoundsTable = typeof sounds;
 export type ScenesTable = typeof scenes;
 export type ScenesSoundsTable = typeof scenesSounds;
 export type TagsTable = typeof tags;
+export type CategoriesTable = typeof categories;
+export type GenresTable = typeof genres;
 export type SoundsTagsTable = typeof soundsTags;
 
 export type NewSoundEntity = typeof sounds.$inferInsert;
 export type SoundEntity = typeof sounds.$inferSelect;
 export type SoundWithTags = SoundEntity & { tags: TagEntity[] };
-export type SoundWithPosition = SoundWithTags & { position: number };
+export type SoundFull = SoundEntity & {
+	tags: TagEntity[];
+	categories: CategoryEntity[];
+	genres: GenreEntity[];
+};
 
 export type NewSceneEntity = typeof scenes.$inferInsert;
 export type SceneEntity = typeof scenes.$inferSelect;
-export type SceneWithSounds = SceneEntity & { sounds: SoundWithTags[] };
-export type SceneWithSoundsFull = SceneEntity & { sceneSounds: SceneSoundWithTags[] };
+export type SceneWithSounds = SceneEntity & { sounds: SoundFull[] };
+export type SceneWithSoundsFull = SceneEntity & { sceneSounds: SceneSoundWithSoundFull[] };
 
 export type NewSceneSoundEntity = typeof scenesSounds.$inferInsert;
 export type SceneSoundEntity = typeof scenesSounds.$inferSelect;
-export type SceneSoundWithTags = SceneSoundEntity & { sound: SoundWithTags | null };
+export type SceneSoundWithSoundFull = SceneSoundEntity & { sound: SoundFull | null };
 
 export type NewTagEntity = typeof tags.$inferInsert;
 export type TagEntity = typeof tags.$inferSelect;
+
+export type NewCategoryEntity = typeof categories.$inferInsert;
+export type CategoryEntity = typeof categories.$inferSelect;
+
+export type NewGenreEntity = typeof genres.$inferInsert;
+export type GenreEntity = typeof genres.$inferSelect;
 
 export type NewSoundTagEntity = typeof soundsTags.$inferInsert;
 export type SoundTagEntity = typeof soundsTags.$inferSelect;

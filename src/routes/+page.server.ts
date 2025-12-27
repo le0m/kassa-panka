@@ -1,5 +1,11 @@
-import { db, type SceneWithSoundsFull, type TagEntity } from '$lib/server/db';
-import { type SoundWithTags, type SceneWithSounds } from '$lib/server/db';
+import {
+	db,
+	type CategoryEntity,
+	type GenreEntity,
+	type SceneWithSoundsFull,
+	type SoundFull,
+	type TagEntity
+} from '$lib/server/db';
 import type { PageServerLoad } from './$types';
 
 /**
@@ -8,7 +14,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ url }) => {
 	const searchQuery = url.searchParams.get('q')?.trim();
 
-	const allSounds: SoundWithTags[] = await db.query.sounds.findMany({
+	const allSounds: SoundFull[] = await db.query.sounds.findMany({
 		where: {
 			deletedAt: { isNull: true },
 			...(searchQuery
@@ -21,7 +27,7 @@ export const load: PageServerLoad = async ({ url }) => {
 				: {})
 		},
 		orderBy: { updatedAt: 'desc' },
-		with: { tags: true },
+		with: { tags: true, categories: true, genres: true },
 		limit: 50
 	});
 
@@ -32,7 +38,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			sceneSounds: {
 				where: { sound: { deletedAt: { isNull: true } } },
 				orderBy: { position: 'asc' },
-				with: { sound: { with: { tags: true } } }
+				with: { sound: { with: { tags: true, categories: true, genres: true } } }
 			}
 		}
 	});
@@ -40,9 +46,19 @@ export const load: PageServerLoad = async ({ url }) => {
 	// Fetch all tags
 	const allTags: TagEntity[] = await db.query.tags.findMany({ orderBy: { name: 'asc' } });
 
+	// Fetch all categories
+	const allCategories: CategoryEntity[] = await db.query.categories.findMany({
+		orderBy: { name: 'asc' }
+	});
+
+	// Fetch all genres
+	const allGenres: GenreEntity[] = await db.query.genres.findMany({ orderBy: { name: 'asc' } });
+
 	return {
 		sounds: allSounds,
 		scenes: allScenesFull,
-		tags: allTags
+		tags: allTags,
+		categories: allCategories,
+		genres: allGenres
 	};
 };

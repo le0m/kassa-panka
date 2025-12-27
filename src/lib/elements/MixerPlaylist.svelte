@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SceneSoundWithTags } from '$lib/server/db';
+	import type { SceneSoundWithSoundFull } from '$lib/server/db';
 
 	/**
 	 * Horizontal playlist display for a specific channel
@@ -10,7 +10,7 @@
 		/** Tailwind color class for the border (e.g., 'amber', 'purple', 'emerald') */
 		color: string;
 		/** Array of scene sounds to display */
-		sceneSounds?: SceneSoundWithTags[];
+		sceneSounds?: SceneSoundWithSoundFull[];
 	}
 
 	let { name, color, sceneSounds = [] }: Props = $props();

@@ -47,6 +47,10 @@ The database schema is available in the application code, it uses drizzle ORM. C
 - `scenes_sounds` is the junction table between `sounds` and `scenes`; it includes extra metadata, like `position` to sort the sounds of the scene
 - `tags` to store tags
 - `sounds_tags` is the junction table between `tags` and `sounds`
+- `categories` to store categories
+- `sounds_categories` is the junction table between `categories` and `sounds`
+- `genres` to store genres
+- `sounds_genres` is the junction table between `genres` and `sounds`
 
 ## Tools
 
