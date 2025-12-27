@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
@@ -6,6 +7,9 @@
 	import Mixer from '$lib/elements/Mixer.svelte';
 
 	let { data }: { data: PageData } = $props();
+
+	let admin = $derived(data.admin);
+	setContext('admin', () => admin);
 
 	/**
 	 * Handles search when triggered from Sidebar
@@ -23,11 +27,10 @@
 		});
 	}
 
-	/** FUNCTIONALITY CURRENTLY DISABLED */
 	let importing = $state(false);
 	let perc = $state(0);
 	const handleImport = async () => {
-		if (importing) {
+		if (!admin || importing) {
 			return;
 		}
 
@@ -84,9 +87,10 @@
 					Kassa Panka
 				</h1>
 				<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
-				<!-- FUNCTIONALITY CURRENTLY DISABLED -->
-				<button disabled={importing} onclick={handleImport}>import</button>
-				<progress class={{ hidden: !importing }} max="100" value={perc}></progress>
+				{#if admin}
+					<button disabled={importing} onclick={handleImport}>import</button>
+					<progress class={{ hidden: !importing }} max="100" value={perc}></progress>
+				{/if}
 			</header>
 		</div>
 

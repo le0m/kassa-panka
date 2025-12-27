@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
-	import IconSearch from './icons/IconSearch.svelte';
 	import type { SoundFull, TagEntity, CategoryEntity, GenreEntity } from '$lib/server/db';
 
 	interface Props {
@@ -15,6 +15,7 @@
 
 	let { sounds = [], tags = [], categories = [], genres = [], onsearch }: Props = $props();
 
+	let admin: () => boolean = getContext('admin');
 	let searchQuery = $state('');
 	let isModalOpen = $state(false);
 	let editSound = $state<SoundFull | null>(null);
@@ -109,13 +110,15 @@
 		<div class="flex items-center justify-center">
 			<h2 class="flex-1 text-lg font-semibold text-slate-100">Sound Library</h2>
 
-			<!-- Upload Button -->
-			<button
-				onclick={openModal}
-				class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
-			>
-				New Sound
-			</button>
+			{#if admin()}
+				<!-- Upload Button -->
+				<button
+					onclick={openModal}
+					class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
+				>
+					New Sound
+				</button>
+			{/if}
 		</div>
 
 		<!-- Search -->
@@ -137,7 +140,11 @@
 			</div>
 		{:else}
 			{#each sounds as sound (sound.id)}
-				<SoundCard {sound} onedit={handleEdit} ondelete={handleDelete} />
+				<SoundCard
+					{sound}
+					onedit={admin() ? handleEdit : undefined}
+					ondelete={admin() ? handleDelete : undefined}
+				/>
 			{/each}
 		{/if}
 	</div>

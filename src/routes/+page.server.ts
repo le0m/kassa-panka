@@ -12,6 +12,7 @@ import type { PageServerLoad } from './$types';
  * Load all non-deleted sounds from the database with their tags, optionally filtered by search query
  */
 export const load: PageServerLoad = async ({ url }) => {
+	const admin = url.searchParams.has('admin');
 	const searchQuery = url.searchParams.get('q')?.trim();
 
 	const allSounds: SoundFull[] = await db.query.sounds.findMany({
@@ -55,6 +56,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	const allGenres: GenreEntity[] = await db.query.genres.findMany({ orderBy: { name: 'asc' } });
 
 	return {
+		admin,
 		sounds: allSounds,
 		scenes: allScenesFull,
 		tags: allTags,
