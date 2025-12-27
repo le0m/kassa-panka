@@ -15,11 +15,35 @@
 	 * Handles search when triggered from Sidebar
 	 * @param query - The search query string
 	 */
-	async function handleSearch(query: string) {
-		const params = new URLSearchParams();
-		if (query.trim()) {
-			params.set('q', query.trim());
+	async function handleFilter({
+		search,
+		category,
+		genre
+	}: {
+		search: string;
+		category: string;
+		genre: string;
+	}) {
+		const params = new URLSearchParams(window.location.search);
+
+		if (search.trim()) {
+			params.set('q', search.trim());
+		} else {
+			params.delete('q');
 		}
+
+		if (category.trim()) {
+			params.set('cat', category.trim());
+		} else {
+			params.delete('cat');
+		}
+
+		if (genre.trim()) {
+			params.set('gen', genre.trim());
+		} else {
+			params.delete('gen');
+		}
+
 		const queryString = params.toString();
 		await goto(queryString ? `?${queryString}` : '/', {
 			replaceState: false,
@@ -69,7 +93,7 @@
 	<!-- Sidebar (left, spanning top row only) -->
 	<div class="overflow-hidden">
 		<Sidebar
-			onsearch={handleSearch}
+			onfilter={handleFilter}
 			sounds={data.sounds}
 			tags={data.tags}
 			categories={data.categories}

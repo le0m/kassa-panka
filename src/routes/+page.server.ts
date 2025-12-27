@@ -14,20 +14,33 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ url }) => {
 	const admin = url.searchParams.has('admin');
 	const searchQuery = url.searchParams.get('q')?.trim();
+	const categoryQuery = url.searchParams.get('cat')?.trim();
+	const genreQuery = url.searchParams.get('gen')?.trim();
+	const where: any = { deletedAt: { isNull: true } };
+
+	if (searchQuery) {
+		where.OR ??= [];
+		where.OR.push(
+			...searchQuery
+				.split(' ')
+				.flatMap((term) => [
+					{ name: { like: `%${term}%` } },
+					{ tags: { name: { like: `%${term}%` } } }
+				])
+		);
+	}
+
+	if (categoryQuery) {
+		where.categories = { id: categoryQuery };
+	}
+
+	if (genreQuery) {
+		where.genres = { id: genreQuery };
+	}
 
 	const allSounds: SoundFull[] = await db.query.sounds.findMany({
-		where: {
-			deletedAt: { isNull: true },
-			...(searchQuery
-				? {
-						OR: [
-							{ name: { like: `%${searchQuery}%` } },
-							{ tags: { name: { like: `%${searchQuery}%` } } }
-						]
-					}
-				: {})
-		},
-		orderBy: { updatedAt: 'desc' },
+		where,
+		orderBy: { name: 'asc' },
 		with: { tags: true, categories: true, genres: true },
 		limit: 50
 	});

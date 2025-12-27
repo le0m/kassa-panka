@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { browser } from '$app/environment';
 	import { invalidateAll } from '$app/navigation';
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
@@ -10,13 +11,27 @@
 		tags: TagEntity[];
 		categories: CategoryEntity[];
 		genres: GenreEntity[];
-		onsearch: (query: string) => void;
+		onfilter: ({
+			search,
+			category,
+			genre
+		}: {
+			search: string;
+			category: string;
+			genre: string;
+		}) => void;
 	}
 
-	let { sounds = [], tags = [], categories = [], genres = [], onsearch }: Props = $props();
+	let { sounds = [], tags = [], categories = [], genres = [], onfilter }: Props = $props();
 
 	let admin: () => boolean = getContext('admin');
 	let searchQuery = $state('');
+	let selectedCategoryId = $state<string>(
+		browser ? (new URLSearchParams(window.location.search).get('cat') ?? '') : ''
+	);
+	let selectedGenreId = $state<string>(
+		browser ? (new URLSearchParams(window.location.search).get('gen') ?? '') : ''
+	);
 	let isModalOpen = $state(false);
 	let editSound = $state<SoundFull | null>(null);
 
@@ -95,9 +110,24 @@
 	 */
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
-			onsearch(searchQuery);
+			onfilter({
+				search: searchQuery,
+				category: selectedCategoryId,
+				genre: selectedGenreId
+			});
 		}
 	}
+
+	/**
+	 * Handles category and genre when changed.
+	 */
+	const handleChange = () => {
+		onfilter({
+			search: searchQuery,
+			category: selectedCategoryId,
+			genre: selectedGenreId
+		});
+	};
 </script>
 
 <!-- Upload Modal -->
@@ -127,9 +157,35 @@
 			bind:value={searchQuery}
 			oninput={handleInput}
 			onkeydown={handleKeydown}
-			class="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 pl-9 text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+			class="rounded-md border border-slate-700 bg-slate-900 text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
 			placeholder="Search sounds..."
 		/>
+
+		<div class="flex gap-2">
+			<!-- Category Filter -->
+			<select
+				bind:value={selectedCategoryId}
+				onchange={handleChange}
+				class="w-full rounded-md border border-slate-700 bg-slate-900 text-sm text-slate-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+			>
+				<option value="">-- Category --</option>
+				{#each categories as category (category.id)}
+					<option value={category.id}>{category.name}</option>
+				{/each}
+			</select>
+
+			<!-- Genre Filter -->
+			<select
+				bind:value={selectedGenreId}
+				onchange={handleChange}
+				class="w-full rounded-md border border-slate-700 bg-slate-900 text-sm text-slate-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+			>
+				<option value="">-- Genre --</option>
+				{#each genres as genre (genre.id)}
+					<option value={genre.id}>{genre.name}</option>
+				{/each}
+			</select>
+		</div>
 	</div>
 
 	<!-- Scrollable Sound List -->
