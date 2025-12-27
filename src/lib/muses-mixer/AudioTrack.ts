@@ -42,6 +42,10 @@ export class AudioTrack {
 		this.sourceNode.disconnect();
 	}
 
+	close(): void {
+		this.sourceNode.disconnect();
+	}
+
 	/** Connect the track output to a channel input. */
 	output(channel: AudioChannel) {
 		const connected = channel.tracks.findIndex((t) => t === this);

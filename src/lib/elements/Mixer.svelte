@@ -10,24 +10,39 @@
 
 	let { scene }: Props = $props();
 
+	let mixer: AudioMixer;
+	let channels: Record<SoundCategory, AudioChannel> = $state({});
+	let activeScene = $state<SceneWithSoundsFull | undefined>(undefined);
+
 	let ambienceSounds = $derived(
-		scene?.sceneSounds.filter((sceSo) =>
+		activeScene?.sceneSounds.filter((sceSo) =>
 			sceSo.sound?.categories.some((c) => c.name === SoundCategory.Ambience)
 		) ?? []
 	);
 	let musicSounds = $derived(
-		scene?.sceneSounds.filter((sceSo) =>
+		activeScene?.sceneSounds.filter((sceSo) =>
 			sceSo.sound?.categories.some((c) => c.name === SoundCategory.Music)
 		) ?? []
 	);
 	let sfxSounds = $derived(
-		scene?.sceneSounds.filter((sceSo) =>
+		activeScene?.sceneSounds.filter((sceSo) =>
 			sceSo.sound?.categories.some((c) => c.name === SoundCategory.SFX)
 		) ?? []
 	);
 
-	let mixer: AudioMixer;
-	let channels: Record<SoundCategory, AudioChannel> = $state({});
+	$effect(() => {
+		if (!scene || scene.id === activeScene?.id) {
+			return;
+		}
+
+		console.log('Active scene changed, creating new mixer');
+		activeScene = scene;
+		if (mixer) {
+			mixer.close();
+		}
+
+		createMixer();
+	});
 
 	// Initialize mixer and channels on first user gesture, as required by WebAudioAPI
 	const handleUserGesture = () => {

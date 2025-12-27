@@ -73,9 +73,21 @@ export class AudioChannel {
 			.connect(mixingConsole.inputNode);
 	}
 
+	close(): void {
+		this.outputNode.disconnect();
+		this.gainNode.disconnect();
+		this.stereoPannerNode.disconnect();
+		this.HighEQNode.disconnect();
+		this.MidEQNode.disconnect();
+		this.LowEQNode.disconnect();
+		while (this.tracks.length) this.tracks.pop()?.close();
+		while (this.customNodes.length) this.customNodes.pop()?.disconnect();
+		this.inputNode.disconnect();
+	}
+
 	/**
 	 * Add a custom node or effect to the channel (in-order).
-	 * @param {AudioNode} customNode - The effect or audio node to connect between the channelOutputNode nad the mixerInputNode.
+	 * @param {AudioNode} customNode - The effect or audio node to connect between the channelOutputNode and the mixerInputNode.
 	 */
 	addNode(customNode: AudioNode) {
 		this.customNodes.push(customNode);

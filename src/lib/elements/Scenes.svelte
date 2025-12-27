@@ -6,9 +6,10 @@
 
 	interface Props {
 		scenes: SceneWithSoundsFull[];
+		onsceneclick: (scene: SceneWithSoundsFull) => void;
 	}
 
-	const { scenes }: Props = $props();
+	const { scenes, onsceneclick }: Props = $props();
 
 	let isModalOpen = $state(false);
 	let editScene = $state<SceneWithSoundsFull | null>(null);
@@ -131,6 +132,7 @@
 				<SceneCard
 					{scene}
 					deleting={deletingScene}
+					onclick={onsceneclick}
 					ondelete={handleDeleteScene}
 					onedit={handleEditScene}
 					updateSuccess={sceneSuccess === scene.id}

@@ -13,6 +13,7 @@
 	interface Props {
 		scene: SceneWithSoundsFull;
 		deleting: string | null;
+		onclick: (scene: SceneWithSoundsFull) => void;
 		ondelete: (id: string, name: string) => void;
 		onedit: (scene: SceneWithSoundsFull) => void;
 		updateSuccess?: boolean;
@@ -22,6 +23,7 @@
 	let {
 		scene,
 		deleting,
+		onclick,
 		ondelete,
 		onedit,
 		updateSuccess = false,
@@ -158,8 +160,11 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="m-4 flex flex-col gap-4 rounded-lg border border-slate-700 bg-slate-800/50 p-4 transition-all hover:border-indigo-500/50 hover:bg-slate-800"
+	onclick={() => onclick(scene)}
 >
 	<div class="flex flex-col gap-2">
 		<!-- Header -->

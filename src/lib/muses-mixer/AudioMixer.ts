@@ -55,6 +55,12 @@ export class AudioMixer {
 		this.inputNode.connect(this.ctx.destination);
 	}
 
+	close(): void {
+		while (this.channels.length) this.channels.pop()?.close();
+		this.inputNode.disconnect(this.ctx.destination);
+		this.ctx.close();
+	}
+
 	/**
 	 * Due to the constant change in browser security, it is necessary to wait for the user to perform an action within the web page in order to execute the *AudioContext* correctly.
 	 * If necessary, you can execute this method once the user executes the action in order to allow access to the *AudioContext*.

@@ -5,11 +5,13 @@
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 	import Scenes from '$lib/elements/Scenes.svelte';
 	import Mixer from '$lib/elements/Mixer.svelte';
+	import type { SceneWithSoundsFull } from '$lib/server/db';
 
 	let { data }: { data: PageData } = $props();
 
 	let admin = $derived(data.admin);
 	setContext('admin', () => admin);
+	let activeScene = $state<SceneWithSoundsFull | undefined>(undefined);
 
 	/**
 	 * Handles search when triggered from Sidebar
@@ -50,6 +52,8 @@
 			invalidateAll: true
 		});
 	}
+
+	const handleSceneClick = (scene: SceneWithSoundsFull) => (activeScene = scene);
 
 	let importing = $state(false);
 	let perc = $state(0);
@@ -119,12 +123,12 @@
 		</div>
 
 		<section class="min-h-0 flex-1 overflow-hidden">
-			<Scenes scenes={data.scenes} />
+			<Scenes scenes={data.scenes} onsceneclick={handleSceneClick} />
 		</section>
 	</main>
 
 	<!-- Mixer (bottom, spanning both columns) -->
 	<div class="col-span-2">
-		<Mixer scene={data.scenes.find((s) => s.sceneSounds.length > 0)} />
+		<Mixer scene={activeScene} />
 	</div>
 </div>

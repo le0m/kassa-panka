@@ -54,7 +54,8 @@ export const load: PageServerLoad = async ({ url }) => {
 				orderBy: { position: 'asc' },
 				with: { sound: { with: { tags: true, categories: true, genres: true } } }
 			}
-		}
+		},
+		orderBy: { updatedAt: 'desc' }
 	});
 
 	// Fetch all tags
