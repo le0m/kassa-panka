@@ -4,16 +4,78 @@
 	import IconMusic from './icons/IconMusic.svelte';
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
-	import type { SoundWithTags } from '$lib/server/db';
+	import type { SoundFull } from '$lib/server/db';
+	import { humanTimeInterval, SoundCategory } from '$lib';
 
 	interface Props {
-		sound: SoundWithTags;
-		onedit?: (sound: SoundWithTags) => void;
+		sound: SoundFull;
+		onedit?: (sound: SoundFull) => void;
 		ondelete?: (soundId: string, soundName: string) => Promise<void> | void;
 		draggable?: boolean;
 	}
 
 	let { sound, onedit, ondelete, draggable = true }: Props = $props();
+
+	/**
+	 * Gets the first category from the sound's categories array
+	 */
+	const firstCategory = $derived(sound.categories?.[0]?.name);
+
+	/**
+	 * Gets the first genre from the sound's genres array
+	 */
+	const firstGenre = $derived(sound.genres?.[0]?.name);
+
+	/**
+	 * Color scheme for card border and background based on category
+	 * Matches MixerChannel colors: Music -> amber, SFX -> purple, Ambience -> emerald
+	 */
+	const categoryColors = $derived(
+		{
+			[SoundCategory.Ambience]: {
+				border: 'border-amber-700',
+				bg: 'bg-amber-800/30',
+				hover: 'hover:bg-amber-500/20'
+			},
+			[SoundCategory.Music]: {
+				border: 'border-purple-700',
+				bg: 'bg-purple-800/30',
+				hover: 'hover:bg-purple-500/20'
+			},
+			[SoundCategory.SFX]: {
+				border: 'border-emerald-700',
+				bg: 'bg-emerald-800/30',
+				hover: 'hover:bg-emerald-500/20'
+			}
+		}[firstCategory ?? ''] ?? {
+			border: 'border-slate-700',
+			bg: 'bg-slate-800',
+			hover: 'hover:bg-indigo-500/50'
+		}
+	);
+
+	/**
+	 * Color scheme for genre chip
+	 */
+	const genreColors = $derived(
+		{
+			Fantasy: {
+				border: 'border-violet-700/50',
+				bg: 'bg-violet-900/40'
+			},
+			'Sci-Fi': {
+				border: 'border-blue-700/50',
+				bg: 'bg-blue-900/40'
+			},
+			Modern: {
+				border: 'border-orange-700/50',
+				bg: 'bg-orange-900/40'
+			}
+		}[firstGenre ?? ''] ?? {
+			border: 'border-slate-700/50',
+			bg: 'bg-slate-900/40'
+		}
+	);
 
 	let isDragging = $state<boolean>(false);
 	let deleting = $state<boolean>(false);
@@ -76,7 +138,7 @@
 	{draggable}
 	ondragstart={handleDragStart}
 	ondragend={handleDragEnd}
-	class="m-4 flex flex-col gap-2 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
+	class="m-4 flex flex-col gap-2 rounded-lg border p-4 shadow-md transition-all {categoryColors.border} {categoryColors.bg} {categoryColors.hover}"
 	class:cursor-grab={draggable}
 	class:active:cursor-grabbing={draggable}
 	class:opacity-50={isDragging}
@@ -112,16 +174,25 @@
 		</div>
 	</div>
 
+	{#if firstGenre}
+		<div class="flex gap-2">
+			<span
+				class="rounded-full border px-2.5 py-0.5 text-xs font-medium {genreColors.border} {genreColors.bg}"
+			>
+				{firstGenre}
+			</span>
+		</div>
+	{/if}
+
 	{#if sound.description}
 		<p class="text-sm text-slate-400">{@html sound.description}</p>
+		<p class="font-mono text-sm text-slate-300">{humanTimeInterval(sound.duration * 1000)}</p>
 	{/if}
 
 	{#if sound.tags && sound.tags.length > 0}
 		<div class="flex flex-wrap gap-2">
 			{#each sound.tags as tag (tag.id)}
-				<span
-					class="rounded-full border border-cyan-700/50 bg-cyan-900/40 px-2.5 py-0.5 text-xs text-cyan-300"
-				>
+				<span class="rounded-full border border-cyan-700 bg-cyan-900 px-2.5 py-0.5 text-xs">
 					{tag.name}
 				</span>
 			{/each}
@@ -132,13 +203,13 @@
 <!-- Hidden drag image: smaller, transparent copy that follows the cursor -->
 <div
 	bind:this={dragImageElement}
-	class="pointer-events-none fixed top-[-9999px] left-[-9999px] w-48 scale-75 rounded-lg border border-slate-500 bg-slate-800 p-3 opacity-70 shadow-xl"
+	class="pointer-events-none fixed top-[-9999px] left-[-9999px] w-48 scale-75 rounded-lg border {categoryColors.border} {categoryColors.bg} p-3 opacity-70 shadow-xl"
 >
 	<div class="flex items-center gap-2">
 		<IconMusic class="h-4 w-4 shrink-0 text-indigo-400" />
 		<h4 class="truncate text-sm font-semibold text-slate-100">{sound.name}</h4>
 	</div>
 	{#if sound.description}
-		<p class="line-clamp-2 text-xs text-slate-400">{sound.description}</p>
+		<p class="line-clamp-2 text-xs text-slate-400">{@html sound.description}</p>
 	{/if}
 </div>

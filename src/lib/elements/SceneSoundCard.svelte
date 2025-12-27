@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import IconMusic from './icons/IconMusic.svelte';
-	import IconPause from './icons/IconPause.svelte';
-	import IconPlay from './icons/IconPlay.svelte';
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
 	import type { SceneSoundWithSoundFull } from '$lib/server/db';
+	import { humanTimeInterval, SoundCategory } from '$lib';
 
 	interface Props {
 		sceneSound: SceneSoundWithSoundFull;
@@ -30,17 +28,45 @@
 	let deleting = $state<boolean>(false);
 	let audioElement: HTMLAudioElement | undefined = $state();
 	let isPlaying = $state<boolean>(false);
-	let currentTime = $state<number>(0);
-	let duration = $state<number>(0);
-	let cardElement: HTMLDivElement;
 	let dragImageElement: HTMLDivElement;
 
-	$effect(() => {
-		if (audioElement) {
-			duration = audioElement.duration;
-			currentTime = audioElement.currentTime;
+	/**
+	 * Gets the first category from the sound's categories array
+	 */
+	const firstCategory = $derived(sceneSound.sound?.categories?.[0]?.name);
+
+	/**
+	 * Gets the first genre from the sound's genres array
+	 */
+	const firstGenre = $derived(sceneSound.sound?.genres?.[0]?.name);
+
+	/**
+	 * Color scheme for card border and background based on category
+	 * Matches MixerChannel colors: Music -> amber, SFX -> purple, Ambience -> emerald
+	 */
+	const categoryColors = $derived(
+		{
+			[SoundCategory.Ambience]: {
+				border: 'border-amber-700',
+				bg: 'bg-amber-800/30',
+				hover: 'hover:bg-amber-500/20'
+			},
+			[SoundCategory.Music]: {
+				border: 'border-purple-700',
+				bg: 'bg-purple-800/30',
+				hover: 'hover:bg-purple-500/20'
+			},
+			[SoundCategory.SFX]: {
+				border: 'border-emerald-700',
+				bg: 'bg-emerald-800/30',
+				hover: 'hover:bg-emerald-500/20'
+			}
+		}[firstCategory ?? ''] ?? {
+			border: 'border-slate-700',
+			bg: 'bg-slate-800',
+			hover: 'hover:bg-indigo-500/50'
 		}
-	});
+	);
 
 	/**
 	 * Handles the delete button click - delegates to parent
@@ -67,41 +93,6 @@
 		} else {
 			audioElement.play();
 		}
-	}
-
-	/**
-	 * Handles audio time update
-	 */
-	function handleTimeUpdate() {
-		if (audioElement) {
-			currentTime = audioElement.currentTime;
-		}
-	}
-
-	/**
-	 * Handles audio play event
-	 */
-	function handlePlay() {
-		isPlaying = true;
-	}
-
-	/**
-	 * Handles audio pause event
-	 */
-	function handlePause() {
-		isPlaying = false;
-	}
-
-	/**
-	 * Formats time in seconds to MM:SS format
-	 * @param seconds - Time in seconds
-	 * @returns Formatted time string
-	 */
-	function formatTime(seconds: number): string {
-		if (!isFinite(seconds)) return '0:00';
-		const mins = Math.floor(seconds / 60);
-		const secs = Math.floor(seconds % 60);
-		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}
 
 	/**
@@ -133,7 +124,6 @@
 
 <!-- Unified layout for all instances -->
 <div
-	bind:this={cardElement}
 	role="button"
 	tabindex="0"
 	{draggable}
@@ -141,7 +131,7 @@
 	ondragend={handleDragEnd}
 	onclick={togglePlayPause}
 	onkeydown={(e) => (e.key === 'Enter' || e.key === ' ' ? togglePlayPause() : null)}
-	class="flex cursor-pointer flex-col gap-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-md transition-all hover:border-indigo-500/50 hover:bg-slate-800"
+	class="flex cursor-pointer flex-col gap-4 rounded-lg border p-4 shadow-md transition-all {categoryColors.border} {categoryColors.bg} {categoryColors.hover}"
 	class:cursor-grab={draggable}
 	class:active:cursor-grabbing={draggable}
 	class:opacity-50={isDragging || isSaving}
@@ -174,45 +164,10 @@
 		<p class="text-sm text-slate-400">{@html sceneSound.sound.description}</p>
 	{/if}
 
-	{#if sceneSound.sound?.tags && sceneSound.sound.tags.length > 0}
-		<div class="flex flex-wrap gap-2">
-			{#each sceneSound.sound.tags as tag (tag.id)}
-				<span
-					class="rounded-full border border-cyan-700/50 bg-cyan-900/40 px-2.5 py-0.5 text-xs text-cyan-300"
-				>
-					{tag.name}
-				</span>
-			{/each}
-		</div>
-	{/if}
-
-	{#if sceneSound.sound?.mediaType}
-		<!-- Hidden audio element -->
-		<audio
-			bind:this={audioElement}
-			ontimeupdate={handleTimeUpdate}
-			onplay={handlePlay}
-			onpause={handlePause}
-			onended={handlePause}
-			class="hidden"
-		>
-			<source src="{base}/sounds/{sceneSound.sound.fileName}" type={sceneSound.sound.mediaType} />
-			Your browser does not support the audio element.
-		</audio>
-
-		<!-- Custom timing display -->
-		<div class="flex text-sm text-slate-400">
-			<div class="flex items-center gap-2">
-				<div class="flex h-6 w-6">
-					{#if isPlaying}
-						<IconPause class="h-5 w-5 text-indigo-400" />
-					{:else}
-						<IconPlay class="h-5 w-5 text-slate-400" />
-					{/if}
-				</div>
-				<span class="font-mono">{formatTime(currentTime)} / {formatTime(duration)}</span>
-			</div>
-		</div>
+	{#if sceneSound.sound}
+		<p class="font-mono text-xs text-slate-300">
+			{humanTimeInterval(sceneSound.sound.duration * 1000)}
+		</p>
 	{/if}
 </div>
 

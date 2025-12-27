@@ -9,6 +9,7 @@ export const sounds = sqliteTable('sounds', {
 	description: text('description'),
 	fileName: text('file_name', { length: 128 }).notNull(),
 	fileSize: integer('file_size').notNull(),
+	duration: integer('duration').notNull(),
 	mediaType: text('media_type', { length: 64 }).notNull(),
 	createdAt: text('created_at')
 		.notNull()

@@ -1,0 +1,1 @@
+ALTER TABLE `sounds` ADD `duration` integer DEFAULT 0 NOT NULL;
