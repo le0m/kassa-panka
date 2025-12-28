@@ -65,16 +65,16 @@
 	const genreColors = $derived(
 		{
 			Fantasy: {
-				border: 'border-violet-700/50',
-				bg: 'bg-violet-900/40'
+				border: 'border-pink-700/50',
+				bg: 'bg-pink-900/40'
 			},
 			'Sci-Fi': {
-				border: 'border-blue-700/50',
-				bg: 'bg-blue-900/40'
+				border: 'border-sky-700/50',
+				bg: 'bg-sky-900/40'
 			},
 			Modern: {
-				border: 'border-orange-700/50',
-				bg: 'bg-orange-900/40'
+				border: 'border-lime-700/50',
+				bg: 'bg-lime-900/40'
 			}
 		}[firstGenre ?? ''] ?? {
 			border: 'border-slate-700/50',
