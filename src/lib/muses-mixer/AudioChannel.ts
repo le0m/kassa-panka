@@ -17,6 +17,7 @@ export class AudioChannel {
 	stereoPannerNode: StereoPannerNode;
 	private mixer: AudioMixer;
 	private customNodes: AudioNode[] = [];
+	private resumeTracks: AudioTrack[] = [];
 
 	/** The current channel id provided from AudioMixer instance */
 	id: string = 'N/A';
@@ -195,6 +196,15 @@ export class AudioChannel {
 	}
 
 	/**
+	 * Search a track by an identifier.
+	 * @param id - The identifier to search for
+	 * @returns {AudioTrack | undefined} - The track if found
+	 */
+	findTrack(id: string): AudioTrack | undefined {
+		return this.tracks.find((track) => track.id === id);
+	}
+
+	/**
 	 * Add a new audio input from an audio-element, stream-source, media-source or create a new element by loading a file from a provided URL<string>
 	 * @param {MediaStreamAudioSourceNode|MediaElementAudioSourceNode|HTMLAudioElement|String|AudioTrack} source - An audio-element to create a new *AudioTrack* instance, an URL of the file to create that element automatically (Base64 supported) or the audio-node to connect directly into channel's *inputNode*
 	 */
@@ -288,6 +298,59 @@ export class AudioChannel {
 	/** Check if the current channel is muted */
 	get muted(): boolean {
 		return this.outputNode.gain.value > 0 ? false : true;
+	}
+
+	/**
+	 * Play the channel audio. Use stop() to start from the beginning or pause() to pause the audio.
+	 * @param {string?} id - The optional track ID to start from if not resuming
+	 */
+	async play(id?: string) {
+		// Resume if channel was paused
+		if (this.resumeTracks.length) {
+			return Promise.all(this.resumeTracks.splice(0).map((track) => track.play())).then(
+				() => void 0
+			);
+		}
+
+		// Start from specific track if it was requested
+		if (id) {
+			const track = this.tracks.find((track) => track.id === id);
+			if (track) {
+				return track.play();
+			}
+		}
+
+		// Start from first track
+		return this.tracks.at(0)?.play();
+	}
+
+	/** Check if any track is playing */
+	get playing(): boolean {
+		return this.tracks.some((track) => track.playing);
+	}
+
+	/** Check if all tracks are paused or ended */
+	get paused(): boolean {
+		return this.tracks.every((track) => track.paused || track.ended);
+	}
+
+	/** Pause the channel and resume it with play() method. */
+	pause() {
+		for (const track of this.tracks) {
+			if (!track.playing) {
+				continue;
+			}
+
+			track.pause();
+			this.resumeTracks.push(track);
+		}
+	}
+
+	/** Pause the channel and set time of all tracks to 0, playing audio from the start again with play() method. */
+	stop() {
+		for (const track of this.tracks) {
+			track.stop();
+		}
 	}
 
 	/** Decrease volume smoothly until it is silent */

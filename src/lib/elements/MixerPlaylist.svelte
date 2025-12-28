@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { humanTimeInterval } from '$lib';
-	import type { SceneSoundWithSoundFull } from '$lib/server/db';
+	import type { SceneSoundWithSoundFull, SoundFull } from '$lib/server/db';
 
 	/**
 	 * Horizontal playlist display for a specific channel
@@ -12,28 +12,44 @@
 		color: string;
 		/** Array of scene sounds to display */
 		sceneSounds?: SceneSoundWithSoundFull[];
+		/** List of scene sound currently playing */
+		activeSoundIds: string[];
+		/** Callback to handle click of sound card */
+		onsoundclick: (sceneSound: SceneSoundWithSoundFull) => void;
 	}
 
-	let { name, color, sceneSounds = [] }: Props = $props();
+	let { name, color, sceneSounds = [], activeSoundIds = [], onsoundclick }: Props = $props();
 
 	/** Complete Tailwind class strings based on color prop */
 	const colorClasses = $derived(
 		{
 			amber: {
 				border: 'border-amber-700',
-				bg: 'bg-amber-800/30'
+				bg: 'bg-amber-800/30',
+				active: 'bg-amber-500/50',
+				hover: 'hover:bg-amber-500/20',
+				activeHover: 'hover:bg-amber-500/40'
 			},
 			purple: {
 				border: 'border-purple-700',
-				bg: 'bg-purple-800/30'
+				bg: 'bg-purple-800/30',
+				active: 'bg-purple-500/50',
+				hover: 'hover:bg-purple-500/20',
+				activeHover: 'hover:bg-purple-500/40'
 			},
 			emerald: {
 				border: 'border-emerald-700',
-				bg: 'bg-emerald-800/30'
+				bg: 'bg-emerald-800/30',
+				active: 'bg-emerald-500/50',
+				hover: 'hover:bg-emerald-500/20',
+				activeHover: 'hover:bg-emerald-500/40'
 			}
 		}[color] ?? {
 			border: 'border-neutral-700',
-			bg: 'bg-neutral-800/30'
+			bg: 'bg-neutral-800/30',
+			active: 'bg-neutral-500/50',
+			hover: 'hover:bg-neutral-500/20',
+			activeHover: 'hover:bg-neutral-500/40'
 		}
 	);
 </script>
@@ -50,7 +66,17 @@
 			{#each sceneSounds as sceneSound (sceneSound.id)}
 				{@const sound = sceneSound.sound}
 				{#if sound}
-					<div class="h-[80px] w-[80px] rounded border p-2 {colorClasses.border} {colorClasses.bg}">
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div
+						class={[
+							'h-[80px] w-[80px] cursor-pointer rounded border p-2',
+							colorClasses.border,
+							activeSoundIds.includes(sceneSound.id) ? colorClasses.active : colorClasses.bg,
+							activeSoundIds.includes(sceneSound.id) ? colorClasses.activeHover : colorClasses.hover
+						]}
+						onclick={() => onsoundclick(sceneSound)}
+					>
 						<h4 class="text-xs font-medium text-ellipsis text-white">{sound.name}</h4>
 						<p class="font-mono text-xs text-slate-300">
 							{humanTimeInterval(sound.duration * 1000)}

@@ -2,7 +2,9 @@ import { AudioChannel } from './AudioChannel.ts';
 
 /** Creates a new audio instance compatible with the AudioChannel class. Anyways, you will able to control the final audio-source<element> (playing, pause, loop, etc.)*/
 export class AudioTrack {
-	/* The current HTMLAudioElement used to play and have control over the audio. */
+	/** An optional identifier. */
+	id: string = 'N/A';
+	/** The current HTMLAudioElement used to play and have control over the audio. */
 	audioElement: HTMLAudioElement;
 	sourceNode: MediaElementAudioSourceNode;
 
@@ -97,19 +99,24 @@ export class AudioTrack {
 		return this.audioElement.currentTime;
 	}
 
-	/** Play the current audio from the last time value. Use stop() to start from the beginning or pause() to resume the audio. */
+	/** Play the current audio from the last time value. Use stop() to start from the beginning or pause() to pause the audio. */
 	play() {
 		return this.audioElement.play();
 	}
 
 	/** Check if the current track is playing. */
 	get playing() {
-		return !this.audioElement.paused;
+		return !this.audioElement.paused && !this.audioElement.ended;
 	}
 
 	/** Check if the current track is paused. */
 	get paused() {
 		return this.audioElement.paused;
+	}
+
+	/** Check if the current track has finished playing. */
+	get ended() {
+		return this.audioElement.ended;
 	}
 
 	/** Pause the current audio and resume it with play() method. */
@@ -121,5 +128,15 @@ export class AudioTrack {
 	stop() {
 		this.audioElement.pause();
 		return (this.audioElement.currentTime = 0);
+	}
+
+	/** Add event listener to the inner HTML audio element. */
+	on(event: keyof HTMLMediaElementEventMap, listener: (ev: Event) => void) {
+		this.audioElement.addEventListener(event, listener);
+	}
+
+	/** Remove event listener from the inner HTML audio element. */
+	off(event: keyof HTMLMediaElementEventMap, listener: (ev: Event) => void) {
+		this.audioElement.removeEventListener(event, listener);
 	}
 }

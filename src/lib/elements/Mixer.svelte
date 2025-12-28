@@ -78,7 +78,20 @@
 		color="amber"
 		channel={channels['ambience']}
 		sceneSounds={ambienceSounds}
+		sequential={false}
 	/>
-	<MixerChannel name="Music" color="purple" channel={channels['music']} sceneSounds={musicSounds} />
-	<MixerChannel name="SFX" color="emerald" channel={channels['sfx']} sceneSounds={sfxSounds} />
+	<MixerChannel
+		name="Music"
+		color="purple"
+		channel={channels['music']}
+		sceneSounds={musicSounds}
+		sequential={true}
+	/>
+	<MixerChannel
+		name="SFX"
+		color="emerald"
+		channel={channels['sfx']}
+		sceneSounds={sfxSounds}
+		sequential={false}
+	/>
 </div>

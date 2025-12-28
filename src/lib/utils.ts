@@ -36,11 +36,12 @@ export const getAudioDuration = (blob: Blob, type: string): Promise<number> =>
 	});
 
 /**
+ * Create HTML audio element from URL.
  *
  * @param url Audio file URL
  * @returns {HTMLAudioElement}
  */
-export const playAudio = (url: string | URL): HTMLAudioElement => {
+export const createAudio = (url: string | URL): HTMLAudioElement => {
 	const audio = new Audio();
 	audio.addEventListener('error', (e) =>
 		console.error({ error: e.message ?? e.toString() }, 'Error reading audio file')

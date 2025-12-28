@@ -4,7 +4,7 @@
 	import { asset } from '$app/paths';
 	import type { PageData } from './$types';
 	import type { SceneWithSoundsFull, SoundFull } from '$lib/server/db';
-	import { playAudio } from '$lib';
+	import { createAudio } from '$lib';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 	import Scenes from '$lib/elements/Scenes.svelte';
 	import Mixer from '$lib/elements/Mixer.svelte';
@@ -109,7 +109,7 @@
 		currentAudioId = undefined;
 
 		if (wasPaused || sound.id !== wasAudio) {
-			currentAudio = playAudio(url);
+			currentAudio = createAudio(url);
 			currentAudioId = sound.id;
 		}
 
