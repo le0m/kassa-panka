@@ -2,43 +2,40 @@
 	import IconMusic from './icons/IconMusic.svelte';
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
-	import type { SceneSoundWithSoundFull } from '$lib/server/db';
+	import type { SceneSoundWithSoundFull, SoundFull } from '$lib/server/db';
 	import { humanTimeInterval, SoundCategory } from '$lib';
 
 	interface Props {
 		sceneSound: SceneSoundWithSoundFull;
 		ondelete?: (sceneSound: SceneSoundWithSoundFull) => Promise<void> | void;
-		draggable?: boolean;
 		ondragstart?: (event: DragEvent, sceneSound: SceneSoundWithSoundFull) => void;
 		ondragend?: () => void;
+		onplaysound?: (sound: SoundFull) => void;
+		draggable?: boolean;
 		isDragging?: boolean;
 		isSaving?: boolean;
+		active?: boolean;
 	}
 
 	let {
 		sceneSound,
 		ondelete,
-		draggable = false,
 		ondragstart,
 		ondragend,
+		onplaysound,
+		draggable = false,
 		isDragging = false,
-		isSaving = false
+		isSaving = false,
+		active = false
 	}: Props = $props();
 
 	let deleting = $state<boolean>(false);
-	let audioElement: HTMLAudioElement | undefined = $state();
-	let isPlaying = $state<boolean>(false);
 	let dragImageElement: HTMLDivElement;
 
 	/**
 	 * Gets the first category from the sound's categories array
 	 */
 	const firstCategory = $derived(sceneSound.sound?.categories?.[0]?.name);
-
-	/**
-	 * Gets the first genre from the sound's genres array
-	 */
-	const firstGenre = $derived(sceneSound.sound?.genres?.[0]?.name);
 
 	/**
 	 * Color scheme for card border and background based on category
@@ -49,21 +46,25 @@
 			[SoundCategory.Ambience]: {
 				border: 'border-amber-700',
 				bg: 'bg-amber-800/30',
+				active: 'bg-amber-500/20',
 				hover: 'hover:bg-amber-500/20'
 			},
 			[SoundCategory.Music]: {
 				border: 'border-purple-700',
 				bg: 'bg-purple-800/30',
+				active: 'bg-purple-500/20',
 				hover: 'hover:bg-purple-500/20'
 			},
 			[SoundCategory.SFX]: {
 				border: 'border-emerald-700',
 				bg: 'bg-emerald-800/30',
+				active: 'bg-emerald-500/20',
 				hover: 'hover:bg-emerald-500/20'
 			}
 		}[firstCategory ?? ''] ?? {
 			border: 'border-slate-700',
 			bg: 'bg-slate-800',
+			active: 'bg-indigo-500/50',
 			hover: 'hover:bg-indigo-500/50'
 		}
 	);
@@ -83,17 +84,9 @@
 	}
 
 	/**
-	 * Toggles play/pause state of the audio
+	 * Handle sound card click for playing sound.
 	 */
-	function togglePlayPause() {
-		if (!audioElement) return;
-
-		if (isPlaying) {
-			audioElement.pause();
-		} else {
-			audioElement.play();
-		}
-	}
+	const handleClick = () => sceneSound.sound && onplaysound?.(sceneSound.sound);
 
 	/**
 	 * Handles drag start event - sets the sceneSound data and custom drag image
@@ -123,15 +116,21 @@
 </script>
 
 <!-- Unified layout for all instances -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	role="button"
 	tabindex="0"
 	{draggable}
 	ondragstart={handleDragStart}
 	ondragend={handleDragEnd}
-	onclick={togglePlayPause}
-	onkeydown={(e) => (e.key === 'Enter' || e.key === ' ' ? togglePlayPause() : null)}
-	class="flex cursor-pointer flex-col gap-4 rounded-lg border p-4 shadow-md transition-all {categoryColors.border} {categoryColors.bg} {categoryColors.hover}"
+	onclick={handleClick}
+	class={[
+		'flex cursor-pointer flex-col gap-4 rounded-lg border p-4 shadow-md transition-all',
+		categoryColors.border,
+		active ? categoryColors.active : categoryColors.bg,
+		categoryColors.hover
+	]}
 	class:cursor-grab={draggable}
 	class:active:cursor-grabbing={draggable}
 	class:opacity-50={isDragging || isSaving}

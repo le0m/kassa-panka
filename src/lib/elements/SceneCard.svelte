@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { SoundCategory } from '$lib';
-	import type { SceneSoundWithSoundFull, SceneWithSoundsFull } from '$lib/server/db';
-	import { DragState } from '$lib/utils/drag-state.svelte';
+	import type { SceneSoundWithSoundFull, SceneWithSoundsFull, SoundFull } from '$lib/server/db';
+	import { DragState } from '$lib/drag-and-drop/drag-state.svelte';
 	import CategorySoundList from './CategorySoundList.svelte';
 	import IconEdit from './icons/IconEdit.svelte';
 	import IconSave from './icons/IconSave.svelte';
@@ -16,6 +16,7 @@
 		onclick: (scene: SceneWithSoundsFull) => void;
 		ondelete: (id: string, name: string) => void;
 		onedit: (scene: SceneWithSoundsFull) => void;
+		onplaysound?: (sound: SoundFull) => string | undefined;
 		updateSuccess?: boolean;
 		updateError?: boolean;
 	}
@@ -26,6 +27,7 @@
 		onclick,
 		ondelete,
 		onedit,
+		onplaysound,
 		updateSuccess = false,
 		updateError = false
 	}: Props = $props();
@@ -222,6 +224,7 @@
 			onremove={handleRemoveSound}
 			onaddsound={handleAddSound}
 			onreorder={handleReorderSounds}
+			{onplaysound}
 		/>
 
 		<CategorySoundList
@@ -233,6 +236,7 @@
 			onremove={handleRemoveSound}
 			onaddsound={handleAddSound}
 			onreorder={handleReorderSounds}
+			{onplaysound}
 		/>
 
 		<CategorySoundList
@@ -244,6 +248,7 @@
 			onremove={handleRemoveSound}
 			onaddsound={handleAddSound}
 			onreorder={handleReorderSounds}
+			{onplaysound}
 		/>
 	</div>
 </div>

@@ -2,14 +2,15 @@
 	import { invalidateAll } from '$app/navigation';
 	import SceneModal from '$lib/elements/SceneModal.svelte';
 	import SceneCard from '$lib/elements/SceneCard.svelte';
-	import type { SceneWithSoundsFull } from '$lib/server/db';
+	import type { SceneWithSoundsFull, SoundFull } from '$lib/server/db';
 
 	interface Props {
 		scenes: SceneWithSoundsFull[];
 		onsceneclick: (scene: SceneWithSoundsFull) => void;
+		onplaysound?: (sound: SoundFull) => string | undefined;
 	}
 
-	const { scenes, onsceneclick }: Props = $props();
+	const { scenes, onsceneclick, onplaysound }: Props = $props();
 
 	let isModalOpen = $state(false);
 	let editScene = $state<SceneWithSoundsFull | null>(null);
@@ -135,6 +136,7 @@
 					onclick={onsceneclick}
 					ondelete={handleDeleteScene}
 					onedit={handleEditScene}
+					{onplaysound}
 					updateSuccess={sceneSuccess === scene.id}
 					updateError={sceneError === scene.id}
 				/>

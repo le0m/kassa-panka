@@ -2,9 +2,9 @@
  * Convert milliseconds to a human-readable time interval string.
  *
  * @param ms milliseconds
- * @returns human time
+ * @returns {string} human time
  */
-export const humanTimeInterval = (ms: number) => {
+export const humanTimeInterval = (ms: number): string => {
 	const pad = (n: number) => `${n}`.padStart(2, '0');
 	const q = [(ms / 3.6e6) | 0, ((ms % 3.6e6) / 6e4) | 0, ((ms % 6e4) / 1000) | 0];
 	while (q.length > 2 && q[0] === 0) q.shift();
@@ -17,7 +17,7 @@ export const humanTimeInterval = (ms: number) => {
  *
  * @param buffer audio file buffer
  * @param type audio file media type
- * @returns the duration
+ * @returns {number} the duration
  */
 export const getAudioDuration = (blob: Blob, type: string): Promise<number> =>
 	new Promise((res, rej) => {
@@ -34,3 +34,19 @@ export const getAudioDuration = (blob: Blob, type: string): Promise<number> =>
 		});
 		audio.src = url;
 	});
+
+/**
+ *
+ * @param url Audio file URL
+ * @returns {HTMLAudioElement}
+ */
+export const playAudio = (url: string | URL): HTMLAudioElement => {
+	const audio = new Audio();
+	audio.addEventListener('error', (e) =>
+		console.error({ error: e.message ?? e.toString() }, 'Error reading audio file')
+	);
+	audio.addEventListener('canplay', () => audio?.play());
+	audio.src = url.toString();
+
+	return audio;
+};

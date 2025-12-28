@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import IconEdit from './icons/IconEdit.svelte';
 	import IconMusic from './icons/IconMusic.svelte';
 	import IconSpinner from './icons/IconSpinner.svelte';
@@ -11,10 +10,12 @@
 		sound: SoundFull;
 		onedit?: (sound: SoundFull) => void;
 		ondelete?: (soundId: string, soundName: string) => Promise<void> | void;
+		onplaysound?: (sound: SoundFull) => void;
 		draggable?: boolean;
+		active?: boolean;
 	}
 
-	let { sound, onedit, ondelete, draggable = true }: Props = $props();
+	let { sound, onplaysound, onedit, ondelete, draggable = true, active = false }: Props = $props();
 
 	/**
 	 * Gets the first category from the sound's categories array
@@ -35,21 +36,25 @@
 			[SoundCategory.Ambience]: {
 				border: 'border-amber-700',
 				bg: 'bg-amber-800/30',
+				active: 'bg-amber-500/20',
 				hover: 'hover:bg-amber-500/20'
 			},
 			[SoundCategory.Music]: {
 				border: 'border-purple-700',
 				bg: 'bg-purple-800/30',
+				active: 'bg-purple-500/20',
 				hover: 'hover:bg-purple-500/20'
 			},
 			[SoundCategory.SFX]: {
 				border: 'border-emerald-700',
 				bg: 'bg-emerald-800/30',
+				active: 'bg-emerald-500/20',
 				hover: 'hover:bg-emerald-500/20'
 			}
 		}[firstCategory ?? ''] ?? {
 			border: 'border-slate-700',
 			bg: 'bg-slate-800',
+			active: 'bg-indigo-500/20',
 			hover: 'hover:bg-indigo-500/50'
 		}
 	);
@@ -129,16 +134,29 @@
 	function handleDragEnd() {
 		isDragging = false;
 	}
+
+	/**
+	 * Handle sound card click for playing sound.
+	 */
+	const handleClick = () => onplaysound?.(sound);
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	bind:this={cardElement}
 	role="button"
 	tabindex="0"
 	{draggable}
+	onclick={handleClick}
 	ondragstart={handleDragStart}
 	ondragend={handleDragEnd}
-	class="m-4 flex flex-col gap-2 rounded-lg border p-4 shadow-md transition-all {categoryColors.border} {categoryColors.bg} {categoryColors.hover}"
+	class={[
+		'm-4 flex flex-col gap-2 rounded-lg border p-4 shadow-md transition-all',
+		categoryColors.border,
+		active ? categoryColors.active : categoryColors.bg,
+		categoryColors.hover
+	]}
 	class:cursor-grab={draggable}
 	class:active:cursor-grabbing={draggable}
 	class:opacity-50={isDragging}

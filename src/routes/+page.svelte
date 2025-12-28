@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { asset } from '$app/paths';
 	import type { PageData } from './$types';
+	import type { SceneWithSoundsFull, SoundFull } from '$lib/server/db';
+	import { playAudio } from '$lib';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 	import Scenes from '$lib/elements/Scenes.svelte';
 	import Mixer from '$lib/elements/Mixer.svelte';
-	import type { SceneWithSoundsFull } from '$lib/server/db';
 
 	let { data }: { data: PageData } = $props();
 
 	let admin = $derived(data.admin);
 	setContext('admin', () => admin);
 	let activeScene = $state<SceneWithSoundsFull | undefined>(undefined);
+	let currentAudio = $state<HTMLAudioElement | undefined>();
+	let currentAudioId = $state<string | undefined>();
 
 	/**
 	 * Handles search when triggered from Sidebar
@@ -91,6 +95,26 @@
 
 		importing = false;
 	};
+
+	/**
+	 * Handle playing sound from sound card on click.
+	 * Pause if the same sound is clicked again while playing.
+	 * @param sound - The sound to play
+	 */
+	const handlePlaySound = (sound: SoundFull) => {
+		const url = asset(`/sounds/${sound.fileName}`);
+		const wasPaused = currentAudio?.paused ?? true;
+		const wasAudio = currentAudioId;
+		currentAudio?.pause();
+		currentAudioId = undefined;
+
+		if (wasPaused || sound.id !== wasAudio) {
+			currentAudio = playAudio(url);
+			currentAudioId = sound.id;
+		}
+
+		return currentAudioId;
+	};
 </script>
 
 <div class="grid h-screen grid-cols-[minmax(200px,25%)_1fr] grid-rows-[1fr_auto]">
@@ -98,6 +122,7 @@
 	<div class="overflow-hidden">
 		<Sidebar
 			onfilter={handleFilter}
+			onplaysound={handlePlaySound}
 			sounds={data.sounds}
 			tags={data.tags}
 			categories={data.categories}
@@ -123,7 +148,7 @@
 		</div>
 
 		<section class="min-h-0 flex-1 overflow-hidden">
-			<Scenes scenes={data.scenes} onsceneclick={handleSceneClick} />
+			<Scenes scenes={data.scenes} onsceneclick={handleSceneClick} onplaysound={handlePlaySound} />
 		</section>
 	</main>
 
