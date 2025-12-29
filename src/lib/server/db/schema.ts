@@ -129,7 +129,6 @@ export type SoundsTagsTable = typeof soundsTags;
 
 export type NewSoundEntity = typeof sounds.$inferInsert;
 export type SoundEntity = typeof sounds.$inferSelect;
-export type SoundWithTags = SoundEntity & { tags: TagEntity[] };
 export type SoundFull = SoundEntity & {
 	tags: TagEntity[];
 	categories: CategoryEntity[];
@@ -138,12 +137,11 @@ export type SoundFull = SoundEntity & {
 
 export type NewSceneEntity = typeof scenes.$inferInsert;
 export type SceneEntity = typeof scenes.$inferSelect;
-export type SceneWithSounds = SceneEntity & { sounds: SoundFull[] };
-export type SceneWithSoundsFull = SceneEntity & { sceneSounds: SceneSoundWithSoundFull[] };
+export type SceneFull = SceneEntity & { sceneSounds: SceneSoundFull[] };
 
 export type NewSceneSoundEntity = typeof scenesSounds.$inferInsert;
 export type SceneSoundEntity = typeof scenesSounds.$inferSelect;
-export type SceneSoundWithSoundFull = SceneSoundEntity & { sound: SoundFull | null };
+export type SceneSoundFull = SceneSoundEntity & { sound: SoundFull | null };
 
 export type NewTagEntity = typeof tags.$inferInsert;
 export type TagEntity = typeof tags.$inferSelect;

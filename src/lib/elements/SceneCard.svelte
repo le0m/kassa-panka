@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { SoundCategory } from '$lib';
-	import type { SceneSoundWithSoundFull, SceneWithSoundsFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull, SceneFull, SoundFull } from '$lib/server/db';
 	import { DragState } from '$lib/drag-and-drop/drag-state.svelte';
 	import CategorySoundList from './CategorySoundList.svelte';
 	import IconEdit from './icons/IconEdit.svelte';
@@ -11,11 +11,11 @@
 	import IconX from './icons/IconX.svelte';
 
 	interface Props {
-		scene: SceneWithSoundsFull;
+		scene: SceneFull;
 		deleting: string | null;
-		onclick: (scene: SceneWithSoundsFull) => void;
+		onclick: (scene: SceneFull) => void;
 		ondelete: (id: string, name: string) => void;
-		onedit: (scene: SceneWithSoundsFull) => void;
+		onedit: (scene: SceneFull) => void;
 		onplaysound?: (sound: SoundFull) => string | undefined;
 		updateSuccess?: boolean;
 		updateError?: boolean;
@@ -128,7 +128,7 @@
 	/**
 	 * Removes a sound from the scene
 	 */
-	async function handleRemoveSound(sceneSound: SceneSoundWithSoundFull) {
+	async function handleRemoveSound(sceneSound: SceneSoundFull) {
 		const confirmed = confirm(
 			`Remove "${sceneSound.sound!.name}" from "${scene.name}"?\n\nThis will not delete the sound, only remove it from this scene.`
 		);

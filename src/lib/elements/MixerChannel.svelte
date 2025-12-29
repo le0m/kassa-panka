@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { asset } from '$app/paths';
 	import { AudioTrack, type AudioChannel } from '$lib/muses-mixer';
-	import type { SceneSoundWithSoundFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 	import IconPause from './icons/IconPause.svelte';
 	import IconPlay from './icons/IconPlay.svelte';
 	import MixerPlaylist from './MixerPlaylist.svelte';
@@ -18,7 +18,7 @@
 		/** The channel connected to the mixer */
 		channel?: AudioChannel;
 		/** Array of scene sounds to display */
-		sceneSounds?: SceneSoundWithSoundFull[];
+		sceneSounds?: SceneSoundFull[];
 		/** Whether the sounds in this channel should be played sequentially (one at a time) or not (multiple concurrent sounds) */
 		sequential: boolean;
 	}
@@ -41,7 +41,7 @@
 	 * Create new track from sceneSound, attaching listeners for playback events.
 	 * @param sceneSound
 	 */
-	const createTrack = (sceneSound: SceneSoundWithSoundFull) => {
+	const createTrack = (sceneSound: SceneSoundFull) => {
 		if (!channel || !sceneSound.sound) {
 			return undefined;
 		}
@@ -87,7 +87,7 @@
 			);
 			let nextSceneSound = sortedSceneSounds.find((sceSo) => sceSo.position > sceneSound.position);
 			if (nextSceneSound === undefined) {
-				nextSceneSound = sortedSceneSounds.at(0) as SceneSoundWithSoundFull;
+				nextSceneSound = sortedSceneSounds.at(0) as SceneSoundFull;
 			}
 
 			handleSoundClick(nextSceneSound);
@@ -101,7 +101,7 @@
 	 *
 	 * @param sceneSound - The clicked sceneSound.
 	 */
-	const handleSoundClick = async (sceneSound: SceneSoundWithSoundFull) => {
+	const handleSoundClick = async (sceneSound: SceneSoundFull) => {
 		playing = false;
 
 		if (!channel || !sceneSound.sound) {

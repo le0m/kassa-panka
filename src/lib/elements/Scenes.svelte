@@ -2,18 +2,18 @@
 	import { invalidateAll } from '$app/navigation';
 	import SceneModal from '$lib/elements/SceneModal.svelte';
 	import SceneCard from '$lib/elements/SceneCard.svelte';
-	import type { SceneWithSoundsFull, SoundFull } from '$lib/server/db';
+	import type { SceneFull, SoundFull } from '$lib/server/db';
 
 	interface Props {
-		scenes: SceneWithSoundsFull[];
-		onsceneclick: (scene: SceneWithSoundsFull) => void;
+		scenes: SceneFull[];
+		onsceneclick: (scene: SceneFull) => void;
 		onplaysound?: (sound: SoundFull) => string | undefined;
 	}
 
 	const { scenes, onsceneclick, onplaysound }: Props = $props();
 
 	let isModalOpen = $state(false);
-	let editScene = $state<SceneWithSoundsFull | null>(null);
+	let editScene = $state<SceneFull | null>(null);
 	let deletingScene = $state<string | null>(null);
 	let sceneSuccess = $state<string | null>(null); // ID of scene that was successfully saved
 	let sceneError = $state<string | null>(null); // ID of scene that had an error
@@ -22,7 +22,7 @@
 	 * Handles editing a scene
 	 * @param scene - The scene data to edit
 	 */
-	function handleEditScene(scene: SceneWithSoundsFull) {
+	function handleEditScene(scene: SceneFull) {
 		editScene = scene;
 		isModalOpen = true;
 	}

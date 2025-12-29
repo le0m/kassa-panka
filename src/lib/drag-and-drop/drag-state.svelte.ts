@@ -1,11 +1,11 @@
-import type { SceneSoundWithSoundFull, SoundFull } from '$lib/server/db';
+import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 
 /**
  * Manages drag-and-drop state for scene sounds
  */
 export class DragState {
 	/** The scene sound currently being dragged (for reordering) */
-	draggingSceneSound = $state<SceneSoundWithSoundFull | null>(null);
+	draggingSceneSound = $state<SceneSoundFull | null>(null);
 
 	/** New sound being dragged from sidebar */
 	draggingNewSound = $state<SoundFull | null>(null);
@@ -14,7 +14,7 @@ export class DragState {
 	dragOverIndex = $state<number | null>(null);
 
 	/** Optimistic order shown during/after drag operations */
-	optimisticOrder = $state<SceneSoundWithSoundFull[] | null>(null);
+	optimisticOrder = $state<SceneSoundFull[] | null>(null);
 
 	/** ID of sound currently being saved via API */
 	savingSound = $state<string | null>(null);

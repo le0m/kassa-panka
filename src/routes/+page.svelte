@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { asset } from '$app/paths';
 	import type { PageData } from './$types';
-	import type { SceneWithSoundsFull, SoundFull } from '$lib/server/db';
+	import type { SceneFull, SoundFull } from '$lib/server/db';
 	import { createAudio } from '$lib';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 	import Scenes from '$lib/elements/Scenes.svelte';
@@ -13,7 +13,7 @@
 
 	let admin = $derived(data.admin);
 	setContext('admin', () => admin);
-	let activeScene = $state<SceneWithSoundsFull | undefined>(undefined);
+	let activeScene = $state<SceneFull | undefined>(undefined);
 	let currentAudio = $state<HTMLAudioElement | undefined>();
 	let currentAudioId = $state<string | undefined>();
 
@@ -57,7 +57,7 @@
 		});
 	}
 
-	const handleSceneClick = (scene: SceneWithSoundsFull) => (activeScene = scene);
+	const handleSceneClick = (scene: SceneFull) => (activeScene = scene);
 
 	let importing = $state(false);
 	let perc = $state(0);

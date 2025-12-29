@@ -1,5 +1,5 @@
 import { SoundCategory } from '$lib';
-import type { SceneSoundWithSoundFull, SoundFull } from '$lib/server/db';
+import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 
 /**
  * Gets the category of a sound
@@ -11,9 +11,7 @@ export function getSoundCategory(sound: SoundFull): SoundCategory | undefined {
 /**
  * Gets the category of a scene sound
  */
-export function getSceneSoundCategory(
-	sceneSound: SceneSoundWithSoundFull
-): SoundCategory | undefined {
+export function getSceneSoundCategory(sceneSound: SceneSoundFull): SoundCategory | undefined {
 	return sceneSound.sound?.categories[0]?.name as SoundCategory | undefined;
 }
 
@@ -54,7 +52,7 @@ export function createOptimisticSceneSound(
 	soundId: string,
 	sound: SoundFull,
 	position: number
-): SceneSoundWithSoundFull {
+): SceneSoundFull {
 	return {
 		id: `optimistic-${Date.now()}`,
 		sceneId,
@@ -77,7 +75,7 @@ export function reorderArray<T>(array: T[], fromIndex: number, toIndex: number):
 /**
  * Updates positions for an array of scene sounds
  */
-export function updatePositions(sounds: SceneSoundWithSoundFull[]): SceneSoundWithSoundFull[] {
+export function updatePositions(sounds: SceneSoundFull[]): SceneSoundFull[] {
 	return sounds.map((sound, index) => ({
 		...sound,
 		position: index
@@ -88,15 +86,15 @@ export function updatePositions(sounds: SceneSoundWithSoundFull[]): SceneSoundWi
  * Creates display order for sounds considering drag state
  */
 export function createDisplayOrder(
-	categorySounds: SceneSoundWithSoundFull[],
+	categorySounds: SceneSoundFull[],
 	category: SoundCategory,
 	options: {
-		optimisticOrder: SceneSoundWithSoundFull[] | null;
-		draggingSceneSound: SceneSoundWithSoundFull | null;
+		optimisticOrder: SceneSoundFull[] | null;
+		draggingSceneSound: SceneSoundFull | null;
 		draggingNewSound: SoundFull | null;
 		dragOverIndex: number | null;
 	}
-): SceneSoundWithSoundFull[] {
+): SceneSoundFull[] {
 	const { optimisticOrder, draggingSceneSound, draggingNewSound, dragOverIndex } = options;
 
 	// Use optimistic order if available (after drop, before API response)
@@ -124,7 +122,7 @@ export function createDisplayOrder(
 		const draggedCategory = getSoundCategory(draggingNewSound);
 		if (matchesCategory(draggedCategory, category)) {
 			const reordered = [...sorted];
-			const placeholder: SceneSoundWithSoundFull = {
+			const placeholder: SceneSoundFull = {
 				id: 'placeholder',
 				sceneId: sorted[0]?.sceneId ?? '',
 				soundId: draggingNewSound.id,

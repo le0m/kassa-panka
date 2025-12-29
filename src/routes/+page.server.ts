@@ -2,7 +2,7 @@ import {
 	db,
 	type CategoryEntity,
 	type GenreEntity,
-	type SceneWithSoundsFull,
+	type SceneFull,
 	type SoundFull,
 	type TagEntity
 } from '$lib/server/db';
@@ -46,7 +46,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	});
 
 	// Fetch all non-deleted scenes
-	const allScenesFull: SceneWithSoundsFull[] = await db.query.scenes.findMany({
+	const allScenesFull: SceneFull[] = await db.query.scenes.findMany({
 		where: { deletedAt: { isNull: true } },
 		with: {
 			sceneSounds: {

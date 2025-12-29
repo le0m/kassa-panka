@@ -2,13 +2,13 @@
 	import IconMusic from './icons/IconMusic.svelte';
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
-	import type { SceneSoundWithSoundFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 	import { humanTimeInterval, SoundCategory } from '$lib';
 
 	interface Props {
-		sceneSound: SceneSoundWithSoundFull;
-		ondelete?: (sceneSound: SceneSoundWithSoundFull) => Promise<void> | void;
-		ondragstart?: (event: DragEvent, sceneSound: SceneSoundWithSoundFull) => void;
+		sceneSound: SceneSoundFull;
+		ondelete?: (sceneSound: SceneSoundFull) => Promise<void> | void;
+		ondragstart?: (event: DragEvent, sceneSound: SceneSoundFull) => void;
 		ondragend?: () => void;
 		onplaysound?: (sound: SoundFull) => void;
 		draggable?: boolean;

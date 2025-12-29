@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { AudioChannel, AudioMixer } from '$lib/muses-mixer';
-	import { type SceneWithSoundsFull } from '$lib/server/db';
+	import { type SceneFull } from '$lib/server/db';
 	import { SoundCategory } from '$lib';
 	import MixerChannel from './MixerChannel.svelte';
 
 	interface Props {
-		scene?: SceneWithSoundsFull;
+		scene?: SceneFull;
 	}
 
 	let { scene }: Props = $props();
 
 	let mixer: AudioMixer;
 	let channels: Record<SoundCategory, AudioChannel> = $state({});
-	let activeScene = $state<SceneWithSoundsFull | undefined>(undefined);
+	let activeScene = $state<SceneFull | undefined>(undefined);
 
 	let ambienceSounds = $derived(
 		activeScene?.sceneSounds.filter((sceSo) =>

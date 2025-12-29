@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { SoundCategory } from '$lib';
-	import type { SceneSoundWithSoundFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 	import {
 		createDisplayOrder,
 		createOptimisticSceneSound,
@@ -21,11 +21,11 @@
 		/** Display label for the category */
 		label: string;
 		/** Sounds in this category */
-		sounds: SceneSoundWithSoundFull[];
+		sounds: SceneSoundFull[];
 		/** ID of the scene sound currently being saved */
 		savingId: string | null;
 		/** Callback when a sound should be removed */
-		onremove: (sceneSound: SceneSoundWithSoundFull) => void;
+		onremove: (sceneSound: SceneSoundFull) => void;
 		/** Callback when a sound should be added at a position */
 		onaddsound: (soundId: string, position: number) => Promise<void>;
 		/** Callback when sounds should be reordered */
@@ -47,10 +47,10 @@
 	}: Props = $props();
 
 	// Local drag state
-	let draggingSceneSound = $state<SceneSoundWithSoundFull | null>(null);
+	let draggingSceneSound = $state<SceneSoundFull | null>(null);
 	let draggingNewSound = $state<SoundFull | null>(null);
 	let dragOverIndex = $state<number | null>(null);
-	let optimisticOrder = $state<SceneSoundWithSoundFull[] | null>(null);
+	let optimisticOrder = $state<SceneSoundFull[] | null>(null);
 	let activeSoundId = $state<string | undefined>(undefined);
 
 	// Computed display order considering drag state
@@ -81,7 +81,7 @@
 	/**
 	 * Handles drag start
 	 */
-	function handleDragStart(event: DragEvent, sceneSound: SceneSoundWithSoundFull) {
+	function handleDragStart(event: DragEvent, sceneSound: SceneSoundFull) {
 		draggingSceneSound = sceneSound;
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';

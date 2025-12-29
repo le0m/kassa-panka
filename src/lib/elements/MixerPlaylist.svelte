@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { humanTimeInterval } from '$lib';
-	import type { SceneSoundWithSoundFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 
 	/**
 	 * Horizontal playlist display for a specific channel
@@ -11,11 +11,11 @@
 		/** Tailwind color class for the border (e.g., 'amber', 'purple', 'emerald') */
 		color: string;
 		/** Array of scene sounds to display */
-		sceneSounds?: SceneSoundWithSoundFull[];
+		sceneSounds?: SceneSoundFull[];
 		/** List of scene sound currently playing */
 		activeSoundIds: string[];
 		/** Callback to handle click of sound card */
-		onsoundclick: (sceneSound: SceneSoundWithSoundFull) => void;
+		onsoundclick: (sceneSound: SceneSoundFull) => void;
 	}
 
 	let { name, color, sceneSounds = [], activeSoundIds = [], onsoundclick }: Props = $props();
