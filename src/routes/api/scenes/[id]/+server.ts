@@ -3,6 +3,7 @@ import { scenes } from '$lib/server/db';
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { logger } from '$lib/logger';
 
 /**
  * PATCH handler to update an existing scene
@@ -33,7 +34,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 		return json({ scene: updatedScene });
 	} catch (error) {
-		console.error('Error updating scene:', error);
+		logger.error({ error }, 'Error updating scene');
 		return json({ error: 'Failed to update scene' }, { status: 500 });
 	}
 };
@@ -59,7 +60,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
 
 		return json({ success: true });
 	} catch (error) {
-		console.error('Error deleting scene:', error);
+		logger.error({ error }, 'Error deleting scene');
 		return json({ error: 'Failed to delete scene' }, { status: 500 });
 	}
 };

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { logger } from '$lib/logger';
 	import type { SceneFull } from '$lib/server/db';
 
 	interface Props {
@@ -95,7 +96,7 @@
 			onClose();
 		} catch (error) {
 			submitError = 'Network error occurred';
-			console.error('Submit error:', error);
+			logger.error({ error }, 'Submit error');
 			if (onError && editScene) {
 				onError(editScene.id);
 			}

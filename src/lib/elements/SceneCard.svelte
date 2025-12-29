@@ -9,6 +9,7 @@
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
 	import IconX from './icons/IconX.svelte';
+	import { logger } from '$lib/logger';
 
 	interface Props {
 		scene: SceneFull;
@@ -87,7 +88,7 @@
 			dragState.showSuccess();
 			await invalidateAll();
 		} catch (error) {
-			console.error('Error linking sound to scene:', error);
+			logger.error({ error }, 'Error linking sound to scene');
 			dragState.showError();
 			throw error;
 		}
@@ -117,7 +118,7 @@
 			dragState.showSuccess();
 			await invalidateAll();
 		} catch (error) {
-			console.error('Error reordering sounds:', error);
+			logger.error({ error }, 'Error reordering sounds');
 			dragState.showError();
 			throw error;
 		}
@@ -145,14 +146,17 @@
 
 			if (!response.ok) {
 				dragState.showError();
-				console.error('Failed to remove sound:', result.error);
+				logger.error(
+					{ message: result.error, status: response.statusText, code: response.status },
+					'Failed to remove sound'
+				);
 				return;
 			}
 
 			dragState.showSuccess();
 			await invalidateAll();
 		} catch (error) {
-			console.error('Error removing sound from scene:', error);
+			logger.error({ error }, 'Error removing sound from scene');
 			dragState.showError();
 		} finally {
 			dragState.removingSound = null;

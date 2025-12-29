@@ -1,4 +1,5 @@
 import { asset } from '$app/paths';
+import { logger } from './logger';
 import type { SoundEntity } from './server/db';
 import { createAudio } from './utils';
 
@@ -25,17 +26,17 @@ export const playSound = (sound: SoundEntity): Promise<boolean> =>
 		}
 
 		if (currentAudio && !currentAudio.paused && !currentAudio.ended) {
-			console.log(`Pausing previous sound to play "${sound.name}"`);
+			logger.debug(`Pausing previous sound to play "${sound.name}"`);
 			currentAudio.pause();
 		} else {
-			console.log(`Playing sound "${sound.name}"`);
+			logger.debug(`Playing sound "${sound.name}"`);
 		}
 
 		currentAudio = createAudio(asset(`/sounds/${sound.fileName}`));
 		currentAudio.dataset.sound = sound.id;
 		for (const event of ['pause', 'ended', 'error', 'abort']) {
 			currentAudio.addEventListener(event, () => {
-				console.log(`Event "${event}" for sound "${sound.name}"`);
+				logger.debug(`Event "${event}" for sound "${sound.name}"`);
 				res(false);
 			});
 		}

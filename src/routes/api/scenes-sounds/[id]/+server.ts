@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { scenesSounds } from '$lib/server/db';
 import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { logger } from '$lib/logger';
 
 /**
  * Update a scene-sound relation (e.g., loop property)
@@ -36,7 +37,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 		return json({ success: true, sceneSound: result[0] });
 	} catch (error) {
-		console.error('Error updating scene-sound:', error);
+		logger.error({ error }, 'Error updating scene-sound');
 		return json({ error: 'Failed to update scene-sound' }, { status: 500 });
 	}
 };

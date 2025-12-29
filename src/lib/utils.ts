@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 /**
  * Convert milliseconds to a human-readable time interval string.
  *
@@ -24,7 +26,7 @@ export const getAudioDuration = (blob: Blob, type: string): Promise<number> =>
 		const url = window.URL.createObjectURL(blob);
 		const audio = new Audio();
 		audio.addEventListener('error', (event) => {
-			console.error({ error: event.error }, 'Error loading audio file');
+			logger.error({ error: event.error }, 'Error loading audio file');
 			rej(event.error);
 		});
 		audio.addEventListener('loadedmetadata', () => {
@@ -44,7 +46,7 @@ export const getAudioDuration = (blob: Blob, type: string): Promise<number> =>
 export const createAudio = (url: string | URL): HTMLAudioElement => {
 	const audio = new Audio();
 	audio.addEventListener('error', (e) =>
-		console.error({ error: e.message ?? e.toString() }, 'Error reading audio file')
+		logger.error({ error: e.message ?? e.toString() }, 'Error reading audio file')
 	);
 	audio.addEventListener('canplay', () => audio?.play());
 	audio.src = url.toString();

@@ -6,6 +6,7 @@
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 	import Scenes from '$lib/elements/Scenes.svelte';
 	import Mixer from '$lib/elements/Mixer.svelte';
+	import { logger } from '$lib/logger';
 
 	let { data }: { data: PageData } = $props();
 
@@ -84,8 +85,8 @@
 			try {
 				const progress = JSON.parse(message) as { count: number; total: number };
 				perc = (progress.count * 100) / progress.total;
-			} catch (e) {
-				console.error('Error receiving import update', e);
+			} catch (error) {
+				logger.error({ error }, 'Error receiving import update');
 			}
 		}
 

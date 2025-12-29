@@ -3,6 +3,7 @@
 	import { type SceneFull } from '$lib/server/db';
 	import { SoundCategory } from '$lib';
 	import MixerChannel from './MixerChannel.svelte';
+	import { logger } from '$lib/logger';
 
 	interface Props {
 		scene?: SceneFull;
@@ -35,7 +36,7 @@
 			return;
 		}
 
-		console.log('Active scene changed, creating new mixer');
+		logger.debug('Active scene changed, creating new mixer');
 		activeScene = scene;
 		if (mixer) {
 			mixer.close();
@@ -50,7 +51,7 @@
 			return;
 		}
 
-		console.log('Initializing mixer');
+		logger.debug('Initializing mixer');
 		createMixer();
 	};
 

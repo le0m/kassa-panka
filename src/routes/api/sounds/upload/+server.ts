@@ -6,6 +6,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { eq } from 'drizzle-orm';
 import { getAudioDuration } from '$lib';
+import { logger } from '$lib/logger';
 
 /**
  * POST endpoint to upload a new sound file
@@ -116,7 +117,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					}
 				}
 			} catch (error) {
-				console.error('Error processing tags:', error);
+				logger.error({ error }, 'Error processing tags');
 				// Continue without tags rather than failing the entire upload
 			}
 		}
@@ -129,7 +130,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					categoryId
 				});
 			} catch (error) {
-				console.error('Error associating category:', error);
+				logger.error({ error }, 'Error associating category');
 				// Continue without category rather than failing the entire upload
 			}
 		}
@@ -142,14 +143,14 @@ export const POST: RequestHandler = async ({ request }) => {
 					genreId
 				});
 			} catch (error) {
-				console.error('Error associating genre:', error);
+				logger.error({ error }, 'Error associating genre');
 				// Continue without genre rather than failing the entire upload
 			}
 		}
 
 		return json({ success: true, sound: newSound }, { status: 201 });
 	} catch (error) {
-		console.error('Error uploading sound:', error);
+		logger.error({ error }, 'Error uploading sound');
 		return json({ error: 'Failed to upload sound' }, { status: 500 });
 	}
 };

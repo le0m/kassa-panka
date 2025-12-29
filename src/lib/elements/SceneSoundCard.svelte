@@ -6,6 +6,7 @@
 	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 	import { humanTimeInterval, SoundCategory } from '$lib';
 	import { playSound } from '$lib/play-sound.svelte';
+	import { logger } from '$lib/logger';
 
 	interface Props {
 		sceneSound: SceneSoundFull;
@@ -146,7 +147,7 @@
 			// Update the local state
 			sceneSound.loop = loop = data.sceneSound.loop;
 		} catch (error) {
-			console.error('Error toggling loop:', error);
+			logger.error({ error }, 'Error toggling loop');
 		}
 	}
 </script>

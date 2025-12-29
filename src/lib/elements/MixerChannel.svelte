@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { asset } from '$app/paths';
+	import { logger } from '$lib/logger';
 	import { AudioTrack, type AudioChannel } from '$lib/muses-mixer';
 	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 	import IconPause from './icons/IconPause.svelte';
@@ -68,7 +69,7 @@
 		track.on('ended', () => {
 			// Remove from active sounds if channel is not sequential
 			if (!sequential && !track.loop) {
-				console.log(`Ended sound "${sceneSound.sound!.name}" in channel "${channel.id}"`);
+				logger.debug(`Ended sound "${sceneSound.sound!.name}" in channel "${channel.id}"`);
 				let idx = activeSoundIds.findIndex((id) => id === track!.id);
 				if (idx !== -1) {
 					activeSoundIds.splice(idx, 1);
@@ -82,7 +83,7 @@
 				return;
 			}
 
-			console.log(
+			logger.debug(
 				`Playing next sound after "${sceneSound.sound!.name}" in channel "${channel.id}"`
 			);
 			let nextSceneSound = sortedSceneSounds.find((sceSo) => sceSo.position > sceneSound.position);
@@ -110,11 +111,10 @@
 
 		let track = channel.findTrack(sceneSound.id);
 		if (!track) {
-			console.log(`Adding sound "${sceneSound.sound.name}" to channel "${channel.id}"`);
+			logger.debug(`Adding sound "${sceneSound.sound.name}" to channel "${channel.id}"`);
 			track = createTrack(sceneSound);
 			if (track === undefined) {
-				console.warn(
-					{ channel: !!channel, sound: sceneSound.sound },
+				logger.warn(
 					`Can't create track for scene sound "${sceneSound.id}" in channel "${channel.id}"`
 				);
 
@@ -123,14 +123,14 @@
 		}
 
 		if (!track.playing) {
-			console.log(`Resuming sound "${sceneSound.sound.name}" in channel "${channel.id}"`);
+			logger.debug(`Resuming sound "${sceneSound.sound.name}" in channel "${channel.id}"`);
 			playing = true;
 			await track.play();
 
 			return;
 		}
 
-		console.log(`Pausing sound "${sceneSound.sound.name}" in channel "${channel.id}"`);
+		logger.debug(`Pausing sound "${sceneSound.sound.name}" in channel "${channel.id}"`);
 		track.pause();
 		playing = channel.playing;
 	};
@@ -147,7 +147,7 @@
 
 		// Pause channel if it was playing
 		if (channel.playing) {
-			console.log(`Pausing channel "${channel.id}"`);
+			logger.debug(`Pausing channel "${channel.id}"`);
 			channel.pause();
 
 			return Promise.resolve(void 0);
@@ -155,7 +155,7 @@
 
 		// Resume channel if it was paused
 		if (channel.tracks.some((track) => track.paused)) {
-			console.log(`Resuming channel "${channel.id}"`);
+			logger.debug(`Resuming channel "${channel.id}"`);
 			playing = true;
 			channel.play();
 
@@ -163,7 +163,7 @@
 		}
 
 		if (!sortedSceneSounds.length) {
-			console.log(`No sounds to play in channel "${channel.id}"`);
+			logger.debug(`No sounds to play in channel "${channel.id}"`);
 
 			return Promise.resolve(void 0);
 		}
@@ -172,15 +172,14 @@
 		const sceneSound = sortedSceneSounds[0];
 		const track = createTrack(sceneSound);
 		if (track === undefined) {
-			console.warn(
-				{ channel: !!channel, sound: sceneSound.sound },
+			logger.warn(
 				`Can't create track for scene sound "${sceneSound.id}" in channel "${channel.id}"`
 			);
 
 			return Promise.resolve(void 0);
 		}
 
-		console.log(`Playing channel "${channel.id}"`);
+		logger.debug(`Playing channel "${channel.id}"`);
 		playing = true;
 
 		return track.play();

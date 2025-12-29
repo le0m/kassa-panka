@@ -29,6 +29,7 @@
 
 import { AudioTrack } from './AudioTrack.ts';
 import { AudioMixer } from './AudioMixer.ts';
+import { logger } from '$lib/logger';
 
 /**
  * The audio-channel class used to manage AudioMixer's channels.
@@ -165,11 +166,11 @@ export class AudioChannel {
 				} // connect first node [v] ;
 				this.outputNode.connect(this.customNodes[0]);
 			}
-		} catch (ex) {
-			console.error('CHANNEL_RECONNECT:NODES_eRROR ~>', ex);
+		} catch (error) {
+			logger.error({ error }, 'CHANNEL_RECONNECT:NODES_eRROR ~>');
 			this.outputNode.disconnect();
 			this.outputNode.connect(this.mixer.inputNode);
-			throw ex;
+			throw error;
 		} finally {
 			this.volume = 1;
 		}

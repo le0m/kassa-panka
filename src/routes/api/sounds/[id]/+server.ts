@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { sounds, soundsTags, tags, soundsCategories, soundsGenres } from '$lib/server/db';
 import { eq, and } from 'drizzle-orm';
+import { logger } from '$lib/logger';
 
 /**
  * PATCH endpoint to update a sound by ID
@@ -97,7 +98,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 		return json({ success: true, message: 'Sound updated successfully', sound: result[0] });
 	} catch (error) {
-		console.error('Error updating sound:', error);
+		logger.error({ error }, 'Error updating sound');
 		return json({ error: 'Failed to update sound' }, { status: 500 });
 	}
 };
@@ -127,7 +128,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
 
 		return json({ success: true, message: 'Sound deleted successfully' });
 	} catch (error) {
-		console.error('Error deleting sound:', error);
+		logger.error({ error }, 'Error deleting sound');
 		return json({ error: 'Failed to delete sound' }, { status: 500 });
 	}
 };

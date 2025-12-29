@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { logger } from '$lib/logger';
 	import type { SoundFull, TagEntity, CategoryEntity, GenreEntity } from '$lib/server/db';
 	import { getAudioDuration } from '$lib/utils';
 
@@ -194,7 +195,7 @@
 			}, 100);
 		} catch (error) {
 			uploadError = 'Network error occurred';
-			console.error('Upload/update error:', error);
+			logger.error({ error }, 'Upload/update error');
 		} finally {
 			uploading = false;
 		}

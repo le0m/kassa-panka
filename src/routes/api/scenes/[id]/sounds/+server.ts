@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { scenesSounds, scenes, sounds } from '$lib/server/db';
 import { eq, and, isNull, desc } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { logger } from '$lib/logger';
 
 /**
  * Add a sound to a scene (create relation in scenes_sounds table)
@@ -81,7 +82,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
 		return json({ success: true, sceneId, soundId });
 	} catch (error) {
-		console.error('Error linking sound to scene:', error);
+		logger.error({ error }, 'Error linking sound to scene');
 		return json({ error: 'Failed to link sound to scene' }, { status: 500 });
 	}
 };
@@ -119,7 +120,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 		return json({ success: true, sceneId });
 	} catch (error) {
-		console.error('Error updating sound positions:', error);
+		logger.error({ error }, 'Error updating sound positions');
 		return json({ error: 'Failed to update sound positions' }, { status: 500 });
 	}
 };
@@ -147,7 +148,7 @@ export const DELETE: RequestHandler = async ({ params, url }) => {
 
 		return json({ success: true, sceneSoundId });
 	} catch (error) {
-		console.error('Error removing sound from scene:', error);
+		logger.error({ error }, 'Error removing sound from scene');
 		return json({ error: 'Failed to remove sound from scene' }, { status: 500 });
 	}
 };

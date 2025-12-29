@@ -3,6 +3,7 @@
 	import SceneModal from '$lib/elements/SceneModal.svelte';
 	import SceneCard from '$lib/elements/SceneCard.svelte';
 	import type { SceneFull, SoundFull } from '$lib/server/db';
+	import { logger } from '$lib/logger';
 
 	interface Props {
 		scenes: SceneFull[];
@@ -57,7 +58,7 @@
 			// Refresh the page data to remove the deleted scene
 			await invalidateAll();
 		} catch (error) {
-			console.error('Delete error:', error);
+			logger.error({ error }, 'Delete error');
 			alert('Network error occurred while deleting scene');
 		} finally {
 			deletingScene = null;
