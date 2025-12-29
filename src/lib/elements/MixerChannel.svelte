@@ -49,6 +49,7 @@
 
 		const track = channel.input(asset(`/sounds/${sceneSound.sound.fileName}`)) as AudioTrack;
 		track.id = sceneSound.id;
+		track.loop = sceneSound.loop;
 
 		const removeEvents: (keyof HTMLMediaElementEventMap)[] = ['pause', 'error', 'abort'];
 		removeEvents.forEach((event) =>
@@ -68,8 +69,9 @@
 		});
 		track.on('ended', () => {
 			// Remove from active sounds if channel is not sequential
-			if (!sequential && !track.loop) {
+			if (!sequential /* && !track.loop*/) {
 				logger.debug(`Ended sound "${sceneSound.sound!.name}" in channel "${channel.id}"`);
+				playing = false;
 				let idx = activeSoundIds.findIndex((id) => id === track!.id);
 				if (idx !== -1) {
 					activeSoundIds.splice(idx, 1);
