@@ -68,11 +68,6 @@
 
 <!-- Player -->
 <div class="flex flex-col gap-4 border-neutral-700 bg-neutral-900 p-4">
-	<!-- Left: Audio controls, IGNORE FOR NOW -->
-	<!--<div class="flex min-w-fit items-center gap-3 px-6">
-		<MixerPlayer {isPlaying} />
-	</div>-->
-
 	<MixerChannel
 		name="Ambience"
 		color="amber"

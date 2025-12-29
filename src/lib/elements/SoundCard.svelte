@@ -5,17 +5,16 @@
 	import IconTrash from './icons/IconTrash.svelte';
 	import type { SoundFull } from '$lib/server/db';
 	import { humanTimeInterval, SoundCategory } from '$lib';
+	import { playSound } from '$lib/play-sound.svelte';
 
 	interface Props {
 		sound: SoundFull;
 		onedit?: (sound: SoundFull) => void;
 		ondelete?: (soundId: string, soundName: string) => Promise<void> | void;
-		onplaysound?: (sound: SoundFull) => void;
 		draggable?: boolean;
-		active?: boolean;
 	}
 
-	let { sound, onplaysound, onedit, ondelete, draggable = true, active = false }: Props = $props();
+	let { sound, onedit, ondelete, draggable = true }: Props = $props();
 
 	/**
 	 * Gets the first category from the sound's categories array
@@ -86,6 +85,7 @@
 	let deleting = $state<boolean>(false);
 	let cardElement: HTMLDivElement;
 	let dragImageElement: HTMLDivElement;
+	let playing = $state(false);
 
 	/**
 	 * Handles the delete button click - delegates to parent
@@ -138,7 +138,10 @@
 	/**
 	 * Handle sound card click for playing sound.
 	 */
-	const handleClick = () => onplaysound?.(sound);
+	const handleClick = async () => {
+		playing = true;
+		playing = await playSound(sound);
+	};
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -154,7 +157,7 @@
 	class={[
 		'm-4 flex flex-col gap-2 rounded-lg border p-4 shadow-md transition-all',
 		categoryColors.border,
-		active ? categoryColors.active : categoryColors.bg,
+		playing ? categoryColors.active : categoryColors.bg,
 		categoryColors.hover
 	]}
 	class:cursor-grab={draggable}

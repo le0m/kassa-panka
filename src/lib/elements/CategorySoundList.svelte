@@ -30,28 +30,16 @@
 		onaddsound: (soundId: string, position: number) => Promise<void>;
 		/** Callback when sounds should be reordered */
 		onreorder: (soundUpdates: Array<{ id: string; position: number }>) => Promise<void>;
-		/** Callback when sound should be played */
-		onplaysound?: (sound: SoundFull) => string | undefined;
 	}
 
-	let {
-		sceneId,
-		category,
-		label,
-		sounds,
-		savingId,
-		onremove,
-		onaddsound,
-		onreorder,
-		onplaysound
-	}: Props = $props();
+	let { sceneId, category, label, sounds, savingId, onremove, onaddsound, onreorder }: Props =
+		$props();
 
 	// Local drag state
 	let draggingSceneSound = $state<SceneSoundFull | null>(null);
 	let draggingNewSound = $state<SoundFull | null>(null);
 	let dragOverIndex = $state<number | null>(null);
 	let optimisticOrder = $state<SceneSoundFull[] | null>(null);
-	let activeSoundId = $state<string | undefined>(undefined);
 
 	// Computed display order considering drag state
 	let displaySounds = $derived.by(() =>
@@ -62,12 +50,6 @@
 			dragOverIndex
 		})
 	);
-
-	/**
-	 * Handle playing sound from sound card on click.
-	 * @param sound - The sound to play
-	 */
-	const handlePlaySound = (sound: SoundFull) => (activeSoundId = onplaysound?.(sound));
 
 	/**
 	 * Clears all drag state
@@ -277,13 +259,11 @@
 					<SceneSoundCard
 						{sceneSound}
 						ondelete={onremove}
-						onplaysound={handlePlaySound}
 						draggable={true}
 						ondragstart={(e) => handleDragStart(e, sceneSound)}
 						ondragend={handleDragEnd}
 						isDragging={draggingSceneSound?.id === sceneSound.id}
 						isSaving={savingId === sceneSound.id}
-						active={sceneSound.sound !== null && sceneSound.sound.id === activeSoundId}
 					/>
 				{/if}
 			</div>

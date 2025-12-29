@@ -20,17 +20,9 @@
 			category: string;
 			genre: string;
 		}) => void;
-		onplaysound?: (sound: SoundFull) => string | undefined;
 	}
 
-	let {
-		sounds = [],
-		tags = [],
-		categories = [],
-		genres = [],
-		onfilter,
-		onplaysound
-	}: Props = $props();
+	let { sounds = [], tags = [], categories = [], genres = [], onfilter }: Props = $props();
 
 	let admin: () => boolean = getContext('admin');
 	let searchQuery = $state('');
@@ -42,7 +34,6 @@
 	);
 	let isModalOpen = $state(false);
 	let editSound = $state<SoundFull | null>(null);
-	let activeSoundId = $state<string | undefined>(undefined);
 
 	/**
 	 * Initialize search query from URL on mount
@@ -69,12 +60,6 @@
 		isModalOpen = false;
 		editSound = null;
 	}
-
-	/**
-	 * Handle playing sound from sound card on click.
-	 * @param sound - The sound to play
-	 */
-	const handlePlaySound = (sound: SoundFull) => (activeSoundId = onplaysound?.(sound));
 
 	/**
 	 * Handles editing a sound
@@ -213,10 +198,8 @@
 			{#each sounds as sound (sound.id)}
 				<SoundCard
 					{sound}
-					onplaysound={handlePlaySound}
 					onedit={admin() ? handleEdit : undefined}
 					ondelete={admin() ? handleDelete : undefined}
-					active={activeSoundId === sound.id}
 				/>
 			{/each}
 		{/if}

@@ -7,10 +7,9 @@
 	interface Props {
 		scenes: SceneFull[];
 		onsceneclick: (scene: SceneFull) => void;
-		onplaysound?: (sound: SoundFull) => string | undefined;
 	}
 
-	const { scenes, onsceneclick, onplaysound }: Props = $props();
+	const { scenes, onsceneclick }: Props = $props();
 
 	let isModalOpen = $state(false);
 	let editScene = $state<SceneFull | null>(null);
@@ -136,7 +135,6 @@
 					onclick={onsceneclick}
 					ondelete={handleDeleteScene}
 					onedit={handleEditScene}
-					{onplaysound}
 					updateSuccess={sceneSuccess === scene.id}
 					updateError={sceneError === scene.id}
 				/>

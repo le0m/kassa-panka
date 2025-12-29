@@ -5,17 +5,16 @@
 	import IconLoop from './icons/IconLoop.svelte';
 	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 	import { humanTimeInterval, SoundCategory } from '$lib';
+	import { playSound } from '$lib/play-sound.svelte';
 
 	interface Props {
 		sceneSound: SceneSoundFull;
 		ondelete?: (sceneSound: SceneSoundFull) => Promise<void> | void;
 		ondragstart?: (event: DragEvent, sceneSound: SceneSoundFull) => void;
 		ondragend?: () => void;
-		onplaysound?: (sound: SoundFull) => void;
 		draggable?: boolean;
 		isDragging?: boolean;
 		isSaving?: boolean;
-		active?: boolean;
 	}
 
 	let {
@@ -23,16 +22,15 @@
 		ondelete,
 		ondragstart,
 		ondragend,
-		onplaysound,
 		draggable = false,
 		isDragging = false,
-		isSaving = false,
-		active = false
+		isSaving = false
 	}: Props = $props();
 
 	let deleting = $state<boolean>(false);
 	let loop = $derived(sceneSound.loop);
 	let dragImageElement: HTMLDivElement;
+	let playing = $state(false);
 
 	/**
 	 * Gets the first category from the sound's categories array
@@ -88,12 +86,15 @@
 	/**
 	 * Handle sound card click for playing sound.
 	 */
-	const handleClick = (event: MouseEvent) => {
+	const handleClick = async (event: MouseEvent) => {
 		event.stopPropagation();
 
-		if (sceneSound.sound) {
-			onplaysound?.(sceneSound.sound);
+		if (!sceneSound.sound) {
+			return;
 		}
+
+		playing = true;
+		playing = await playSound(sceneSound.sound);
 	};
 
 	/**
@@ -163,7 +164,7 @@
 	class={[
 		'flex cursor-pointer flex-col gap-4 rounded-lg border p-4 shadow-md transition-all',
 		categoryColors.border,
-		active ? categoryColors.active : categoryColors.bg,
+		playing ? categoryColors.active : categoryColors.bg,
 		categoryColors.hover
 	]}
 	class:cursor-grab={draggable}

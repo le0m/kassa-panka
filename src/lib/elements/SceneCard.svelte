@@ -16,7 +16,6 @@
 		onclick: (scene: SceneFull) => void;
 		ondelete: (id: string, name: string) => void;
 		onedit: (scene: SceneFull) => void;
-		onplaysound?: (sound: SoundFull) => string | undefined;
 		updateSuccess?: boolean;
 		updateError?: boolean;
 	}
@@ -27,7 +26,6 @@
 		onclick,
 		ondelete,
 		onedit,
-		onplaysound,
 		updateSuccess = false,
 		updateError = false
 	}: Props = $props();
@@ -224,7 +222,6 @@
 			onremove={handleRemoveSound}
 			onaddsound={handleAddSound}
 			onreorder={handleReorderSounds}
-			{onplaysound}
 		/>
 
 		<CategorySoundList
@@ -236,7 +233,6 @@
 			onremove={handleRemoveSound}
 			onaddsound={handleAddSound}
 			onreorder={handleReorderSounds}
-			{onplaysound}
 		/>
 
 		<CategorySoundList
@@ -248,7 +244,6 @@
 			onremove={handleRemoveSound}
 			onaddsound={handleAddSound}
 			onreorder={handleReorderSounds}
-			{onplaysound}
 		/>
 	</div>
 </div>
