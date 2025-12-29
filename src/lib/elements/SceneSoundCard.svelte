@@ -2,6 +2,7 @@
 	import IconMusic from './icons/IconMusic.svelte';
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
+	import IconLoop from './icons/IconLoop.svelte';
 	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 	import { humanTimeInterval, SoundCategory } from '$lib';
 
@@ -30,6 +31,7 @@
 	}: Props = $props();
 
 	let deleting = $state<boolean>(false);
+	let loop = $derived(sceneSound.loop);
 	let dragImageElement: HTMLDivElement;
 
 	/**
@@ -86,7 +88,13 @@
 	/**
 	 * Handle sound card click for playing sound.
 	 */
-	const handleClick = () => sceneSound.sound && onplaysound?.(sceneSound.sound);
+	const handleClick = (event: MouseEvent) => {
+		event.stopPropagation();
+
+		if (sceneSound.sound) {
+			onplaysound?.(sceneSound.sound);
+		}
+	};
 
 	/**
 	 * Handles drag start event - sets the sceneSound data and custom drag image
@@ -111,6 +119,33 @@
 	function handleDragEnd() {
 		if (ondragend) {
 			ondragend();
+		}
+	}
+
+	/**
+	 * Toggles the loop property of the scene-sound
+	 */
+	async function toggleLoop(event: MouseEvent) {
+		event.stopPropagation();
+
+		try {
+			const response = await fetch(`/api/scenes-sounds/${sceneSound.id}`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ loop: !sceneSound.loop })
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to toggle loop');
+			}
+
+			const data = await response.json();
+			// Update the local state
+			sceneSound.loop = loop = data.sceneSound.loop;
+		} catch (error) {
+			console.error('Error toggling loop:', error);
 		}
 	}
 </script>
@@ -164,9 +199,23 @@
 	{/if}
 
 	{#if sceneSound.sound}
-		<p class="font-mono text-xs text-slate-300">
-			{humanTimeInterval(sceneSound.sound.duration * 1000)}
-		</p>
+		<div class="flex items-center gap-2">
+			<p class="font-mono text-xs text-slate-300">
+				{humanTimeInterval(sceneSound.sound.duration * 1000)}
+			</p>
+			<button
+				onclick={toggleLoop}
+				class={[
+					'rounded p-1 transition-colors',
+					loop ? 'text-green-500 hover:text-green-400' : 'text-slate-500 hover:text-slate-400',
+					'hover:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-600'
+				]}
+				aria-label={loop ? 'Disable loop' : 'Enable loop'}
+				title={loop ? 'Disable loop' : 'Enable loop'}
+			>
+				<IconLoop class="h-4 w-4" />
+			</button>
+		</div>
 	{/if}
 </div>
 

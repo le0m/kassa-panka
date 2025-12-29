@@ -51,14 +51,16 @@ export function createOptimisticSceneSound(
 	sceneId: string,
 	soundId: string,
 	sound: SoundFull,
-	position: number
+	position: number,
+	loop: boolean = false
 ): SceneSoundFull {
 	return {
 		id: `optimistic-${Date.now()}`,
 		sceneId,
 		soundId,
 		position,
-		sound
+		sound,
+		loop
 	};
 }
 
@@ -127,7 +129,8 @@ export function createDisplayOrder(
 				sceneId: sorted[0]?.sceneId ?? '',
 				soundId: draggingNewSound.id,
 				position: dragOverIndex,
-				sound: draggingNewSound
+				sound: draggingNewSound,
+				loop: false
 			};
 			reordered.splice(dragOverIndex, 0, placeholder);
 			return reordered;

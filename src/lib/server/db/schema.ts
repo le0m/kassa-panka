@@ -47,7 +47,8 @@ export const scenesSounds = sqliteTable('scenes_sounds', {
 	soundId: text('sound_id', { length: 128 })
 		.notNull()
 		.references(() => sounds.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-	position: integer('position').notNull().default(0)
+	position: integer('position').notNull().default(0),
+	loop: integer('loop', { mode: 'boolean' }).notNull().default(false)
 });
 
 export const tags = sqliteTable('tags', {

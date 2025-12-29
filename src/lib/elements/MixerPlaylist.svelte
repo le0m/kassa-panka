@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { humanTimeInterval } from '$lib';
 	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
+	import IconLoop from './icons/IconLoop.svelte';
 
 	/**
 	 * Horizontal playlist display for a specific channel
@@ -78,9 +79,14 @@
 						onclick={() => onsoundclick(sceneSound)}
 					>
 						<h4 class="text-xs font-medium text-ellipsis text-white">{sound.name}</h4>
-						<p class="font-mono text-xs text-slate-300">
-							{humanTimeInterval(sound.duration * 1000)}
-						</p>
+						<div class="flex items-center gap-1">
+							<p class="font-mono text-xs text-slate-300">
+								{humanTimeInterval(sound.duration * 1000)}
+							</p>
+							<IconLoop
+								class={['h-3 w-3', sceneSound.loop ? 'text-green-500' : 'text-slate-500'].join(' ')}
+							/>
+						</div>
 					</div>
 				{/if}
 			{/each}
