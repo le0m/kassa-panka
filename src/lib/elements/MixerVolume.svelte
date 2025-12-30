@@ -13,7 +13,7 @@
 
 	let { name, onvolumechange, color }: Props = $props();
 
-	let volume = $state(0.5);
+	let volume = $state(1);
 	const handleInput = () => {
 		onvolumechange(name, volume);
 	};
@@ -35,6 +35,11 @@
 				text: 'text-emerald-400',
 				track: 'bg-emerald-600',
 				thumb: '[&::-webkit-slider-thumb]:bg-emerald-400 [&::-moz-range-thumb]:bg-emerald-400'
+			},
+			cyan: {
+				text: 'text-cyan-400',
+				track: 'bg-cyan-600',
+				thumb: '[&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:bg-cyan-400'
 			}
 		}[color] ?? {
 			text: 'text-neutral-400',

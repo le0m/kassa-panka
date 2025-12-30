@@ -47,7 +47,6 @@ export class AudioChannel {
 	stereoPannerNode: StereoPannerNode;
 	private mixer: AudioMixer;
 	private customNodes: AudioNode[] = [];
-	private resumeTracks: AudioTrack[] = [];
 
 	/** The current channel id provided from AudioMixer instance */
 	id: string = 'N/A';
@@ -332,17 +331,10 @@ export class AudioChannel {
 
 	/**
 	 * Play the channel audio. Use stop() to start from the beginning or pause() to pause the audio.
-	 * @param {string?} id - The optional track ID to start from if not resuming
+	 * @param {string?} id - Play this track ID if available
 	 */
 	async play(id?: string) {
-		// Resume if channel was paused
-		if (this.resumeTracks.length) {
-			return Promise.all(this.resumeTracks.splice(0).map((track) => track.play())).then(
-				() => void 0
-			);
-		}
-
-		// Start from specific track if it was requested
+		// Play specific track if it was requested
 		if (id) {
 			const track = this.tracks.find((track) => track.id === id);
 			if (track) {
@@ -350,7 +342,13 @@ export class AudioChannel {
 			}
 		}
 
-		// Start from first track
+		// Resume paused tracks if any
+		const paused = this.tracks.filter((track) => track.paused && !track.ended);
+		if (paused.length) {
+			return Promise.all(paused.map((track) => track.play())).then(() => void 0);
+		}
+
+		// Play first track
 		return this.tracks.at(0)?.play();
 	}
 
@@ -372,7 +370,6 @@ export class AudioChannel {
 			}
 
 			track.pause();
-			this.resumeTracks.push(track);
 		}
 	}
 

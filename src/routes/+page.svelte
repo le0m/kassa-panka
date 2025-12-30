@@ -94,7 +94,7 @@
 	};
 </script>
 
-<div class="grid h-screen grid-cols-[minmax(200px,25%)_1fr] grid-rows-[1fr_auto]">
+<div class="grid h-screen grid-cols-[minmax(200px,30%)_1fr] grid-rows-[1fr_auto]">
 	<!-- Sidebar (left, spanning top row only) -->
 	<div class="overflow-hidden">
 		<Sidebar

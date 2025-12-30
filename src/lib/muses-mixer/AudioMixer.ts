@@ -134,4 +134,9 @@ export class AudioMixer {
 	get volume(): number {
 		return this.inputNode.gain.value;
 	}
+
+	/** Check if any track is playing */
+	get playing(): boolean {
+		return this.channels.some((channel) => channel.playing);
+	}
 }
