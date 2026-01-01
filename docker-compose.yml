@@ -1,0 +1,26 @@
+services:
+  kassa-panka:
+    image: kp:dev
+    build: .
+    ports:
+      - '3000:3000'
+    volumes:
+      - type: bind
+        source: ./local.db
+        target: /app/local.db
+    environment:
+      DATABASE_DSN: local.db
+    depends_on:
+      kassa-panka-migrations:
+        condition: service_completed_successfully
+
+  kassa-panka-migrations:
+    image: kp:dev
+    build: .
+    entrypoint: node_modules/.bin/drizzle-kit migrate
+    volumes:
+      - type: bind
+        source: ./local.db
+        target: /app/local.db
+    environment:
+      DATABASE_DSN: local.db
