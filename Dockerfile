@@ -1,7 +1,7 @@
 ###
 # Builder
 ###
-FROM --platform=$BUILDPLATFORM node:lts-alpine AS builder
+FROM node:lts-alpine AS builder
 
 # Install dependencies
 WORKDIR /app
