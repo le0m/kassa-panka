@@ -21,7 +21,7 @@ export const humanTimeInterval = (ms: number): string => {
  * @param type audio file media type
  * @returns {number} the duration
  */
-export const getAudioDuration = (blob: Blob, type: string): Promise<number> =>
+export const getAudioDuration = (blob: Blob): Promise<number> =>
 	new Promise((res, rej) => {
 		const url = window.URL.createObjectURL(blob);
 		const audio = new Audio();

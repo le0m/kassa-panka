@@ -157,7 +157,7 @@ export class AudioChannel {
 				this.outputNode.connect(this.mixer.inputNode);
 			} else {
 				const size = this.customNodes.length;
-				for (var i = 0; i < size; i++) {
+				for (let i = 0; i < size; i++) {
 					this.customNodes[i].disconnect();
 					this.customNodes[i].connect(
 						i >= size - 1 ? this.mixer.inputNode : this.customNodes[i + 1]
@@ -242,7 +242,7 @@ export class AudioChannel {
 			| MediaStreamAudioSourceNode
 			| MediaElementAudioSourceNode
 			| HTMLAudioElement
-			| String
+			| string
 			| AudioTrack
 	) {
 		if (
@@ -382,38 +382,38 @@ export class AudioChannel {
 
 	/** Decrease volume smoothly until it is silent */
 	fadeOut(ms: number = 2000): Promise<boolean> {
-		const channel = this;
 		if (typeof ms !== 'number') {
 			ms = 2000;
 		}
-		return new Promise((res, rej) => {
+
+		return new Promise((res) => {
 			const vpc: number = (2 / ms) * 10;
 			const int = setInterval(() => {
-				if (channel.inputNode.gain.value <= 0) {
-					channel.inputNode.gain.value = 0;
+				if (this.inputNode.gain.value <= 0) {
+					this.inputNode.gain.value = 0;
 					clearInterval(int);
 					return res(true);
 				} // continue [v] ;
-				channel.inputNode.gain.value -= vpc;
+				this.inputNode.gain.value -= vpc;
 			}, 2);
 		});
 	}
 
 	/** Increase volume smoothly until it's in maximun input volume (this doesn't affect other features like "muted" or "volume" properties) */
 	fadeIn(ms: number = 2000): Promise<boolean> {
-		const channel = this;
 		if (typeof ms !== 'number') {
 			ms = 2000;
 		}
-		return new Promise((res, rej) => {
+
+		return new Promise((res) => {
 			const vpc: number = (2 / ms) * 10;
 			const int = setInterval(() => {
-				if (channel.inputNode.gain.value >= 1) {
-					channel.inputNode.gain.value = 1;
+				if (this.inputNode.gain.value >= 1) {
+					this.inputNode.gain.value = 1;
 					clearInterval(int);
 					return res(true);
 				} // continue [v] ;
-				channel.inputNode.gain.value += vpc;
+				this.inputNode.gain.value += vpc;
 			}, 2);
 		});
 	}

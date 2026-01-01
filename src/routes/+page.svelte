@@ -2,7 +2,7 @@
 	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
-	import type { SceneFull, SoundFull } from '$lib/server/db';
+	import type { SceneFull } from '$lib/server/db';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
 	import Scenes from '$lib/elements/Scenes.svelte';
 	import Mixer from '$lib/elements/Mixer.svelte';
@@ -27,6 +27,7 @@
 		category: string;
 		genre: string;
 	}) {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const params = new URLSearchParams(window.location.search);
 
 		if (search.trim()) {
@@ -48,6 +49,7 @@
 		}
 
 		const queryString = params.toString();
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		await goto(queryString ? `?${queryString}` : '/', {
 			replaceState: false,
 			invalidateAll: true

@@ -16,6 +16,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	const searchQuery = url.searchParams.get('q')?.trim();
 	const categoryQuery = url.searchParams.get('cat')?.trim();
 	const genreQuery = url.searchParams.get('gen')?.trim();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const where: any = { deletedAt: { isNull: true } };
 
 	if (searchQuery) {

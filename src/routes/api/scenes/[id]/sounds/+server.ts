@@ -128,7 +128,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 /**
  * Remove a sound from a scene (delete relation from scenes_sounds table)
  */
-export const DELETE: RequestHandler = async ({ params, url }) => {
+export const DELETE: RequestHandler = async ({ url }) => {
 	const sceneSoundId = url.searchParams.get('sceneSoundId');
 
 	if (!sceneSoundId) {

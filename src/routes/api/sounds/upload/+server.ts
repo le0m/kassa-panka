@@ -5,7 +5,6 @@ import { sounds, tags, soundsTags, soundsCategories, soundsGenres } from '$lib/s
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { eq } from 'drizzle-orm';
-import { getAudioDuration } from '$lib';
 import { logger } from '$lib/logger';
 
 /**

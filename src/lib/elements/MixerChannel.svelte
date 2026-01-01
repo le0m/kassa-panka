@@ -2,7 +2,7 @@
 	import { asset } from '$app/paths';
 	import { logger } from '$lib/logger';
 	import { AudioTrack, type AudioChannel } from '$lib/muses-mixer';
-	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull } from '$lib/server/db';
 	import IconPause from './icons/IconPause.svelte';
 	import IconPlay from './icons/IconPlay.svelte';
 	import MixerPlaylist from './MixerPlaylist.svelte';
@@ -210,7 +210,6 @@
 	</span>
 	<div class="min-w-0 flex-1">
 		<MixerPlaylist
-			{name}
 			{color}
 			sceneSounds={sortedSceneSounds}
 			onsoundclick={handleSoundClick}
