@@ -2,7 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import SceneModal from '$lib/elements/SceneModal.svelte';
 	import SceneCard from '$lib/elements/SceneCard.svelte';
-	import type { SceneFull, SoundFull } from '$lib/server/db';
+	import type { SceneFull } from '$lib/server/db';
 	import { logger } from '$lib/logger';
 
 	interface Props {

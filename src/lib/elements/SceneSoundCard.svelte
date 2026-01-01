@@ -3,7 +3,7 @@
 	import IconSpinner from './icons/IconSpinner.svelte';
 	import IconTrash from './icons/IconTrash.svelte';
 	import IconLoop from './icons/IconLoop.svelte';
-	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull } from '$lib/server/db';
 	import { humanTimeInterval, SoundCategory } from '$lib';
 	import { playSound } from '$lib/play-sound.svelte';
 	import { logger } from '$lib/logger';
@@ -154,7 +154,6 @@
 
 <!-- Unified layout for all instances -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	role="button"
 	tabindex="0"
@@ -197,6 +196,7 @@
 	</div>
 
 	{#if sceneSound.sound?.description}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		<p class="text-sm text-slate-400">{@html sceneSound.sound.description}</p>
 	{/if}
 

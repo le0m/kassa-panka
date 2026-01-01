@@ -59,7 +59,7 @@ export class AudioTrack {
 	 * const track2 = channel.input( "data:audio/mpeg;base64,...", mixer.ctx ) ;
 	 * ```
 	 */
-	constructor(audioSource: HTMLAudioElement | String, audioContext: AudioContext) {
+	constructor(audioSource: HTMLAudioElement | string, audioContext: AudioContext) {
 		if (typeof audioSource === 'string') {
 			const el = document.createElement('audio');
 			el.src = audioSource;

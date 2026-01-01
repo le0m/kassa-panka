@@ -166,7 +166,7 @@
 					return;
 				}
 
-				const duration = await getAudioDuration(file, file.type);
+				const duration = await getAudioDuration(file);
 				formData.set('duration', duration.toString());
 
 				// Upload form

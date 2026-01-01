@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { SoundCategory } from '$lib';
-	import type { SceneSoundFull, SceneFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull, SceneFull } from '$lib/server/db';
 	import { DragState } from '$lib/drag-and-drop/drag-state.svelte';
 	import CategorySoundList from './CategorySoundList.svelte';
 	import IconEdit from './icons/IconEdit.svelte';

@@ -145,7 +145,6 @@
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	bind:this={cardElement}
 	role="button"
@@ -206,6 +205,7 @@
 	{/if}
 
 	{#if sound.description}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		<p class="text-sm text-slate-400">{@html sound.description}</p>
 	{/if}
 
@@ -232,6 +232,7 @@
 		<h4 class="truncate text-sm font-semibold text-slate-100">{sound.name}</h4>
 	</div>
 	{#if sound.description}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		<p class="line-clamp-2 text-xs text-slate-400">{@html sound.description}</p>
 	{/if}
 </div>

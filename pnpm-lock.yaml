@@ -11,12 +11,18 @@ importers:
       better-sqlite3:
         specifier: ^12.5.0
         version: 12.5.0
+      drizzle-kit:
+        specifier: 1.0.0-beta.3-702eadc
+        version: 1.0.0-beta.3-702eadc
       drizzle-orm:
         specifier: 1.0.0-beta.3-36e9b9e
         version: 1.0.0-beta.3-36e9b9e(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.8)(better-sqlite3@12.5.0)(mssql@11.0.1)
       pino:
         specifier: ^10.1.0
         version: 10.1.0
+      vite:
+        specifier: ^7.2.6
+        version: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)
     devDependencies:
       '@eslint/compat':
         specifier: ^1.4.0
@@ -48,9 +54,6 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.10.4
-      drizzle-kit:
-        specifier: 1.0.0-beta.3-702eadc
-        version: 1.0.0-beta.3-702eadc
       eslint:
         specifier: ^9.39.1
         version: 9.39.2(jiti@2.6.1)
@@ -90,9 +93,6 @@ importers:
       typescript-eslint:
         specifier: ^8.48.1
         version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      vite:
-        specifier: ^7.2.6
-        version: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)
 
 packages:
 

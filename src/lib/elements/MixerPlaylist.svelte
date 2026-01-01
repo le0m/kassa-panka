@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { humanTimeInterval } from '$lib';
-	import type { SceneSoundFull, SoundFull } from '$lib/server/db';
+	import type { SceneSoundFull } from '$lib/server/db';
 	import IconLoop from './icons/IconLoop.svelte';
 
 	/**
 	 * Horizontal playlist display for a specific channel
 	 */
 	interface Props {
-		/** Channel name to display */
-		name: string;
 		/** Tailwind color class for the border (e.g., 'amber', 'purple', 'emerald') */
 		color: string;
 		/** Array of scene sounds to display */
@@ -19,7 +17,7 @@
 		onsoundclick: (sceneSound: SceneSoundFull) => void;
 	}
 
-	let { name, color, sceneSounds = [], activeSoundIds = [], onsoundclick }: Props = $props();
+	let { color, sceneSounds = [], activeSoundIds = [], onsoundclick }: Props = $props();
 
 	/** Complete Tailwind class strings based on color prop */
 	const colorClasses = $derived(
