@@ -17,7 +17,7 @@
 	let mixer: AudioMixer;
 	let channels: Record<SoundCategory, AudioChannel> = $state({});
 	let activeScene = $state<SceneFull | undefined>(undefined);
-	let playing = $state(true);
+	let playing = $state(false);
 
 	let ambienceSounds = $derived(
 		activeScene?.sceneSounds.filter((sceSo) =>
