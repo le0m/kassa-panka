@@ -9,7 +9,7 @@ services:
         source: ./local.db
         target: /app/local.db
     environment:
-      DATABASE_DSN: local.db
+      DATABASE_PATH: local.db
     depends_on:
       kassa-panka-migrations:
         condition: service_completed_successfully
@@ -23,4 +23,4 @@ services:
         source: ./local.db
         target: /app/local.db
     environment:
-      DATABASE_DSN: local.db
+      DATABASE_PATH: local.db

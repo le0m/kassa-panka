@@ -4,6 +4,8 @@ import { relations } from './relations';
 
 export * from './schema';
 
-if (!env.DATABASE_DSN) throw new Error('DATABASE_DSN is not set');
+if (!env.DATABASE_PATH) {
+	throw new Error('DATABASE_PATH is not set');
+}
 
-export const db = drizzle(env.DATABASE_DSN, { relations });
+export const db = drizzle(env.DATABASE_PATH, { relations });
