@@ -1,7 +1,10 @@
 services:
   kassa-panka:
     image: kp:dev
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_PATH: local.db
     ports:
       - '3000:3000'
     volumes:
@@ -9,18 +12,37 @@ services:
         source: ./local.db
         target: /app/local.db
     environment:
-      DATABASE_DSN: local.db
+      DATABASE_PATH: local.db
+      # Uncomment to use OpenSearch for searching sounds
+      # This also needs the opensearch service below
+      # OPENSEARCH_URL: http://opensearch:9200
     depends_on:
       kassa-panka-migrations:
         condition: service_completed_successfully
 
   kassa-panka-migrations:
     image: kp:dev
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_PATH: local.db
     entrypoint: node_modules/.bin/drizzle-kit migrate
     volumes:
       - type: bind
         source: ./local.db
         target: /app/local.db
     environment:
-      DATABASE_DSN: local.db
+      DATABASE_PATH: local.db
+
+  # Optional OpenSearch service for searching sounds
+  # Run with `docker compose --profile search up -d`
+  opensearch:
+    image: opensearchproject/opensearch:3
+    profiles:
+      - search
+    environment:
+      - discovery.type=single-node
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_SECURITY_PLUGIN=true # Disable HTTPS and authentication, only for local dev
+      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+      - 'OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m' # Set min and max JVM heap sizes

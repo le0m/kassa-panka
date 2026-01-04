@@ -58,16 +58,19 @@
 
 	const handleSceneClick = (scene: SceneFull) => (activeScene = scene);
 
-	let importing = $state(false);
-	let perc = $state(0);
-	const handleImport = async () => {
-		if (!admin || importing) {
+	let indexing = $state(false);
+	let progress = $state({ total: 0, current: { success: 0, fail: 0 } });
+	let progressValue = $derived(
+		progress.total ? 100 * ((progress.current.success + progress.current.fail) / progress.total) : 0
+	);
+	const handleSearchIndex = async () => {
+		if (!admin || indexing) {
 			return;
 		}
 
-		importing = true;
+		indexing = true;
 
-		const response = await fetch('/api/sounds/import');
+		const response = await fetch('/api/search/index');
 		const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader();
 		while (true) {
 			const { done, value } = await reader.read();
@@ -85,14 +88,16 @@
 			}
 
 			try {
-				const progress = JSON.parse(message) as { count: number; total: number };
-				perc = (progress.count * 100) / progress.total;
+				progress = JSON.parse(message) as {
+					total: number;
+					current: { success: number; fail: number };
+				};
 			} catch (error) {
 				logger.error({ error }, 'Error receiving import update');
 			}
 		}
 
-		importing = false;
+		indexing = false;
 	};
 </script>
 
@@ -119,8 +124,17 @@
 				</h1>
 				<p class="text-slate-400">Sound effects for your tabletop gaming sessions</p>
 				{#if admin}
-					<button disabled={importing} onclick={handleImport}>import</button>
-					<progress class={{ hidden: !importing }} max="100" value={perc}></progress>
+					<button
+						class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-indigo-700 hover:shadow-lg"
+						disabled={indexing}
+						onclick={handleSearchIndex}>index search</button
+					>
+					<progress class={{ hidden: !indexing }} max="100" value={progressValue}></progress>
+					<div>
+						<span class="text-xs text-emerald-500/60">Success: {progress.current.success}</span> |
+						<span class="text-xs text-rose-500/60">Fail: {progress.current.fail}</span> |
+						<span class="text-xs text-sky-500/60">Total: {progress.total}</span>
+					</div>
 				{/if}
 			</header>
 		</div>

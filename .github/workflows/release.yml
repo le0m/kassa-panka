@@ -122,7 +122,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: |
             VERSION
-            DATABASE_DSN=local.db
+            DATABASE_PATH=local.db
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

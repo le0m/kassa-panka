@@ -6,7 +6,10 @@ import {
 	type SoundFull,
 	type TagEntity
 } from '$lib/server/db';
+import { searchSound } from '$lib/server/opensearch';
 import type { PageServerLoad } from './$types';
+
+const ITEMS_PER_PAGE = 50;
 
 /**
  * Load all non-deleted sounds from the database with their tags, optionally filtered by search query
@@ -16,35 +19,66 @@ export const load: PageServerLoad = async ({ url }) => {
 	const searchQuery = url.searchParams.get('q')?.trim();
 	const categoryQuery = url.searchParams.get('cat')?.trim();
 	const genreQuery = url.searchParams.get('gen')?.trim();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const where: any = { deletedAt: { isNull: true } };
+	let allSounds: SoundFull[] = [];
 
-	if (searchQuery) {
-		where.OR ??= [];
-		where.OR.push(
-			...searchQuery
-				.split(' ')
-				.flatMap((term) => [
-					{ name: { like: `%${term}%` } },
-					{ tags: { name: { like: `%${term}%` } } }
-				])
+	if (searchSound) {
+		// Search using opensearch scores
+		const results = (
+			await searchSound(
+				{
+					query: searchQuery,
+					category: categoryQuery,
+					genre: genreQuery
+				},
+				ITEMS_PER_PAGE
+			)
+		).reduce(
+			(results, result) => results.set(result._id, parseFloat(result._score?.toString() ?? '0')),
+			new Map<string, number>()
 		);
-	}
 
-	if (categoryQuery) {
-		where.categories = { id: categoryQuery };
-	}
+		// Filter for IDs found with opensearch and manually sort by score
+		allSounds = (
+			await db.query.sounds.findMany({
+				where: { deletedAt: { isNull: true }, id: { in: results.keys().toArray() } },
+				with: { tags: true, categories: true, genres: true },
+				limit: ITEMS_PER_PAGE
+			})
+		).sort((a, b) => (results.get(b.id) ?? 0) - (results.get(a.id) ?? 0));
+	} else {
+		// Search using SQL
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const where: any = { deletedAt: { isNull: true } };
 
-	if (genreQuery) {
-		where.genres = { id: genreQuery };
-	}
+		if (searchQuery) {
+			if (!where?.id?.in || !where.id.in.length) {
+				where.OR ??= [];
+				where.OR.push(
+					...searchQuery
+						.split(' ')
+						.flatMap((term) => [
+							{ name: { like: `%${term}%` } },
+							{ tags: { name: { like: `%${term}%` } } }
+						])
+				);
+			}
+		}
 
-	const allSounds: SoundFull[] = await db.query.sounds.findMany({
-		where,
-		orderBy: { name: 'asc' },
-		with: { tags: true, categories: true, genres: true },
-		limit: 50
-	});
+		if (categoryQuery) {
+			where.categories = { id: categoryQuery };
+		}
+
+		if (genreQuery) {
+			where.genres = { id: genreQuery };
+		}
+
+		allSounds = await db.query.sounds.findMany({
+			where,
+			orderBy: { name: 'asc' },
+			with: { tags: true, categories: true, genres: true },
+			limit: ITEMS_PER_PAGE
+		});
+	}
 
 	// Fetch all non-deleted scenes
 	const allScenesFull: SceneFull[] = await db.query.scenes.findMany({

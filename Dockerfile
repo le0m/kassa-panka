@@ -10,10 +10,10 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json vite.config.t
 RUN pnpm install --frozen-lockfile
 
 # Build app and remove developer dependencies
-ARG DATABASE_DSN
+ARG DATABASE_PATH
 COPY static /app/static
 COPY src /app/src
-RUN DATABASE_DSN=${DATABASE_DSN} pnpm run build \
+RUN DATABASE_PATH=${DATABASE_PATH} pnpm run build \
     && pnpm install --production --frozen-lockfile
 
 ###
