@@ -1,9 +1,9 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "69b7361d-8eb5-4dfa-82c1-882a44f83130",
+  "id": "a6af7eb1-3ea5-4a0a-997f-8ee827bd1705",
   "prevIds": [
-    "5a037a64-5c62-40a2-8ac3-44cc503dfca4"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -199,6 +199,16 @@
       "default": "0",
       "generated": null,
       "name": "position",
+      "entityType": "columns",
+      "table": "scenes_sounds"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "loop",
       "entityType": "columns",
       "table": "scenes_sounds"
     },
@@ -538,7 +548,7 @@
         "tag_id"
       ],
       "nameExplicit": false,
-      "name": "sounds_tags_sound_id_tag_id_pk",
+      "name": "sounds_tags_pk",
       "entityType": "pks",
       "table": "sounds_tags"
     },

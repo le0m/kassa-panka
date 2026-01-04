@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { getContext } from 'svelte';
 	import SceneModal from '$lib/elements/SceneModal.svelte';
 	import SceneCard from '$lib/elements/SceneCard.svelte';
 	import type { SceneFull } from '$lib/server/db';
@@ -17,6 +17,8 @@
 	let deletingScene = $state<string | null>(null);
 	let sceneSuccess = $state<string | null>(null); // ID of scene that was successfully saved
 	let sceneError = $state<string | null>(null); // ID of scene that had an error
+
+	let invalidateAll = getContext<() => Promise<void>>('invalidate');
 
 	/**
 	 * Handles editing a scene

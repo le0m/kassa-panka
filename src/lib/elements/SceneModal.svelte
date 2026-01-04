@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { getContext } from 'svelte';
 	import { logger } from '$lib/logger';
 	import type { SceneFull } from '$lib/server/db';
 
@@ -20,6 +20,8 @@
 	let formDescription = $state('');
 
 	let isEditMode = $derived(editScene !== null);
+
+	let invalidateAll = getContext<() => Promise<void>>('invalidate');
 
 	/**
 	 * Initialize form with edit data when modal opens in edit mode

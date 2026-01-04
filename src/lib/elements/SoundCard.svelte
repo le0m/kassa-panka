@@ -90,8 +90,9 @@
 	/**
 	 * Handles the delete button click - delegates to parent
 	 */
-	async function handleDelete() {
+	async function handleDelete(event: MouseEvent) {
 		if (ondelete) {
+			event.stopPropagation();
 			deleting = true;
 			try {
 				await ondelete(sound.id, sound.name);
@@ -104,8 +105,9 @@
 	/**
 	 * Handles the edit button click - delegates to parent
 	 */
-	function handleEditClick() {
+	function handleEditClick(event: MouseEvent) {
 		if (onedit) {
+			event.stopPropagation();
 			onedit(sound);
 		}
 	}

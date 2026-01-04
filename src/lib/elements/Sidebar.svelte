@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import { browser } from '$app/environment';
-	import { invalidateAll } from '$app/navigation';
 	import SoundCard from '$lib/elements/SoundCard.svelte';
 	import UploadModal from '$lib/elements/UploadModal.svelte';
 	import type { SoundFull, TagEntity, CategoryEntity, GenreEntity } from '$lib/server/db';
@@ -24,7 +23,7 @@
 
 	let { sounds = [], tags = [], categories = [], genres = [], onfilter }: Props = $props();
 
-	let admin: () => boolean = getContext('admin');
+	let admin = getContext<() => boolean>('admin');
 	let searchQuery = $state('');
 	let selectedCategoryId = $state<string>(
 		browser ? (new URLSearchParams(window.location.search).get('cat') ?? '') : ''
@@ -34,6 +33,8 @@
 	);
 	let isModalOpen = $state(false);
 	let editSound = $state<SoundFull | null>(null);
+
+	let invalidateAll = getContext<() => Promise<void>>('invalidate');
 
 	/**
 	 * Initialize search query from URL on mount

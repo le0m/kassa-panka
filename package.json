@@ -8,7 +8,7 @@
 		"build": "vite build",
 		"preview": "vite preview | pino-pretty",
 		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:svelte": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"check:prettier": "prettier --check .",
 		"check:eslint": "eslint .",
@@ -45,6 +45,7 @@
 		"typescript-eslint": "^8.48.1"
 	},
 	"dependencies": {
+		"@opensearch-project/opensearch": "^3.5.1",
 		"better-sqlite3": "^12.5.0",
 		"drizzle-kit": "1.0.0-beta.3-702eadc",
 		"drizzle-orm": "1.0.0-beta.3-36e9b9e",

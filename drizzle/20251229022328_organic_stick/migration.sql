@@ -1,1 +1,0 @@
-ALTER TABLE `scenes_sounds` ADD `loop` integer DEFAULT 0 NOT NULL;

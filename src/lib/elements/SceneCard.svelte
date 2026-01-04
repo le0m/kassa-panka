@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { getContext } from 'svelte';
 	import { SoundCategory } from '$lib';
 	import type { SceneSoundFull, SceneFull } from '$lib/server/db';
 	import { DragState } from '$lib/drag-and-drop/drag-state.svelte';
@@ -49,6 +49,8 @@
 			sceSo.sound?.categories.some((c) => c.name === SoundCategory.SFX)
 		) ?? []
 	);
+
+	let invalidateAll = getContext<() => Promise<void>>('invalidate');
 
 	/**
 	 * Handles the delete button click
