@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 	import type { SceneFull } from '$lib/server/db';
 	import Sidebar from '$lib/elements/Sidebar.svelte';
@@ -12,6 +12,7 @@
 
 	let admin = $derived(data.admin);
 	setContext('admin', () => admin);
+	setContext('invalidate', () => invalidateAll());
 	let activeScene = $state<SceneFull | undefined>(undefined);
 
 	/**

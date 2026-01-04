@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { getContext } from 'svelte';
 	import { logger } from '$lib/logger';
 	import type { SoundFull, TagEntity, CategoryEntity, GenreEntity } from '$lib/server/db';
 	import { getAudioDuration } from '$lib/utils';
@@ -35,6 +35,7 @@
 	let selectedGenreId = $state<string>('');
 
 	let isEditMode = $derived(editSound !== null);
+	let invalidateAll = getContext<() => Promise<void>>('invalidate');
 
 	/**
 	 * Adds a tag to the selected tags list
