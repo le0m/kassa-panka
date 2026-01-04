@@ -1,11 +1,21 @@
 import type { RequestHandler } from './$types';
-import { indexSounds } from '$lib/server/opensearch';
+import { createIndex, indexSounds } from '$lib/server/opensearch';
 import { error } from '@sveltejs/kit';
 import { logger } from '$lib/logger';
 
 export const GET: RequestHandler = async () => {
-	if (!indexSounds) {
+	if (!indexSounds || !createIndex) {
 		error(500, 'Search not configured');
+	}
+
+	try {
+		await createIndex(true);
+	} catch (e) {
+		logger.error(
+			{ error: (e as Error).message ?? (e as Error).toString() },
+			'Error recreating index'
+		);
+		error(500, 'Internal error');
 	}
 
 	// Stream indexing progress

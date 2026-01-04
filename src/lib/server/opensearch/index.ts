@@ -16,26 +16,39 @@ const MAPPINGS: Record<string, Types.Common_Mapping.Property> = {
 
 export const opensearch = env.OPENSEARCH_URL ? new Client({ node: env.OPENSEARCH_URL }) : undefined;
 
-if (opensearch) {
-	logger.info('Using OpenSearch');
-	const exists = await opensearch.indices.exists({ index: INDEX_NAME });
-
-	if (!exists.body) {
-		await opensearch.indices.create({
-			index: INDEX_NAME,
-			body: {
-				mappings: { properties: MAPPINGS }
-			}
-		});
-		logger.info('Created OpenSearch index');
-	}
-}
-
 export type SearchOptions = {
 	query?: string;
 	category?: string;
 	genre?: string;
 };
+
+/**
+ * Creates the index. If forced and the index exists, it is deleted before.
+ */
+export const createIndex = opensearch
+	? async (force = false) => {
+			const exists = await opensearch.indices.exists({ index: INDEX_NAME });
+
+			if (exists.body) {
+				if (!force) {
+					logger.debug('OpenSearch index already exists');
+
+					return;
+				}
+
+				await opensearch.indices.delete({ index: INDEX_NAME });
+				logger.info('Deleted OpenSearch index');
+			}
+
+			await opensearch.indices.create({
+				index: INDEX_NAME,
+				body: {
+					mappings: { properties: MAPPINGS }
+				}
+			});
+			logger.info('Created OpenSearch index');
+		}
+	: undefined;
 
 /**
  * Index a sound, updating it if already indexed or creating it otherwise.
@@ -168,3 +181,8 @@ export const searchSound = opensearch
 			return res.body.hits.hits;
 		}
 	: undefined;
+
+if (createIndex) {
+	logger.info('Using OpenSearch');
+	await createIndex();
+}
