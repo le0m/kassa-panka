@@ -81,7 +81,7 @@ jobs:
         run: pnpm install
 
       - name: Run check
-        run: pnpm run check
+        run: pnpm run check:svelte
 
   build-container:
     name: Build Docker container
