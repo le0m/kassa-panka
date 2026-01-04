@@ -1,3 +1,4 @@
+import { logger } from '$lib/logger';
 import {
 	db,
 	type CategoryEntity,
@@ -22,16 +23,29 @@ export const load: PageServerLoad = async ({ url }) => {
 	let allSounds: SoundFull[] = [];
 
 	if (searchSound) {
+		let category;
+		if (categoryQuery) {
+			category = (
+				await db.query.categories.findFirst({
+					columns: { name: true },
+					where: { id: categoryQuery }
+				})
+			)?.name;
+		}
+
+		let genre;
+		if (genreQuery) {
+			genre = (
+				await db.query.genres.findFirst({
+					columns: { name: true },
+					where: { id: genreQuery }
+				})
+			)?.name;
+		}
+
 		// Search using opensearch scores
 		const results = (
-			await searchSound(
-				{
-					query: searchQuery,
-					category: categoryQuery,
-					genre: genreQuery
-				},
-				ITEMS_PER_PAGE
-			)
+			await searchSound({ query: searchQuery, category, genre }, ITEMS_PER_PAGE)
 		).reduce(
 			(results, result) => results.set(result._id, parseFloat(result._score?.toString() ?? '0')),
 			new Map<string, number>()

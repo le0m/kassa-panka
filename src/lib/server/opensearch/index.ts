@@ -6,11 +6,12 @@ import * as schema from '$lib/server/db/schema';
 import { logger } from '$lib/logger';
 
 const INDEX_NAME = 'kassa-panka';
+// Note: to update the mappings, recreating the index may be required depending on the changes
 const MAPPINGS: Record<string, Types.Common_Mapping.Property> = {
 	name: { type: 'text' },
-	tags: { type: 'text' },
-	categories: { type: 'text' },
-	genres: { type: 'text' }
+	tags: { type: 'keyword' },
+	categories: { type: 'keyword' },
+	genres: { type: 'keyword' }
 };
 
 export const opensearch = env.OPENSEARCH_URL ? new Client({ node: env.OPENSEARCH_URL }) : undefined;
@@ -19,12 +20,7 @@ if (opensearch) {
 	logger.info('Using OpenSearch');
 	const exists = await opensearch.indices.exists({ index: INDEX_NAME });
 
-	if (exists.body) {
-		await opensearch.indices.putMapping({
-			index: INDEX_NAME,
-			body: { properties: MAPPINGS }
-		});
-	} else {
+	if (!exists.body) {
 		await opensearch.indices.create({
 			index: INDEX_NAME,
 			body: {
@@ -150,14 +146,14 @@ export const searchSound = opensearch
 				body.query ??= {};
 				body.query.bool ??= {};
 				body.query.bool.must ??= [];
-				body.query.bool.must.push({ term: { categories: options.category } });
+				body.query.bool.must.push({ term: { categories: { value: options.category } } });
 			}
 
 			if (options.genre) {
 				body.query ??= {};
 				body.query.bool ??= {};
 				body.query.bool.must ??= [];
-				body.query.bool.must.push({ term: { genres: options.genre } });
+				body.query.bool.must.push({ term: { genres: { value: options.genre } } });
 			}
 
 			const res = await opensearch.search({ index: INDEX_NAME, body });
