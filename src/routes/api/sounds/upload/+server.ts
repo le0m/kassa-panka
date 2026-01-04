@@ -6,6 +6,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { eq } from 'drizzle-orm';
 import { logger } from '$lib/logger';
+import { indexSound } from '$lib/server/opensearch';
 
 /**
  * POST endpoint to upload a new sound file
@@ -144,6 +145,25 @@ export const POST: RequestHandler = async ({ request }) => {
 			} catch (error) {
 				logger.error({ error }, 'Error associating genre');
 				// Continue without genre rather than failing the entire upload
+			}
+		}
+
+		// Add to search index
+		if (indexSound) {
+			try {
+				const fullNewSound = await db.query.sounds.findFirst({
+					where: { deletedAt: { isNull: true }, id: newSound.id },
+					with: { tags: true, categories: true, genres: true }
+				});
+
+				if (fullNewSound === undefined) {
+					throw new Error('Unable to find full sound for indexing');
+				}
+
+				await indexSound(fullNewSound);
+			} catch (error) {
+				logger.error({ error }, 'Error indexing sound');
+				// Continue without indexing rather than failing the entire upload
 			}
 		}
 

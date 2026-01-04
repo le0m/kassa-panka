@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { sounds, soundsTags, tags, soundsCategories, soundsGenres } from '$lib/server/db';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '$lib/logger';
+import { indexSound, removeSound } from '$lib/server/opensearch';
 
 /**
  * PATCH endpoint to update a sound by ID
@@ -96,6 +97,24 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 			}
 		}
 
+		// Update search index
+		if (indexSound) {
+			try {
+				const fullSound = await db.query.sounds.findFirst({
+					where: { deletedAt: { isNull: true }, id: result[0].id },
+					with: { tags: true, categories: true, genres: true }
+				});
+
+				if (fullSound === undefined) {
+					throw new Error('Unable to find full sound for indexing');
+				}
+
+				await indexSound(fullSound);
+			} catch (error) {
+				logger.error({ error }, 'Error updating sound in index');
+			}
+		}
+
 		return json({ success: true, message: 'Sound updated successfully', sound: result[0] });
 	} catch (error) {
 		logger.error({ error }, 'Error updating sound');
@@ -124,6 +143,15 @@ export const DELETE: RequestHandler = async ({ params }) => {
 
 		if (result.length === 0) {
 			return json({ error: 'Sound not found' }, { status: 404 });
+		}
+
+		// Remove from search index
+		if (removeSound) {
+			try {
+				await removeSound(id);
+			} catch (error) {
+				logger.error({ error }, 'Error removing sound from index');
+			}
 		}
 
 		return json({ success: true, message: 'Sound deleted successfully' });
