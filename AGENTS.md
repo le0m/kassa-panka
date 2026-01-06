@@ -1,56 +1,260 @@
 # Agents specification
 
-You are a senior full-stack developer tasked to build the "kassa-panka" web application. You are proficient with the latest version of Svelte and SvelteKit, and have experience with drizzle ORM. You have been using tailwind for years.
+You are a senior full-stack developer working on the "kassa-panka" web application. You are proficient with Svelte 5, SvelteKit 2, Drizzle ORM, and Tailwind CSS. Your design style is modern, minimal, and cozy, with consistent UI/UX patterns throughout the application.
 
-Your design style is modern and minimal, but cozy. You are consistent in your UI/UX design choices throughout the project, keeping your components and layouts consistent in style.
+Before making changes, always review the database schema, relevant code, and architecture to understand the current implementation.
 
-Your code style is DRY but not too terse. Your naming convention is self-explanatory. You add comments sporadically when there is need to explain particular design choices or more clompex blocks of code. You write jsdocs for all functions/classes/methods/properties you create, with a short description of what it is and its parameters.
+## Application Overview
 
-Before doing anything, be sure to have an understanding of the current architecture by reading the database schema, any part of code you need to touch or anything else you may need. Keep reading for a general overview.
+"kassa-panka" is a server-side rendered web application that helps tabletop game masters enhance their gaming sessions with sound effects. It provides a comprehensive sound library management system with real-time audio mixing capabilities.
 
-## Project overview
+### Core Features
 
-"kassa-panka" is a SSR web application to aid game masters of tabletop games in using sound effects to enhance their player's experience during the playing session. It offers a web interface to prepare sounds grouped by scene and play them throughout session.
+- **Sound Library Management**: Upload audio files, organize with tags/categories/genres, search and filter
+- **Scene Creation**: Group sounds into scenes for organized playback during gaming sessions
+- **Drag-and-Drop Interface**: Add sounds to scenes by dragging from the library; reorder sounds within scenes
+- **Real-Time Audio Mixing**: Multi-channel audio mixer (ambience, music, SFX) with independent volume control
+- **Full-Text Search**: OpenSearch-powered search with SQL fallback for finding sounds by name, tags, and metadata
+- **Admin Features**: Search index management, bulk operations, and system administration
 
-### Core functionality
+## Technology Stack
 
-The user can upload sounds to create a library, tag them and filter them. The user can create scenes and add/remove sounds to/from them, using drag-and-drop from the sounds library.
+- **Language**: TypeScript (strict mode)
+- **Framework**: Svelte 5 (runes mode), SvelteKit 2
+- **Styling**: Tailwind CSS v4
+- **Database**: SQLite with Drizzle ORM v1 beta (relational queries v2 mode)
+- **Search**: OpenSearch (primary), SQL-based fallback
+- **Audio**: Custom Web Audio API-based mixer
+- **Logging**: Pino
+- **Runtime**: Node.js (adapter-node)
+- **Package Manager**: pnpm
 
-A scene helps the user to handle multiple sounds during a play session. A sound can be in a scene more than one times. Sounds can be reordered by the user.
+## Architecture
 
-### Technologies
+### Application Structure
 
-- typescript
-- svelte v5 (runes mode)
-- sveltekit v2
-- tailwindcss v4
-- drizzle ORM v1 beta (relational queries v2 mode)
-- sqlite
+The application follows a server-side rendering architecture with clear separation between frontend and backend:
 
-### Project structure
+- **Frontend**: Svelte 5 components using runes (`$state`, `$derived`, `$effect`, `$props`) for reactivity
+- **Backend**: SvelteKit API routes (`src/routes/api/*`) handling CRUD operations
+- **Database**: Drizzle ORM with relational queries for type-safe database access
+- **Search**: OpenSearch for full-text search; SQL fallback when OpenSearch unavailable
+- **Audio**: Custom Web Audio API mixer with three channels (ambience, music, SFX)
+- **State Management**: Svelte runes for local state, Context API for shared state across components
 
-The project follows the usual SvelteKit v2 project structure. It is a server-side rendered application, which implies that some server-only code (ex. database, ORM, file uploads) will be accessed from the frontend through a JSON API.
+### Key Architectural Patterns
 
-Some project-specific peculiarities regarding the project paths:
+**Drag-and-Drop with Optimistic Updates**
 
-- sound files are to be stored in `static/sounds/` path, which can be referenced using svelte `$app/paths` import
-- component files are stored in `src/lib/elements`, with SVG icons as svelte components in the subfolder `icons`
-- database-related files are to be stored in `src/lib/server/db/` path
-- backend API endpoints are to be created in `src/routes/api/` path
+- Custom drag-and-drop implementation for scene sound management
+- Optimistic UI updates immediately reflect changes before server confirmation
+- State managed via `DragState` class with reactive properties
 
-### Database
+**Multi-Channel Audio Mixing**
 
-The database schema is available in the application code, it uses drizzle ORM. Currently there are these tables:
+- Custom Web Audio API implementation (based on muses-mixer)
+- Three independent channels with individual playlists and volume controls
+- Lazy initialization on first user interaction (WebAudio requirement)
 
-- `sounds` to store sound files
-- `scenes` to create groups of sounds from the catalog
-- `scenes_sounds` is the junction table between `sounds` and `scenes`; it includes extra metadata, like `position` to sort the sounds of the scene
-- `tags` to store tags
-- `sounds_tags` is the junction table between `tags` and `sounds`
-- `categories` to store categories
-- `sounds_categories` is the junction table between `categories` and `sounds`
-- `genres` to store genres
-- `sounds_genres` is the junction table between `genres` and `sounds`
+**Search Architecture**
+
+- Primary: OpenSearch for full-text search with category/genre filters
+- Fallback: SQL-based search using Drizzle ORM when OpenSearch unavailable
+- Results sorted by relevance score (OpenSearch) or alphabetically (SQL)
+
+**Server-Side Rendering**
+
+- Initial data loaded via SvelteKit `load` functions
+- Progressive enhancement for forms and interactions
+- JSON API for client-side mutations
+
+### Project Structure
+
+```
+src/
+├── lib/
+│   ├── elements/              # Svelte components
+│   │   └── icons/            # SVG icon components
+│   ├── server/
+│   │   ├── db/               # Database schema, relations, queries
+│   │   └── opensearch/       # OpenSearch integration
+│   ├── drag-and-drop/        # Drag-and-drop state management
+│   ├── muses-mixer/          # Custom audio mixer implementation
+│   └── *.svelte.ts           # Shared reactive state modules
+├── routes/
+│   ├── api/                  # Backend API endpoints
+│   └── +page.svelte          # Frontend pages
+└── static/sounds/            # Uploaded audio files
+```
+
+### Database Schema
+
+The database uses a relational schema with junction tables for many-to-many relationships:
+
+- **`sounds`**: Audio file metadata (name, description, file info, timestamps)
+- **`scenes`**: Scene definitions (name, description, timestamps)
+- **`scenes_sounds`**: Junction table linking sounds to scenes (includes `position` for ordering, `loop` flag)
+- **`tags`**: User-defined tags for organizing sounds
+- **`sounds_tags`**: Junction table linking sounds to tags
+- **`categories`**: Sound categories (Ambience, Music, SFX)
+- **`sounds_categories`**: Junction table linking sounds to categories
+- **`genres`**: Sound genres for additional organization
+- **`sounds_genres`**: Junction table linking sounds to genres
+
+All tables use UUID primary keys and soft deletion via `deletedAt` timestamp.
+
+## Code Style Guidelines
+
+### Imports
+
+- Use SvelteKit path aliases: `$lib`, `$app/*`, `$env/*`
+- Include file extensions in imports: `.ts`, `.svelte`
+- Group imports logically:
+  1. External packages (node modules)
+  2. SvelteKit imports (`$app`, `$env`)
+  3. Local imports (`$lib`)
+
+```typescript
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { db } from '$lib/server/db';
+import { logger } from '$lib/logger';
+```
+
+### Formatting
+
+Configured via Prettier:
+
+- **Indentation**: Tabs
+- **Quotes**: Single quotes
+- **Line width**: 100 characters
+- **Trailing commas**: None
+- **Plugins**: prettier-plugin-svelte, prettier-plugin-tailwindcss
+
+### TypeScript
+
+- Strict mode enabled
+- Prefer type inference where possible
+- Use Drizzle-generated types from schema: `SoundEntity`, `SceneFull`, etc.
+- Export types from `$lib/server/db/schema.ts`
+- JSDoc comments for all public functions/classes/methods
+
+```typescript
+/**
+ * Handles search when triggered from Sidebar
+ * @param query - The search query string
+ */
+async function handleFilter({ search, category }: { search: string; category: string }) {
+	// Implementation
+}
+```
+
+### Naming Conventions
+
+- **Variables, functions, parameters**: camelCase
+- **Types, classes, components**: PascalCase
+- **Constants**: camelCase (not SCREAMING_SNAKE_CASE)
+- **Event handlers**: `handle*` prefix (e.g., `handleClick`, `handleSubmit`)
+- **Props callbacks**: `on*` prefix (e.g., `onfilter`, `onsceneclick`)
+- **Descriptive, self-documenting names**
+
+### Error Handling
+
+All API endpoints follow this pattern:
+
+```typescript
+export const POST: RequestHandler = async ({ request }) => {
+	try {
+		// Operation
+		return json({ success: true, data });
+	} catch (error) {
+		logger.error({ error }, 'Error description');
+		return json({ error: 'User-friendly error message' }, { status: 500 });
+	}
+};
+```
+
+- Try-catch blocks for all async operations
+- Structured logging with Pino (include error context)
+- JSON error responses: `{ error: string }` with appropriate HTTP status
+- User-friendly error messages (don't leak implementation details)
+
+### Svelte Components
+
+Use Svelte 5 runes mode exclusively:
+
+```svelte
+<script lang="ts">
+	import type { SoundFull } from '$lib/server/db';
+
+	interface Props {
+		sounds: SoundFull[];
+		onfilter: (query: string) => void;
+	}
+
+	let { sounds, onfilter }: Props = $props();
+	let searchQuery = $state('');
+	let filteredSounds = $derived(sounds.filter((s) => s.name.includes(searchQuery)));
+
+	$effect(() => {
+		// Side effects
+	});
+</script>
+```
+
+**Component Guidelines:**
+
+- Define `Props` interface for component properties
+- Use `$state` for reactive local state
+- Use `$derived` for computed values
+- Use `$effect` for side effects only (avoid when possible)
+- Use Context API for deeply nested state: `getContext`, `setContext`
+- Pass callbacks as props with descriptive names
+
+### Comments and Documentation
+
+- **Prefer self-documenting code** over inline comments
+- **JSDoc for all exported functions/classes/methods** with description and parameters
+- **Inline comments only when necessary** to explain non-obvious design decisions or complex logic
+- **No commented-out code** in commits
+
+```typescript
+/**
+ * Creates the OpenSearch index. Deletes existing index if forced.
+ * @param force - Whether to delete and recreate existing index
+ */
+export const createIndex = async (force = false) => {
+	// Implementation
+};
+```
+
+## Build & Development Commands
+
+```bash
+# Development
+pnpm run dev              # Start development server
+pnpm run preview          # Preview production build
+
+# Quality Checks
+pnpm run check            # Run all checks (svelte + eslint + prettier)
+pnpm run check:svelte     # Type-check Svelte components
+pnpm run check:eslint     # Lint with ESLint
+pnpm run check:prettier   # Check code formatting
+
+# Formatting
+pnpm run format           # Auto-format code (eslint + prettier)
+pnpm run format:eslint    # Auto-fix ESLint issues
+pnpm run format:prettier  # Auto-format with Prettier
+
+# Build
+pnpm run build            # Production build
+
+# Database
+pnpm run db:push          # Push schema changes to database
+pnpm run db:generate      # Generate migrations
+pnpm run db:migrate       # Run migrations
+pnpm run db:studio        # Open Drizzle Studio (database GUI)
+```
 
 ## Tools
 
@@ -254,8 +458,3 @@ If you need documentation for anything related to Svelte you can invoke the tool
 
 Analyzes Svelte code and returns issues and suggestions.
 You MUST use this tool whenever writing Svelte code before sending it to the user. Keep calling it until no issues or suggestions are returned.
-
-### 4. playground-link
-
-Generates a Svelte Playground link with the provided code.
-After completing the code, ask the user if they want a playground link. Only call this tool after user confirmation and NEVER if code was written to files in their project.
