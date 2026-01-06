@@ -46,12 +46,12 @@ import { AudioChannel } from './AudioChannel.ts';
  * ```
  * @returns {AudioMixer}
  */
-export function createAudioMixer(context?: AudioContext): AudioMixer {
+export const createAudioMixer = (context?: AudioContext): AudioMixer => {
 	if (typeof context === 'undefined') {
 		context = new AudioContext();
 	}
 	return new AudioMixer(context);
-}
+};
 
 /** Create a virtual mixing-console with audio channels */
 export class AudioMixer {

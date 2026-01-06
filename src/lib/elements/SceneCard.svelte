@@ -55,21 +55,21 @@
 	/**
 	 * Handles the delete button click
 	 */
-	function handleDeleteClick() {
+	const handleDeleteClick = () => {
 		ondelete(scene.id, scene.name);
-	}
+	};
 
 	/**
 	 * Handles the edit button click
 	 */
-	function handleEditClick() {
+	const handleEditClick = () => {
 		onedit(scene);
-	}
+	};
 
 	/**
 	 * Adds a sound to the scene at the specified position
 	 */
-	async function handleAddSound(soundId: string, position: number) {
+	const handleAddSound = async (soundId: string, position: number) => {
 		dragState.clearError();
 
 		try {
@@ -94,12 +94,12 @@
 			dragState.showError();
 			throw error;
 		}
-	}
+	};
 
 	/**
 	 * Reorders sounds in the scene
 	 */
-	async function handleReorderSounds(soundUpdates: Array<{ id: string; position: number }>) {
+	const handleReorderSounds = async (soundUpdates: Array<{ id: string; position: number }>) => {
 		dragState.clearError();
 
 		try {
@@ -124,12 +124,12 @@
 			dragState.showError();
 			throw error;
 		}
-	}
+	};
 
 	/**
 	 * Removes a sound from the scene
 	 */
-	async function handleRemoveSound(sceneSound: SceneSoundFull) {
+	const handleRemoveSound = async (sceneSound: SceneSoundFull) => {
 		const confirmed = confirm(
 			`Remove "${sceneSound.sound!.name}" from "${scene.name}"?\n\nThis will not delete the sound, only remove it from this scene.`
 		);
@@ -163,7 +163,7 @@
 		} finally {
 			dragState.removingSound = null;
 		}
-	}
+	};
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->

@@ -52,11 +52,11 @@ export * from './AudioTrack.ts';
  * channel.input( micNode ) ;
  * ```
  */
-export function getMicStreamNode(): Promise<MediaStreamAudioSourceNode> {
+export const getMicStreamNode = (): Promise<MediaStreamAudioSourceNode> => {
 	return new Promise((res, rej) => {
 		navigator.mediaDevices
 			.getUserMedia({ video: false, audio: true })
-			.then(function (stream: MediaStream) {
+			.then((stream: MediaStream) => {
 				const ctx: AudioContext = new AudioContext();
 				const micNode = ctx.createMediaStreamSource(stream);
 				return res(micNode);
@@ -65,12 +65,12 @@ export function getMicStreamNode(): Promise<MediaStreamAudioSourceNode> {
 				rej(err);
 			});
 	});
-}
+};
 
 /**
  * Get an audio-context instance.
  * @returns {AudioContext}
  */
-export function getAudioContext(): AudioContext {
+export const getAudioContext = (): AudioContext => {
 	return new AudioContext();
-}
+};

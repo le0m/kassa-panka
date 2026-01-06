@@ -24,17 +24,17 @@
 	 * Handles editing a scene
 	 * @param scene - The scene data to edit
 	 */
-	function handleEditScene(scene: SceneFull) {
+	const handleEditScene = (scene: SceneFull) => {
 		editScene = scene;
 		isModalOpen = true;
-	}
+	};
 
 	/**
 	 * Handles scene deletion with confirmation
 	 * @param sceneId - The ID of the scene to delete
 	 * @param sceneName - The name of the scene (for confirmation message)
 	 */
-	async function handleDeleteScene(sceneId: string, sceneName: string) {
+	const handleDeleteScene = async (sceneId: string, sceneName: string) => {
 		const confirmed = confirm(
 			`Are you sure you want to delete "${sceneName}"?\n\nThis action can be undone by a database administrator.`
 		);
@@ -65,44 +65,44 @@
 		} finally {
 			deletingScene = null;
 		}
-	}
+	};
 
 	/**
 	 * Opens the scene modal for creating a new scene
 	 */
-	function openModal() {
+	const openModal = () => {
 		editScene = null;
 		isModalOpen = true;
-	}
+	};
 
 	/**
 	 * Closes the scene modal
 	 */
-	function closeModal() {
+	const closeModal = () => {
 		isModalOpen = false;
 		editScene = null;
-	}
+	};
 
 	/**
 	 * Handles successful scene save/update
 	 * @param sceneId - The ID of the saved scene
 	 */
-	function handleSceneSuccess(sceneId: string) {
+	const handleSceneSuccess = (sceneId: string) => {
 		sceneSuccess = sceneId;
 		sceneError = null;
 		setTimeout(() => {
 			sceneSuccess = null;
 		}, 1000);
-	}
+	};
 
 	/**
 	 * Handles scene save/update error
 	 * @param sceneId - The ID of the scene that failed
 	 */
-	function handleSceneError(sceneId: string) {
+	const handleSceneError = (sceneId: string) => {
 		sceneError = sceneId;
 		sceneSuccess = null;
-	}
+	};
 </script>
 
 <!-- Scene Modal -->

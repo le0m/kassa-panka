@@ -4,35 +4,37 @@ import type { SceneSoundFull, SoundFull } from '$lib/server/db';
 /**
  * Gets the category of a sound
  */
-export function getSoundCategory(sound: SoundFull): SoundCategory | undefined {
+export const getSoundCategory = (sound: SoundFull): SoundCategory | undefined => {
 	return sound.categories[0]?.name as SoundCategory | undefined;
-}
+};
 
 /**
  * Gets the category of a scene sound
  */
-export function getSceneSoundCategory(sceneSound: SceneSoundFull): SoundCategory | undefined {
+export const getSceneSoundCategory = (sceneSound: SceneSoundFull): SoundCategory | undefined => {
 	return sceneSound.sound?.categories[0]?.name as SoundCategory | undefined;
-}
+};
 
 /**
  * Checks if a dragged sound matches the target category
  */
-export function matchesCategory(
+export const matchesCategory = (
 	draggedCategory: SoundCategory | undefined,
 	targetCategory: SoundCategory
-): boolean {
+): boolean => {
 	return draggedCategory === targetCategory;
-}
+};
 
 /**
  * Parses drag data from a drag event
  */
-export function parseDragData(event: DragEvent): {
+export const parseDragData = (
+	event: DragEvent
+): {
 	soundId?: string;
 	sceneSoundId?: string;
 	sound?: SoundFull;
-} | null {
+} | null => {
 	if (!event.dataTransfer) return null;
 
 	try {
@@ -42,18 +44,18 @@ export function parseDragData(event: DragEvent): {
 	} catch {
 		return null;
 	}
-}
+};
 
 /**
  * Creates optimistic scene sound for new sound being added
  */
-export function createOptimisticSceneSound(
+export const createOptimisticSceneSound = (
 	sceneId: string,
 	soundId: string,
 	sound: SoundFull,
 	position: number,
 	loop: boolean = false
-): SceneSoundFull {
+): SceneSoundFull => {
 	return {
 		id: `optimistic-${Date.now()}`,
 		sceneId,
@@ -62,7 +64,7 @@ export function createOptimisticSceneSound(
 		sound,
 		loop
 	};
-}
+};
 
 /**
  * Reorders an array by moving an item from one index to another
@@ -77,17 +79,17 @@ export function reorderArray<T>(array: T[], fromIndex: number, toIndex: number):
 /**
  * Updates positions for an array of scene sounds
  */
-export function updatePositions(sounds: SceneSoundFull[]): SceneSoundFull[] {
+export const updatePositions = (sounds: SceneSoundFull[]): SceneSoundFull[] => {
 	return sounds.map((sound, index) => ({
 		...sound,
 		position: index
 	}));
-}
+};
 
 /**
  * Creates display order for sounds considering drag state
  */
-export function createDisplayOrder(
+export const createDisplayOrder = (
 	categorySounds: SceneSoundFull[],
 	category: SoundCategory,
 	options: {
@@ -96,7 +98,7 @@ export function createDisplayOrder(
 		draggingNewSound: SoundFull | null;
 		dragOverIndex: number | null;
 	}
-): SceneSoundFull[] {
+): SceneSoundFull[] => {
 	const { optimisticOrder, draggingSceneSound, draggingNewSound, dragOverIndex } = options;
 
 	// Use optimistic order if available (after drop, before API response)
@@ -138,4 +140,4 @@ export function createDisplayOrder(
 	}
 
 	return sorted;
-}
+};

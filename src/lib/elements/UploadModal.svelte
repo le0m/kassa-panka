@@ -40,26 +40,26 @@
 	/**
 	 * Adds a tag to the selected tags list
 	 */
-	function addTag(tag: string) {
+	const addTag = (tag: string) => {
 		const trimmedTag = tag.trim().toLowerCase();
 		if (trimmedTag && !selectedTags.includes(trimmedTag)) {
 			selectedTags = [...selectedTags, trimmedTag];
 			tagInput = '';
 			selectedSuggestionIndex = -1;
 		}
-	}
+	};
 
 	/**
 	 * Removes a tag from the selected tags list
 	 */
-	function removeTag(tag: string) {
+	const removeTag = (tag: string) => {
 		selectedTags = selectedTags.filter((t) => t !== tag);
-	}
+	};
 
 	/**
 	 * Handles tag input keypress with keyboard navigation
 	 */
-	function handleTagInput(event: KeyboardEvent) {
+	const handleTagInput = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < filteredTags.length) {
@@ -86,7 +86,7 @@
 			// Reset selection when user types (any other key)
 			selectedSuggestionIndex = -1;
 		}
-	}
+	};
 
 	/**
 	 * Filtered tag suggestions based on input
@@ -103,15 +103,15 @@
 
 	/**	 * Handles clicking outside the modal to close it
 	 */
-	function handleBackdropClick(event: MouseEvent) {
+	const handleBackdropClick = (event: MouseEvent) => {
 		if (event.target === event.currentTarget) {
 			handleClose();
 		}
-	}
+	};
 
 	/**	 * Handles the form submission for uploading or updating a sound file
 	 */
-	async function handleUpload(event: Event) {
+	const handleUpload = async (event: Event) => {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 
@@ -200,12 +200,12 @@
 		} finally {
 			uploading = false;
 		}
-	}
+	};
 
 	/**
 	 * Handles modal close and resets state
 	 */
-	function handleClose() {
+	const handleClose = () => {
 		uploadError = null;
 		uploadSuccess = false;
 		selectedTags = [];
@@ -217,7 +217,7 @@
 		selectedCategoryId = '';
 		selectedGenreId = '';
 		onclose();
-	}
+	};
 
 	/**
 	 * Load tags and populate form when modal opens

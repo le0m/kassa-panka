@@ -19,7 +19,7 @@
 	 * Handles search when triggered from Sidebar
 	 * @param query - The search query string
 	 */
-	async function handleFilter({
+	const handleFilter = async ({
 		search,
 		category,
 		genre
@@ -27,7 +27,7 @@
 		search: string;
 		category: string;
 		genre: string;
-	}) {
+	}) => {
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const params = new URLSearchParams(window.location.search);
 
@@ -55,7 +55,7 @@
 			replaceState: false,
 			invalidateAll: true
 		});
-	}
+	};
 
 	const handleSceneClick = (scene: SceneFull) => (activeScene = scene);
 

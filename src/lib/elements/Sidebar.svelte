@@ -49,34 +49,34 @@
 	/**
 	 * Opens the upload modal
 	 */
-	function openModal() {
+	const openModal = () => {
 		editSound = null;
 		isModalOpen = true;
-	}
+	};
 
 	/**
 	 * Closes the upload modal
 	 */
-	function closeModal() {
+	const closeModal = () => {
 		isModalOpen = false;
 		editSound = null;
-	}
+	};
 
 	/**
 	 * Handles editing a sound
 	 * @param sound - The sound data to edit
 	 */
-	function handleEdit(sound: SoundFull) {
+	const handleEdit = (sound: SoundFull) => {
 		editSound = sound;
 		isModalOpen = true;
-	}
+	};
 
 	/**
 	 * Handles sound deletion with confirmation
 	 * @param soundId - The ID of the sound to delete
 	 * @param soundName - The name of the sound (for confirmation message)
 	 */
-	async function handleDelete(soundId: string, soundName: string) {
+	const handleDelete = async (soundId: string, soundName: string) => {
 		const confirmed = confirm(
 			`Are you sure you want to delete "${soundName}"?\n\nThis action can be undone by a database administrator.`
 		);
@@ -96,20 +96,20 @@
 
 		// Refresh the page data to remove the deleted sound
 		await invalidateAll();
-	}
+	};
 
 	/**
 	 * Handles search input changes
 	 */
-	function handleInput(event: Event) {
+	const handleInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
 		searchQuery = target.value;
-	}
+	};
 
 	/**
 	 * Handles search when Enter is pressed
 	 */
-	function handleKeydown(event: KeyboardEvent) {
+	const handleKeydown = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			onfilter({
 				search: searchQuery,
@@ -117,7 +117,7 @@
 				genre: selectedGenreId
 			});
 		}
-	}
+	};
 
 	/**
 	 * Handles category and genre when changed.

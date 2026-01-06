@@ -90,7 +90,7 @@
 	/**
 	 * Handles the delete button click - delegates to parent
 	 */
-	async function handleDelete(event: MouseEvent) {
+	const handleDelete = async (event: MouseEvent) => {
 		if (ondelete) {
 			event.stopPropagation();
 			deleting = true;
@@ -100,23 +100,23 @@
 				deleting = false;
 			}
 		}
-	}
+	};
 
 	/**
 	 * Handles the edit button click - delegates to parent
 	 */
-	function handleEditClick(event: MouseEvent) {
+	const handleEditClick = (event: MouseEvent) => {
 		if (onedit) {
 			event.stopPropagation();
 			onedit(sound);
 		}
-	}
+	};
 
 	/**
 	 * Handles drag start event - sets the sound data in the data transfer and custom drag image
 	 * @param event - The drag event
 	 */
-	function handleDragStart(event: DragEvent) {
+	const handleDragStart = (event: DragEvent) => {
 		isDragging = true;
 		if (event.dataTransfer && cardElement) {
 			event.dataTransfer.effectAllowed = 'copy';
@@ -128,14 +128,14 @@
 				event.dataTransfer.setDragImage(dragImageElement, 100, 50);
 			}
 		}
-	}
+	};
 
 	/**
 	 * Handles drag end event - resets the dragging state
 	 */
-	function handleDragEnd() {
+	const handleDragEnd = () => {
 		isDragging = false;
-	}
+	};
 
 	/**
 	 * Handle sound card click for playing sound.

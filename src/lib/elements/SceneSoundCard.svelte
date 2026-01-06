@@ -73,7 +73,7 @@
 	/**
 	 * Handles the delete button click - delegates to parent
 	 */
-	async function handleDelete() {
+	const handleDelete = async () => {
 		if (ondelete) {
 			deleting = true;
 			try {
@@ -82,7 +82,7 @@
 				deleting = false;
 			}
 		}
-	}
+	};
 
 	/**
 	 * Handle sound card click for playing sound.
@@ -102,7 +102,7 @@
 	 * Handles drag start event - sets the sceneSound data and custom drag image
 	 * @param event - The drag event
 	 */
-	function handleDragStart(event: DragEvent) {
+	const handleDragStart = (event: DragEvent) => {
 		if (ondragstart) {
 			ondragstart(event, sceneSound);
 
@@ -113,21 +113,21 @@
 				event.dataTransfer.setDragImage(dragImageElement, 100, 50);
 			}
 		}
-	}
+	};
 
 	/**
 	 * Handles drag end event - resets the dragging state
 	 */
-	function handleDragEnd() {
+	const handleDragEnd = () => {
 		if (ondragend) {
 			ondragend();
 		}
-	}
+	};
 
 	/**
 	 * Toggles the loop property of the scene-sound
 	 */
-	async function toggleLoop(event: MouseEvent) {
+	const toggleLoop = async (event: MouseEvent) => {
 		event.stopPropagation();
 
 		try {
@@ -149,7 +149,7 @@
 		} catch (error) {
 			logger.error({ error }, 'Error toggling loop');
 		}
-	}
+	};
 </script>
 
 <!-- Unified layout for all instances -->

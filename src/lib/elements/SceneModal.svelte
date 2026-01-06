@@ -44,7 +44,7 @@
 	/**
 	 * Handles the form submission for creating or updating a scene
 	 */
-	async function handleSubmit(event: Event) {
+	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
 
 		if (!formName.trim()) {
@@ -105,25 +105,25 @@
 		} finally {
 			submitting = false;
 		}
-	}
+	};
 
 	/**
 	 * Handles modal close with cleanup
 	 */
-	function handleClose() {
+	const handleClose = () => {
 		if (!submitting) {
 			onClose();
 		}
-	}
+	};
 
 	/**
 	 * Handles clicking outside the modal to close it
 	 */
-	function handleBackdropClick(event: MouseEvent) {
+	const handleBackdropClick = (event: MouseEvent) => {
 		if (event.target === event.currentTarget) {
 			handleClose();
 		}
-	}
+	};
 </script>
 
 {#if isOpen}

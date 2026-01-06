@@ -54,16 +54,16 @@
 	/**
 	 * Clears all drag state
 	 */
-	function clearDragState() {
+	const clearDragState = () => {
 		draggingSceneSound = null;
 		draggingNewSound = null;
 		dragOverIndex = null;
-	}
+	};
 
 	/**
 	 * Handles drag start
 	 */
-	function handleDragStart(event: DragEvent, sceneSound: SceneSoundFull) {
+	const handleDragStart = (event: DragEvent, sceneSound: SceneSoundFull) => {
 		draggingSceneSound = sceneSound;
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';
@@ -72,26 +72,26 @@
 				JSON.stringify({ sceneSoundId: sceneSound.id })
 			);
 		}
-	}
+	};
 
 	/**
 	 * Handles drag end
 	 */
-	function handleDragEnd() {
+	const handleDragEnd = () => {
 		clearDragState();
-	}
+	};
 
 	/**
 	 * Handles drag over on list container
 	 */
-	function handleListDragOver(event: DragEvent) {
+	const handleListDragOver = (event: DragEvent) => {
 		event.preventDefault();
-	}
+	};
 
 	/**
 	 * Handles drag leave on list container
 	 */
-	function handleListDragLeave(event: DragEvent) {
+	const handleListDragLeave = (event: DragEvent) => {
 		const target = event.currentTarget as HTMLElement;
 		const relatedTarget = event.relatedTarget as Node | null;
 
@@ -99,12 +99,12 @@
 			draggingNewSound = null;
 			dragOverIndex = null;
 		}
-	}
+	};
 
 	/**
 	 * Handles drag over on individual sound
 	 */
-	function handleSoundDragOver(event: DragEvent, index: number) {
+	const handleSoundDragOver = (event: DragEvent, index: number) => {
 		event.preventDefault();
 		event.stopPropagation();
 
@@ -146,12 +146,12 @@
 		}
 
 		dragOverIndex = index;
-	}
+	};
 
 	/**
 	 * Handles drop on individual sound or empty list
 	 */
-	async function handleDrop(event: DragEvent, targetIndex: number) {
+	const handleDrop = async (event: DragEvent, targetIndex: number) => {
 		event.preventDefault();
 		event.stopPropagation();
 
@@ -224,7 +224,7 @@
 		} finally {
 			optimisticOrder = null;
 		}
-	}
+	};
 </script>
 
 <div class="flex flex-col">
