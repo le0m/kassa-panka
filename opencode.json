@@ -1,0 +1,141 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+
+	// ============================================================================
+	// Instructions
+	// ============================================================================
+	"instructions": ["AGENTS.md"],
+
+	// ============================================================================
+	// Additional Configuration
+	// ============================================================================
+	"autoupdate": true,
+	"share": "manual",
+
+	// ============================================================================
+	// Formatters
+	// ============================================================================
+	"formatter": {
+		"prettier": {
+			"command": ["npx", "prettier", "--write", "$FILE"],
+			"extensions": [".js", ".ts", ".jsx", ".tsx", ".svelte", ".json", ".md", ".html", ".css"]
+		}
+	},
+
+	// ============================================================================
+	// Provider & Models Configuration
+	// ============================================================================
+	"provider": {
+		"github-copilot": {
+			"options": {
+				"timeout": 600000
+			}
+		}
+	},
+	"model": "github-copilot/claude-sonnet-4.5",
+	"small_model": "github-copilot/gpt-5-mini",
+
+	// ============================================================================
+	// Default Agent
+	// ============================================================================
+	"default_agent": "plan",
+
+	// ============================================================================
+	// Permissions
+	// ============================================================================
+	"permission": {
+		"*": "allow",
+		"bash": {
+			"rm -rf*": "ask",
+			"git push*": "ask",
+			"git commit*": "ask",
+			"git rebase*": "ask",
+			"pnpm remove*": "ask",
+			"pnpm uninstall*": "ask"
+		},
+		"read": {
+			"*": "allow",
+			"*.env": "deny",
+			"*.env.*": "deny",
+			"*.env.example": "allow"
+		}
+	},
+
+	// ============================================================================
+	// Specialized Agents
+	// ============================================================================
+	"agent": {
+		"build": {
+			"description": "Full development agent with all tools enabled",
+			"mode": "primary",
+			"model": "github-copilot/claude-sonnet-4.5"
+		},
+		"plan": {
+			"description": "Planning and analysis agent without making changes",
+			"mode": "primary",
+			"model": "github-copilot/claude-sonnet-4.5",
+			"tools": {
+				"edit": false,
+				"patch": false,
+				"write": false
+			},
+			"permission": {
+				"bash": "ask"
+			}
+		},
+		"svelte-expert": {
+			"description": "Specialized Svelte 5 and SvelteKit 2 development expert",
+			"mode": "subagent",
+			"model": "github-copilot/claude-sonnet-4.5",
+			"prompt": "You are a Svelte 5 and SvelteKit 2 expert. Focus on:\n- Using Svelte 5 runes ($state, $derived, $effect, $props)\n- Following SvelteKit 2 best practices\n- Server-side rendering patterns\n- Type-safe implementations\n- Always use the Svelte MCP server for documentation lookups\n\nRefer to AGENTS.md for project-specific guidelines."
+		},
+		"reviewer": {
+			"description": "Code review agent with read-only access",
+			"mode": "subagent",
+			"model": "github-copilot/gpt-5.2",
+			"prompt": "You are a code reviewer. Focus on:\n- Code quality and best practices\n- Potential bugs and edge cases\n- Performance implications\n- Security considerations\n- Svelte 5 and SvelteKit 2 patterns\n- Consistency with project guidelines in AGENTS.md\n\nProvide constructive feedback without making direct changes.",
+			"tools": {
+				"edit": false,
+				"patch": false,
+				"write": false
+			},
+			"permission": {
+				"bash": {
+					"git diff*": "allow",
+					"git log*": "allow",
+					"git status*": "allow",
+					"*": "deny"
+				}
+			}
+		},
+		"db-helper": {
+			"description": "Database and Drizzle ORM specialist",
+			"mode": "subagent",
+			"model": "github-copilot/gpt-5.2",
+			"prompt": "You are a database expert specializing in:\n- Drizzle ORM v1 beta (relational queries v2 mode)\n- SQLite database design\n- Type-safe query patterns\n- Database migrations and schema changes\n- Junction tables and many-to-many relationships\n\nRefer to the database schema section in AGENTS.md for the current structure."
+		},
+		"debug": {
+			"description": "Debugging specialist with focused tool access",
+			"mode": "subagent",
+			"model": "github-copilot/gpt-5.2",
+			"prompt": "You are a debugging expert. Focus on:\n- Investigating issues systematically\n- Analyzing logs and error messages\n- Identifying root causes\n- Suggesting targeted fixes\n- Using read and bash tools for investigation"
+		},
+		"designer": {
+			"description": "Design consistency expert for UI/UX and styling",
+			"mode": "subagent",
+			"model": "github-copilot/claude-sonnet-4.5",
+			"prompt": "You are a UI/UX designer specializing in modern, minimal, and cozy design. Your responsibilities:\n\n- Ensure design consistency across the application\n- Follow Tailwind CSS v4 utility-first approach\n- Maintain the existing design language (modern, minimal, cozy)\n- Design new components that fit the existing aesthetic\n- Consider responsive design and accessibility\n- Use Svelte 5 scoped styles when needed\n- Reference existing components for design patterns\n\nKey design principles from AGENTS.md:\n- Modern, minimal, and cozy aesthetic\n- Consistent UI/UX patterns\n- Tailwind CSS v4 for styling\n- Component-scoped styles when appropriate"
+		}
+	},
+
+	// ============================================================================
+	// MCP Servers
+	// ============================================================================
+	"mcp": {
+		"svelte": {
+			"type": "local",
+			"command": ["npx", "-y", "@sveltejs/mcp"],
+			"enabled": true
+		}
+	}
+}
